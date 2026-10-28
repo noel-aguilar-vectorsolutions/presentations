@@ -49,12 +49,17 @@ Don't edit `slides.md` by hand; `index.html` is the source of truth.
 
 Open any `index.html` in a browser.
 
-- **→ / Space / PageDown**: next slide
-- **← / PageUp**: previous slide
+- **→ / ↓ / Space / PageDown**: next slide
+- **← / ↑ / PageUp**: previous slide
 - **Home / End**: first / last slide
 - **F**: toggle fullscreen
+- **Click** the right two-thirds of the screen: next slide; the left third:
+  previous slide
 - **Click an image**: show it full size; click again or **Esc** to close
 - **Print (⌘P)**: one slide per page, so you can save as PDF
+
+The URL tracks the current slide (`index.html#5`), so you can link straight to
+one.
 
 ## Index
 
