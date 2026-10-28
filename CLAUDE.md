@@ -13,6 +13,11 @@ This repo holds HTML presentations, one per subfolder.
   about and **every source used**: URLs, Confluence/Jira links, documents,
   repos, people consulted, and any data files. When you pull in information
   from anywhere, add it to the Sources section in the same change.
+- **`slides.md` in every presentation folder** is a plain-Markdown export of
+  `index.html`: every slide's text and speaker notes, for reading, reviewing and
+  searching. Whenever `index.html` changes, run `./export-markdown.py <slug>` in
+  the same change and commit the regenerated `slides.md` with it. Never edit
+  `slides.md` by hand; `index.html` is the source of truth.
 - **Update the Index table** in the root `README.md` when a presentation is
   added or renamed.
 - Don't modify `_template/` while working on a specific presentation. Change it
