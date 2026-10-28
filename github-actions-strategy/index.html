@@ -130,6 +130,9 @@
   .nowrap-code code { white-space: nowrap; }
   .codelist { list-style: none; padding: 0; }
   .codelist li { display: grid; grid-template-columns: 1.4em 1fr; gap: .4em; }
+  .shots { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 1.6vw; align-items: start; }
+  .shots p { margin: 0 0 .5em; font-size: .6em; }
+  .shots img { display: block; width: 100%; max-height: 52vh; object-fit: contain; object-position: top left; border: 1px solid var(--border); border-radius: 10px; }
   .placeholder { border: 2px dashed var(--border); border-radius: 12px; min-height: 34vh; text-align: center; padding: 10vh 1em 1em; color: var(--muted); font-size: .7em; overflow-wrap: anywhere; }
   .stack { display: flex; flex-direction: column; gap: 1.2em; }
   .diagram { width: 100%; height: auto; max-height: 46vh; }
@@ -172,7 +175,7 @@
 
   @media (max-width: 700px) {
     .slide { padding: 6vh 16px; font-size: 18px; }
-    .two-col, .cards, .cards.two { grid-template-columns: 1fr; }
+    .two-col, .cards, .cards.two, .shots { grid-template-columns: 1fr; }
   }
 
   @media print {
@@ -501,6 +504,32 @@ jobs:
     <aside class="notes">⏱ 2.5 min. Source: github-security-review remediation backlog (GHSEC-01, 03/10, 04, 05, 06, 08, 09, 11, 12, 15, 17). All of these are committed. OIDC to AWS comes first, on Nov 2: the static keys go then. Most of the rest lands on Nov 11, around the v1.0.0 release. Dependabot is switched on per repo as it migrates, and the tidy-ups follow in December. Lead with 2FA: it's the one that removes people. Enforcement is planned for the end of January 2027, so everyone needs to set it up before then. Why SHA pinning: a tag or branch can be moved to point at malicious code, and a workflow can hold your secrets and your AWS role. A full SHA can't change; the "# v4" comment tells Dependabot which version it is. GitHub's SHA-pinning policy covers actions, and reusable workflows are exempt, which is why Vector's standard workflows are referenced as @v1: updates reach you without a change, and you can pin an exact version if you prefer. DevOps curates and approves general-purpose actions; anything else goes through a security review first. The org-wide branch protection baseline also lands on Nov 11, with nothing for teams to do.</aside>
   </section>
 
+  <!-- ============ 3c. Dependabot ============ -->
+
+  <section class="slide">
+    <p class="kicker">New to us</p>
+    <h2>Dependabot keeps your dependencies current</h2>
+    <div class="two-col dense" style="font-size:.66em">
+      <div>
+        <h3>What it is</h3>
+        <ul>
+          <li><strong>Alerts</strong>: tells you when a dependency has a known vulnerability</li>
+          <li><strong>Security updates</strong>: a PR that bumps it to the fixed version</li>
+          <li><strong>Version updates</strong>: weekly PRs that keep your packages (NuGet, npm, pip…) and action SHA pins current (<code>.github/dependabot.yml</code>, added when your repo migrates)</li>
+        </ul>
+        <h3 style="margin-top:.8em">Why it helps</h3>
+        <ul>
+          <li>Hear about vulnerabilities <strong>without going looking</strong></li>
+          <li>The fix is <strong>a PR like any other</strong>: CI runs, you review and merge</li>
+          <li><strong>Small, regular bumps</strong>, not a painful upgrade every few years</li>
+          <li>Keeps <strong>SHA pinning</strong> painless, and it's <strong>free</strong> on our plan</li>
+        </ul>
+      </div>
+      <img src="assets/dependabot-pr.png" alt="A repository's pull request list showing an open Dependabot PR: ci(deps): Bump actions/setup-node from 7.0.0 to 7.1.0 in the minor-and-patch group, labeled dependencies and github_actions, opened by dependabot[bot]" style="border:1px solid var(--border); border-radius:12px; margin-top:2.2em">
+    </div>
+    <aside class="notes">⏱ 1.5 min. Sources: github-security-review GHSEC-04 (alerts, security updates and the dependency graph; free on the Team plan, private repos included) and GHSEC-05; the .NET migration playbook; the pilot repo's .github/dependabot.yml. We haven't used Dependabot before. It's GitHub's built-in dependency bot, with three parts. Alerts come from the dependency graph: GitHub reads your package files (NuGet, npm, pip, and so on), matches them against its advisory database, and raises an alert on the repo's Security tab. Security updates are the PRs it opens for those alerts, bumping the package to the fixed version. Version updates are what dependabot.yml configures. Each migrated repo gets it for its package ecosystem (NuGet, npm, pip, and so on), so packages move to new releases even without a vulnerability, and for github-actions, which keeps the SHA pins current. The pilot so far has only the github-actions part. Settings: weekly, minor and patch bumps grouped into one PR, each major on its own, and a 7-day cooldown so a compromised or broken release can be caught before it reaches us (security updates are never delayed). Its PR titles are Conventional Commits, e.g. "ci(deps): bump ...", so they pass the title check. It's switched on per repo as the repo migrates. Treat its PRs like any other: let CI run, read the release notes for majors, merge. Expect a burst of alerts when it's first turned on. The screenshot shows a Dependabot PR in a repo's PR list: a grouped minor bump of actions/setup-node, with its ci(deps) title and the dependencies label.</aside>
+  </section>
+
   <!-- ============ 4. Conventional Commits ============ -->
 
   <section class="slide">
@@ -771,12 +800,21 @@ jobs:
   <section class="slide">
     <p class="kicker demo">Demo 2 · backup</p>
     <h2>Walkthrough</h2>
-    <div class="cards">
-      <div class="placeholder">Screenshot: release PR<br>with version + changelog<br><span>assets/demo2-release-pr.png</span></div>
-      <div class="placeholder">Screenshot: GitHub Release<br><code>v1.1.0</code><br><span>assets/demo2-github-release.png</span></div>
-      <div class="placeholder">Screenshot: branch list showing<br><code>release/1.1.x</code><br><span>assets/demo2-release-branch.png</span></div>
+    <div class="shots">
+      <div>
+        <p class="muted">1. The release PR waits for a person</p>
+        <img src="assets/demo2-release-pr.png" alt="The pull request list filtered to the label autorelease: pending, showing one open PR: chore(main): release 0.1.3, opened by github-actions[bot], review required">
+      </div>
+      <div>
+        <p class="muted">2. Merged: a release per component</p>
+        <img src="assets/demo2-github-release.png" alt="The Releases page listing one release per component, such as websocket-handler v1.1.2 and ui-extension v1.1.3; websocket-handler v1.1.2 lists a bug fix and a workspace dependency bump">
+      </div>
+      <div>
+        <p class="muted">3. The changelog, from PR titles</p>
+        <img src="assets/demo2-changelog.png" alt="CHANGELOG.md with versions 1.1.2, 1.1.1 and 1.1.0, each grouped into Features, Bug Fixes and Dependencies, with links to the PRs and commits">
+      </div>
     </div>
-    <aside class="notes">Use if the demo repo isn't ready or the live run fails. Capture these screenshots once COREOPS-4428's demo repo exists.</aside>
+    <aside class="notes">Use if the demo repo isn't ready or the live run fails. Walk left to right. (1) The release PR: release-please keeps one open, labeled "autorelease: pending", updating it as PRs merge; nothing is released until a person approves and merges it. (2) Merging it creates the tag and a GitHub Release; in a monorepo, one per component that changed, each with its own notes. (3) The same notes go into CHANGELOG.md, grouped by type (feat, fix, dependencies) and linked to the PRs and commits, so the PR title you wrote is the line people read. The release and changelog screenshots come from a monorepo already on release-please, not from release-please-demo. They show the old CI bot as the releaser; with the release App, it's the App's name instead.</aside>
   </section>
 
   <!-- ============ 9. CI builds, CD promotes ============ -->
