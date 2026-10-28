@@ -11,6 +11,10 @@ presentations/
 ├── CLAUDE.md              ← conventions for Claude Code sessions
 ├── new-presentation.sh    ← scaffolds a new presentation from _template/
 ├── export-markdown.py     ← writes <slug>/slides.md from <slug>/index.html
+├── check-presentation.sh  ← screenshots every slide (light + dark) and a PDF
+├── docs/
+│   ├── presentation-guide.md  ← how to plan, build and check a deck; the design
+│   └── superpowers/specs/     ← each deck's design spec
 ├── _template/             ← starting point for new presentations
 │   ├── index.html
 │   ├── README.md
@@ -31,6 +35,16 @@ open my-topic/index.html
 
 Then edit `my-topic/index.html` and record every source you use in
 `my-topic/README.md`.
+
+The [presentation guide](docs/presentation-guide.md) walks through the whole process
+(design spec, build, review, check) and documents the Vector Solutions branding, the
+screen and font sizes, and the slide components the template provides.
+
+To check a deck's layout without clicking through it:
+
+```bash
+./check-presentation.sh my-topic   # writes tmp/check/my-topic/: every slide, light and dark, plus a PDF
+```
 
 ## Text export
 

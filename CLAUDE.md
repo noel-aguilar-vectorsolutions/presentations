@@ -39,3 +39,17 @@ on every slide, from `assets/vector-logo.png`, `assets/vector-logo-white.png`
 and `assets/brand-title.jpg`. Add `.brand` to a slide for the gradient
 background with white text, and `.brand.photo` for the title background image
 (used on the title and Questions slides).
+
+## Process and design
+
+Follow [`docs/presentation-guide.md`](docs/presentation-guide.md) for every
+deck: write the design spec first, then build, review and check. It's also the
+reference for the brand tokens, screen and font sizes, and the components
+(`.cards`, `.callout`, `.dense`, tables, diagrams, …).
+
+- Use the template's tokens and components; colours go through the CSS
+  variables, never hex values in a slide. Text is never smaller than `.55em`.
+- After changing how slides look, run `./check-presentation.sh <slug>` and look
+  at the screenshots (light and dark) and the PDF before saying it's done.
+- When a deck adds something other decks would reuse, add it to the template
+  and to the guide, when asked.
