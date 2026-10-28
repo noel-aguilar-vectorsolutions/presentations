@@ -146,6 +146,9 @@ def block(node, depth=0):
                 out.append("")
                 out.append("*Diagram labels:* " + " · ".join(l for l in labels if l))
             out.append("")
+        elif t == "img":
+            alt = re.sub(r"\s+", " ", c.attrs.get("alt", "")).strip().replace("[", "\\[").replace("]", "\\]")
+            out += [f"![{alt}]({c.attrs.get('src', '')})", ""]
         elif "timeline" in cls:
             out += ["| Wave | When |", "|---|---|"]
             kids = [x for x in c.children if isinstance(x, Node)]
