@@ -46,6 +46,31 @@ To check a deck's layout without clicking through it:
 ./check-presentation.sh my-topic   # writes tmp/check/my-topic/: every slide, light and dark, plus a PDF
 ```
 
+### Getting started with Claude Code
+
+Open Claude Code in this folder, fill in the brackets and paste this prompt:
+
+```text
+I want to start a new presentation in this repo.
+
+- Topic: [what it's about]
+- Title: [working title]
+- Audience: [who's in the room and what they already know]
+- Purpose: [inform, sell or decide; what people should know or do afterwards]
+- Length: [minutes, including Q&A]
+- Date: [when I'm presenting; the content must be accurate as of then]
+- Sources: [docs, repos, Confluence/Jira links, people, files to work from]
+- Demos: [any live demos, or none]
+
+Follow docs/presentation-guide.md and CLAUDE.md. Ask me questions until you understand
+what the deck is for, then write the design spec in docs/superpowers/specs/ and wait
+for my approval before building any slides. Once I approve, scaffold the deck with
+./new-presentation.sh, build it, check it with ./check-presentation.sh, export
+slides.md, and record every source in the deck's README as you use it.
+```
+
+Leave out anything you don't know yet; Claude will ask.
+
 ## Text export
 
 `slides.md` holds the text of every slide and its speaker notes as plain
