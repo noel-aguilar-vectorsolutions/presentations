@@ -57,7 +57,7 @@
     position: absolute; inset: 0;
     display: none; flex-direction: column; justify-content: center;
     padding: 6vh 8vw;
-    font-size: clamp(14px, min(2.2vw, 3.9vh), 28px);
+    font-size: max(14px, min(2.2vw, 3.9vh));
     line-height: 1.45;
     overflow: hidden;
   }
@@ -151,11 +151,11 @@
   body.show-notes .slide.active .notes {
     display: block; position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto;
     background: var(--surface); border-top: 2px solid var(--accent);
-    padding: 12px 8vw 28px; font-size: 15px; line-height: 1.5; color: var(--fg);
+    padding: 12px 8vw 28px; font-size: max(15px, .9vw); line-height: 1.5; color: var(--fg);
   }
 
   .progress { position: fixed; left: 0; bottom: 0; height: 5px; background: var(--brand-gradient); transition: width .2s ease; z-index: 2; }
-  .counter { position: fixed; right: 16px; bottom: 12px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
+  .counter { position: fixed; right: 16px; bottom: 12px; font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
   body.on-brand .counter { color: rgba(255, 255, 255, .8); }
 
   @media (max-width: 700px) {
@@ -451,7 +451,8 @@ jobs:
 
   <section class="slide">
     <p class="kicker">What changes in your repo</p>
-    <h2>From <code>cibot</code> to the release App</h2>
+    <h2>No more CI bot accounts</h2>
+    <p style="font-size:.8em">Every CI bot account, <code>cibot</code> included, is <strong>retired by the end of January</strong>. The release App takes over.</p>
     <div class="dense" style="font-size:.6em">
       <table>
         <thead><tr><th></th><th><code>cibot</code> (before)</th><th><code>vectorlearning-release[bot]</code> (after)</th></tr></thead>
@@ -465,7 +466,7 @@ jobs:
       </table>
     </div>
     <p class="callout" style="font-size:.8em"><strong>Nothing lands on <code>main</code> except a reviewed PR</strong>, and that includes the bot's own release PR.</p>
-    <aside class="notes">⏱ 1.5 min. Source: cicd-standards docs/ci/release-github-app.md. With Continuous versioning, the version lives only in git tags. Nothing writes a version into a file, so a committed &lt;Version&gt; in a .csproj from an old pipeline should be deleted. With release-please, version files change only through the release PR, which a person approves.</aside>
+    <aside class="notes">⏱ 1.5 min. Source: cicd-standards docs/ci/release-github-app.md. All CI bot accounts, not just cibot, are retired by the end of January 2027: any pipeline still using one, or its personal token, stops working then. With Continuous versioning, the version lives only in git tags. Nothing writes a version into a file, so a committed &lt;Version&gt; in a .csproj from an old pipeline should be deleted. With release-please, version files change only through the release PR, which a person approves.</aside>
   </section>
 
   <section class="slide">
@@ -534,19 +535,20 @@ jobs:
       <table>
         <thead><tr><th>When</th><th>Change</th><th>What you'll notice</th><th>What to do</th></tr></thead>
         <tbody>
-          <tr><td><strong>January</strong></td><th>2FA enforced org-wide</th><td>Members without 2FA are <strong>removed from the org</strong> when it's switched on</td><td><strong>Set up 2FA now</strong></td></tr>
-          <tr><td class="when">TBD</td><th><code>GITHUB_TOKEN</code> read-only by default</th><td>A workflow that writes (tags, comments, packages) fails</td><td>Declare <code>permissions:</code> on each job. The standard workflows already do</td></tr>
-          <tr><td class="when">TBD</td><th>Actions can't approve PRs</th><td>Bots can't approve their own changes</td><td>Nothing, for normal work</td></tr>
-          <tr><td class="when">TBD</td><th>SHA pinning required</th><td><code>@v4</code> on an action is rejected</td><td>Pin <code>@&lt;full-sha&gt; # v4</code>. Dependabot keeps it current</td></tr>
-          <tr><td class="when">TBD</td><th>Approved actions only</th><td>Third-party actions not on the list are blocked</td><td>Use the paved road, or request a security review</td></tr>
-          <tr><td class="when">TBD</td><th>OIDC to AWS</th><td>The static AWS keys in org secrets are deleted</td><td>Assume a role through OIDC. It's built into the standard workflows</td></tr>
-          <tr><td class="when">TBD</td><th>Dependabot</th><td>Dependabot alerts and PRs appear</td><td>Review them like any other PR</td></tr>
-          <tr><td class="when">TBD</td><th>Org-wide branch protection</th><td>Every repo gets a baseline</td><td>Nothing. The standard rulesets sit on top</td></tr>
-          <tr><td class="when">TBD</td><th>Tidy-ups</th><td>No new public repos, wikis off, stale repos archived, <code>claude-review.yml</code> hardened</td><td>Docs go in the repo or Confluence</td></tr>
+          <tr><td><strong>End of January</strong></td><th>2FA enforced org-wide</th><td>Members without 2FA are <strong>removed from the org</strong> when it's switched on</td><td><strong>Set up 2FA now</strong></td></tr>
+          <tr><td class="when">Nov 2</td><th>OIDC to AWS</th><td>The static AWS keys in org secrets are deleted</td><td>Assume a role through OIDC. It's built into the standard workflows</td></tr>
+          <tr><td class="when">Nov 11</td><th><code>GITHUB_TOKEN</code> read-only by default</th><td>A workflow that writes (tags, comments, packages) fails</td><td>Declare <code>permissions:</code> on each job. The standard workflows already do</td></tr>
+          <tr><td class="when">Nov 11</td><th>Actions can't approve PRs</th><td>Bots can't approve their own changes</td><td>Nothing, for normal work</td></tr>
+          <tr><td class="when">Nov 11</td><th>SHA pinning required</th><td><code>@v4</code> on an action is rejected</td><td>Pin <code>@&lt;full-sha&gt; # v4</code>. Dependabot keeps it current</td></tr>
+          <tr><td class="when">Nov 11</td><th>Approved actions only</th><td>Third-party actions not on the list are blocked</td><td>Use the paved road, or request a security review</td></tr>
+          <tr><td class="when">Nov 11</td><th>Org-wide branch protection</th><td>Every repo gets a baseline</td><td>Nothing. The standard rulesets sit on top</td></tr>
+          <tr><td class="when">December</td><th>Tidy-ups</th><td>No new public repos, wikis off, stale repos archived, <code>claude-review.yml</code> hardened</td><td>Docs go in the repo or Confluence</td></tr>
+          <tr><td class="when">End of January</td><th>CI bot accounts retired</th><td><code>cibot</code> and other bot users, and their tokens, stop working</td><td>Move to the standard workflows. The release App tags and releases</td></tr>
+          <tr><td class="when">As repos migrate</td><th>Dependabot</th><td>Dependabot alerts and PRs appear</td><td>Review them like any other PR</td></tr>
         </tbody>
       </table>
     </div>
-    <aside class="notes">⏱ 2.5 min. Source: github-security-review remediation backlog (GHSEC-01, 03/10, 04, 05, 06, 08, 09, 11, 12, 15, 17). All of these are committed. Most roll out around the github-actions v1.0.0 release in mid-November, some start earlier, and 2FA enforcement is in January. Fill in each TBD in the When column with its date. Lead with 2FA: it's the one that removes people. Enforcement happens in January, so everyone needs to set it up before then.</aside>
+    <aside class="notes">⏱ 2.5 min. Source: github-security-review remediation backlog (GHSEC-01, 03/10, 04, 05, 06, 08, 09, 11, 12, 15, 17). All of these are committed. OIDC to AWS comes first, on Nov 2: the static keys go then. Most of the rest lands on Nov 11, around the v1.0.0 release. Dependabot is switched on per repo as it migrates, and the tidy-ups follow in December. Lead with 2FA: it's the one that removes people. Enforcement is planned for the end of January 2027, so everyone needs to set it up before then.</aside>
   </section>
 
   <section class="slide">
@@ -940,7 +942,7 @@ jobs:
       <div>
         <h3>This week</h3>
         <ul>
-          <li>Set up <strong>2FA</strong>. It's enforced in <strong>January</strong></li>
+          <li>Set up <strong>2FA</strong>. It's enforced at the <strong>end of January</strong></li>
           <li>Start writing <strong>Conventional Commit PR titles</strong>, or let Claude write them</li>
           <li>Team leads: choose your <strong>versioning strategy</strong></li>
           <li>List the <strong>third-party actions</strong> you'd need</li>

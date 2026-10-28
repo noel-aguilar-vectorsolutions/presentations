@@ -75,7 +75,7 @@ Estimates from the speaker notes. The target is 60 minutes.
 - Noel Aguilar, DevOps: reasons for the move (cost: about 80% of the CircleCI cost is for active users, which GitHub Actions doesn't charge for; Claude Code; one place), the paved-road framing, before/after changes (`cibot`, rulesets, squash, Dependabot, four-part versions), curated actions, SPAs and Lambdas moving to the Promotion Manager, the migration approach, demo choices
 
 ### Data & assets
-- `assets/brand-title.jpg`: the title and Questions background (gradient with the photo diamond), taken from `ppt/media/image1.jpeg` in `2026-08-nj-rubric-update.pptx` (see below) and resized to 1920px wide
+- `assets/brand-title.jpg`: the title and Questions background (gradient with the photo diamond), taken unchanged (2400×1350) from `ppt/media/image1.jpeg` in `2026-08-nj-rubric-update.pptx` (see below)
 - `assets/`: demo backup screenshots still to be captured (see the placeholders on slides 28 and 33)
 
 ## Notes
@@ -84,8 +84,9 @@ Decided by Noel Aguilar (2026-10-27):
 
 - Demo 1: Continuous versioning, .NET, on `poc_echo_server_dotnet`. Demo 2: release-please with release branches, Python, on `release-please-demo`
 - Lambdas move to AWS ACK, with manifests in `rendered-k8s-manifests`, promoted by the Promotion Manager. SPAs are similar, with the strategy being finalized. Both get a later session with a demo
-- 2FA enforcement is in January
-- Every hardening item on slide 17 is confirmed. Most roll out around the `github-actions` v1.0.0 release in mid-November, some start earlier, and 2FA is in January
+- 2FA enforcement is planned for the end of January 2027 (as of 2026-10-28)
+- All CI bot accounts (`cibot` and any others) are retired by the end of January 2027 (slides 14 and 17)
+- Every hardening item on slide 17 is confirmed, with dates (2026-10-28): OIDC to AWS on Nov 2; `GITHUB_TOKEN` read-only, Actions can't approve PRs, SHA pinning, approved actions only and org-wide branch protection on Nov 11; Dependabot as each repo migrates; tidy-ups in December; 2FA at the end of January 2027
 - Actions are pinned by SHA. Standard reusable workflows are referenced as `@v<major>`, and teams may pin an exact version instead
 - release-please will support monorepos
 - `github-actions` v1.0.0 (first official release) ships by mid-November 2026
@@ -97,8 +98,6 @@ Proposed (not yet in the standards):
 - Delete branches automatically after merge (`delete_branch_on_merge`), to keep the branch list clean as Dependabot opens PRs. It isn't in the `repository-settings.json` templates yet. Shown on slide 13 with a "proposed" label
 
 Open items before presenting:
-
-- **Hardening dates**: fill in the eight `TBD` cells in slide 17's When column
 
 - **`release-please-demo`** is empty on GitHub (2026-10-27). Set it up before the session, or present slides 31–33 as a walkthrough
 - **Out of step with the standards:** the `ci.yml` template and github-actions ADR-0001 (2026-09-26 amendment) still pin `app-ci.yml` by SHA, and `versioning-release-please.md` still says monorepos aren't covered. The deck follows the decisions above
