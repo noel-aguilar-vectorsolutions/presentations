@@ -173,6 +173,13 @@
   .counter { position: fixed; right: 16px; bottom: 12px; font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
   body.on-brand .counter { color: rgba(255, 255, 255, .8); }
 
+  /* Click a screenshot to see it full size; click again or Esc to close. */
+  .slide img { cursor: zoom-in; }
+  dialog.zoom { padding: 0; border: 0; background: transparent; max-width: 96vw; max-height: 96vh; overflow: visible; cursor: zoom-out; }
+  dialog.zoom:focus, dialog.zoom:focus-visible { outline: none; }
+  dialog.zoom::backdrop { background: rgba(10, 20, 45, .82); }
+  dialog.zoom img { display: block; max-width: 96vw; max-height: 96vh; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+
   @media (max-width: 700px) {
     .slide { padding: 6vh 16px; font-size: 18px; }
     .two-col, .cards, .cards.two, .shots { grid-template-columns: 1fr; }
@@ -814,7 +821,7 @@ jobs:
         <img src="assets/demo2-changelog.png" alt="CHANGELOG.md with versions 1.1.2, 1.1.1 and 1.1.0, each grouped into Features, Bug Fixes and Dependencies, with links to the PRs and commits">
       </div>
     </div>
-    <aside class="notes">Use if the demo repo isn't ready or the live run fails. Walk left to right. (1) The release PR: release-please keeps one open, labeled "autorelease: pending", updating it as PRs merge; nothing is released until a person approves and merges it. (2) Merging it creates the tag and a GitHub Release; in a monorepo, one per component that changed, each with its own notes. (3) The same notes go into CHANGELOG.md, grouped by type (feat, fix, dependencies) and linked to the PRs and commits, so the PR title you wrote is the line people read. The release and changelog screenshots come from a monorepo already on release-please, not from release-please-demo. They show the old CI bot as the releaser; with the release App, it's the App's name instead.</aside>
+    <aside class="notes">Use if the demo repo isn't ready or the live run fails. Click a screenshot to show it full size; click again or press Esc to close it. Walk left to right. (1) The release PR: release-please keeps one open, labeled "autorelease: pending", updating it as PRs merge; nothing is released until a person approves and merges it. (2) Merging it creates the tag and a GitHub Release; in a monorepo, one per component that changed, each with its own notes. (3) The same notes go into CHANGELOG.md, grouped by type (feat, fix, dependencies) and linked to the PRs and commits, so the PR title you wrote is the line people read. The release and changelog screenshots come from a monorepo already on release-please, not from release-please-demo. They show the old CI bot as the releaser; with the release App, it's the App's name instead.</aside>
   </section>
 
   <!-- ============ 9. CI builds, CD promotes ============ -->
@@ -940,7 +947,22 @@ jobs:
       history.replaceState(null, '', '#' + (current + 1));
     }
 
+    // Click a slide's image to see it full size in a dialog; click or Esc closes it.
+    const zoom = document.createElement('dialog');
+    zoom.className = 'zoom';
+    zoom.appendChild(document.createElement('img'));
+    document.body.appendChild(zoom);
+    zoom.addEventListener('click', () => zoom.close());
+    document.querySelectorAll('.slide img').forEach((img) => {
+      img.addEventListener('click', () => {
+        zoom.firstChild.src = img.src;
+        zoom.firstChild.alt = img.alt;
+        zoom.showModal();
+      });
+    });
+
     document.addEventListener('keydown', (e) => {
+      if (zoom.open) return; // Esc closes the dialog; other keys don't move the deck under it
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       switch (e.key) {
         case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
@@ -961,7 +983,7 @@ jobs:
 
     // Click right two-thirds of the screen to advance, left third to go back.
     document.addEventListener('click', (e) => {
-      if (e.target.closest('a, button, input, select, textarea, pre, .notes')) return;
+      if (e.target.closest('a, button, input, select, textarea, pre, .notes, .slide img, dialog')) return;
       show(e.clientX > window.innerWidth / 3 ? current + 1 : current - 1);
     });
 

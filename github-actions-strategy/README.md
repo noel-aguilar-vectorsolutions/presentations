@@ -13,7 +13,7 @@ SemVer, image tags, curated and SHA-pinned actions), the GitHub hardening develo
 will notice, what Dependabot is and why it helps, Conventional Commits, the three versioning strategies, release-please and its
 changelog, and the CI-builds/CD-promotes split. Includes two live demos; Demo 2 has a backup slide.
 
-Press **N** while presenting to show the speaker notes, each with a time estimate.
+Press **N** while presenting to show the speaker notes, each with a time estimate. Click a screenshot (slides 15 and 27) to see it full size; click again or press Esc to close it.
 
 ## Running time
 
