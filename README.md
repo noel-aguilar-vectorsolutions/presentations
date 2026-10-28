@@ -53,6 +53,7 @@ Open any `index.html` in a browser.
 - **← / PageUp**: previous slide
 - **Home / End**: first / last slide
 - **F**: toggle fullscreen
+- **Click an image**: show it full size; click again or **Esc** to close
 - **Print (⌘P)**: one slide per page, so you can save as PDF
 
 ## Index

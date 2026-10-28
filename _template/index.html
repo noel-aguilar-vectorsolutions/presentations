@@ -62,6 +62,13 @@
   .progress { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--accent); transition: width .2s ease; }
   .counter { position: fixed; right: 16px; bottom: 12px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
+  /* Click a slide's image to see it full size; click again or Esc to close. */
+  .slide img { cursor: zoom-in; }
+  dialog.zoom { padding: 0; border: 0; background: transparent; max-width: 96vw; max-height: 96vh; overflow: visible; cursor: zoom-out; }
+  dialog.zoom:focus, dialog.zoom:focus-visible { outline: none; }
+  dialog.zoom::backdrop { background: rgba(0, 0, 0, .8); }
+  dialog.zoom img { display: block; max-width: 96vw; max-height: 96vh; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+
   @media (max-width: 700px) {
     .slide { padding: 6vh 16px; font-size: 18px; }
     .two-col { grid-template-columns: 1fr; }
@@ -139,7 +146,22 @@
       history.replaceState(null, '', '#' + (current + 1));
     }
 
+    // Click a slide's image to see it full size in a dialog; click or Esc closes it.
+    const zoom = document.createElement('dialog');
+    zoom.className = 'zoom';
+    zoom.appendChild(document.createElement('img'));
+    document.body.appendChild(zoom);
+    zoom.addEventListener('click', () => zoom.close());
+    document.querySelectorAll('.slide img').forEach((img) => {
+      img.addEventListener('click', () => {
+        zoom.firstChild.src = img.src;
+        zoom.firstChild.alt = img.alt;
+        zoom.showModal();
+      });
+    });
+
     document.addEventListener('keydown', (e) => {
+      if (zoom.open) return; // Esc closes the dialog; other keys don't move the deck under it
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       switch (e.key) {
         case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
@@ -157,7 +179,7 @@
 
     // Click right two-thirds of the screen to advance, left third to go back.
     document.addEventListener('click', (e) => {
-      if (e.target.closest('a, button, input, select, textarea, pre')) return;
+      if (e.target.closest('a, button, input, select, textarea, pre, .slide img, dialog')) return;
       show(e.clientX > window.innerWidth / 3 ? current + 1 : current - 1);
     });
 

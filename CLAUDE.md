@@ -29,3 +29,5 @@ Each slide is a `<section class="slide">` inside `<main class="deck">`.
 Speaker notes go in `<aside class="notes">` inside the slide (hidden on screen
 and in print). Utility classes available in the template: `.title-slide`,
 `.two-col`, `.muted`, `.big`.
+Any `<img>` on a slide can be clicked to show it full size in a dialog; give it
+a meaningful `alt`.
