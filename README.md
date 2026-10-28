@@ -105,4 +105,4 @@ one.
 
 | Presentation | Description | Date |
 |---|---|---|
-| [Moving to GitHub Actions](github-actions-strategy/) | For dev teams and leads: what changes moving from CircleCI to GitHub Actions: paved road, versioning, release-please, hardening | 2026-10-27 |
+| [Moving to GitHub Actions](moving-to-github-actions/) | For dev teams and leads: what changes moving from CircleCI to GitHub Actions: paved road, versioning, release-please, hardening | 2026-10-27 |

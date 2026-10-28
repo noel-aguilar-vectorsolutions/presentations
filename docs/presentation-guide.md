@@ -1,7 +1,7 @@
 # Presentation guide
 
 How a deck in this repo is planned, built, reviewed and checked, and the design every
-deck shares. It's what worked on [Moving to GitHub Actions](../github-actions-strategy/);
+deck shares. It's what worked on [Moving to GitHub Actions](../moving-to-github-actions/);
 that deck is the reference example for everything below.
 
 The repo's rules (folder layout, `README.md` sources, `slides.md` export) are in
@@ -12,7 +12,7 @@ The repo's rules (folder layout, `README.md` sources, `slides.md` export) are in
 ### 1. Plan: write a design spec
 
 Before any slides, write `docs/superpowers/specs/YYYY-MM-DD-<slug>-design.md`
-([example](superpowers/specs/2026-10-27-github-actions-strategy-design.md)). Sections:
+([example](superpowers/specs/2026-10-27-moving-to-github-actions-design.md)). Sections:
 
 | Section | What it settles |
 |---|---|

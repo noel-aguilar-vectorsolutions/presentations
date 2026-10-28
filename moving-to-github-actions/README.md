@@ -3,7 +3,7 @@
 **Created:** 2026-10-27
 **Audience:** development teams and team leads who build applications and will use GitHub Actions to build them
 **Status:** Draft. Trimmed for repetition on 2026-10-28 (39 → 31 slides, ~69 → ~59 min); Demo 1 backup slide dropped and a Dependabot slide added the same day (31 slides, ~60.5 min); still to time in a run-through
-**Design:** [`docs/superpowers/specs/2026-10-27-github-actions-strategy-design.md`](../docs/superpowers/specs/2026-10-27-github-actions-strategy-design.md)
+**Design:** [`docs/superpowers/specs/2026-10-27-moving-to-github-actions-design.md`](../docs/superpowers/specs/2026-10-27-moving-to-github-actions-design.md)
 
 ## Summary
 
@@ -41,7 +41,7 @@ Estimates from the speaker notes. The target is 60 minutes.
 ## Sources
 
 ### Documents & links
-- Deck review, `tmp/github-actions-strategy-review.md` (local, not committed; 2026-10-28, at commit `578e21f`): section 1 (repetition) applied. Slides 17, 19, 25 and 26 dropped; 8+9, 12+20, 15+16 and 35+36 merged; repeated points cut, with the detail kept in speaker notes
+- Deck review, `tmp/moving-to-github-actions-review.md` (local, not committed; 2026-10-28, at commit `578e21f`): section 1 (repetition) applied. Slides 17, 19, 25 and 26 dropped; 8+9, 12+20, 15+16 and 35+36 merged; repeated points cut, with the detail kept in speaker notes
 - [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/): commit and PR title format
 
 ### Internal (Confluence / Jira / repos)
