@@ -75,12 +75,14 @@ Estimates from the speaker notes. The target is 60 minutes.
 
 ### Design
 - `~/OneDrive - Vector Solutions/Documents/presentations/offsites/2026-08-nj-rubric-update.pptx` (Noel Aguilar, 2026-08 offsite deck): the brand colors were sampled from its background images and logo (deep blue `#1A439B`, `#2C61AD`, cyan `#2581C4`, teal `#439AB8`, green `#81C089`, slate text). The rounded-diamond outline motif and the title background also come from it
+- `~/OneDrive - Vector Solutions/Documents/presentations/vector-template.pptx` (Vector Solutions PowerPoint template, read 2026-10-28): the footer on its slide master (slide 5's layout). The color logo (`ppt/media/image2.png`), the white logo (`image7.png`, used on the title slide) and the strip's gradient (`image3.emf`: `#96D448` → `#293D9A` at 66% → `#5AB7E6`). Positions taken from the master: logo at the bottom left, 14.6% of the slide's width; the strip to its right; the slide number at the right
 
 ### People consulted
 - Noel Aguilar, DevOps: reasons for the move (cost: about 80% of the CircleCI cost is for active users, which GitHub Actions doesn't charge for; Claude Code; one place), the paved-road framing, before/after changes (`cibot`, rulesets, squash, Dependabot, four-part versions), curated actions, SPAs and Lambdas moving to the Promotion Manager, the migration approach, demo choices
 
 ### Data & assets
 - `assets/brand-title.jpg`: the title and Questions background (gradient with the photo diamond), taken unchanged (2400×1350) from `ppt/media/image1.jpeg` in `2026-08-nj-rubric-update.pptx` (see below)
+- `assets/vector-logo.png` (350×79) and `assets/vector-logo-white.png` (2602×589): the Vector Solutions logos, taken unchanged from `vector-template.pptx` (`ppt/media/image2.png` and `image7.png`). The white one is used on the dark slides and in dark mode
 - `assets/dependabot-pr.png`: screenshot of a Dependabot PR (`ci(deps)`, bumping `actions/setup-node`) in a repo's PR list, taken by Noel Aguilar on 2026-10-28, for slide 15
 - `assets/demo2-release-pr.png`, `demo2-github-release.png`, `demo2-changelog.png`: Demo 2 backup screenshots for slide 27, provided by Noel Aguilar on 2026-10-28 (a release-please release PR; the GitHub Releases page and `CHANGELOG.md` of a monorepo on release-please, showing `@argocd-promotion-manager` packages)
 

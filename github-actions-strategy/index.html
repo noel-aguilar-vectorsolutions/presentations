@@ -28,6 +28,9 @@
     --warn: #c25a1c;
     --tint-green: #ebf5ea;
     --motif-opacity: .55;
+    /* Footer from vector-template.pptx's slide master: logo, then the green-blue-light blue strip */
+    --logo: url("assets/vector-logo.png");
+    --footer-strip: linear-gradient(90deg, #96d448 0%, #293d9a 65.8%, #5ab7e6 100%);
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
@@ -45,6 +48,7 @@
       --warn: #f29a5c;
       --tint-green: #16354a;
       --motif-opacity: .35;
+      --logo: url("assets/vector-logo-white.png");
     }
   }
 
@@ -62,6 +66,13 @@
     overflow: hidden;
   }
   .slide.active { display: flex; }
+  .slide {
+    padding-bottom: 11vh;
+    background-image: var(--logo), var(--footer-strip);
+    background-repeat: no-repeat;
+    background-size: 14.6vw auto, 76vw 1.9vh;
+    background-position: 1.3vw calc(100% - 1.3vh), 16.8vw calc(100% - 2.9vh);
+  }
 
   .slide h1 { font-size: 2.4em; line-height: 1.1; margin: 0 0 .4em; letter-spacing: -0.02em; color: var(--heading); }
   .slide h2 { font-size: 1.6em; line-height: 1.15; margin: 0 0 .6em; letter-spacing: -0.01em; color: var(--heading); }
@@ -108,9 +119,9 @@
   .slide > * { position: relative; z-index: 1; }
 
   /* Brand slides: gradient background, white text */
-  .slide.brand { background: var(--brand-gradient); color: #fff; }
+  .slide.brand { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, var(--brand-gradient); color: #fff; }
   .slide.brand::before { --motif-opacity: .85; top: -19vw; right: -13vw; width: 42vw; height: 42vw; }
-  .slide.brand.photo { background: #1a439b url("assets/brand-title.jpg") center / cover no-repeat; }
+  .slide.brand.photo { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, #1a439b url("assets/brand-title.jpg") center / cover no-repeat; }
   .slide.brand.photo::before { display: none; }
   .slide.brand.photo > :not(.notes) { max-width: 52%; }
   .slide.brand h1, .slide.brand h2, .slide.brand h3 { color: #fff; }
@@ -169,8 +180,7 @@
     padding: 12px 8vw 28px; font-size: max(15px, .9vw); line-height: 1.5; color: var(--fg);
   }
 
-  .progress { position: fixed; left: 0; bottom: 0; height: 5px; background: var(--brand-gradient); transition: width .2s ease; z-index: 2; }
-  .counter { position: fixed; right: 16px; bottom: 12px; font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
+  .counter { position: fixed; right: 1.3vw; bottom: calc(3.85vh - .65em); font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
   body.on-brand .counter { color: rgba(255, 255, 255, .8); }
 
   /* Click a screenshot to see it full size; click again or Esc to close. */
@@ -181,7 +191,7 @@
   dialog.zoom img { display: block; max-width: 96vw; max-height: 96vh; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
 
   @media (max-width: 700px) {
-    .slide { padding: 6vh 16px; font-size: 18px; }
+    .slide { padding: 6vh 16px 11vh; font-size: 18px; }
     .two-col, .cards, .cards.two, .shots { grid-template-columns: 1fr; }
   }
 
@@ -190,7 +200,7 @@
     html, body { height: auto; }
     .deck { height: auto; overflow: visible; }
     .slide { position: relative; display: flex !important; width: 1280px; height: 720px; font-size: 26px; page-break-after: always; break-after: page; }
-    .progress, .counter { display: none; }
+    .counter { display: none; }
     .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     body.show-notes .slide.active .notes { display: none; }
   }
@@ -928,20 +938,17 @@ jobs:
   </section>
 
 </main>
-<div class="progress"></div>
 <div class="counter"></div>
 
 <script>
   (function () {
     const slides = Array.from(document.querySelectorAll('.slide'));
-    const progress = document.querySelector('.progress');
     const counter = document.querySelector('.counter');
     let current = 0;
 
     function show(i) {
       current = Math.max(0, Math.min(slides.length - 1, i));
       slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
-      progress.style.width = ((current + 1) / slides.length * 100) + '%';
       counter.textContent = (current + 1) + ' / ' + slides.length;
       document.body.classList.toggle('on-brand', slides[current].classList.contains('brand'));
       history.replaceState(null, '', '#' + (current + 1));
