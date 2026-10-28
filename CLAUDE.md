@@ -27,7 +27,15 @@ This repo holds HTML presentations, one per subfolder.
 
 Each slide is a `<section class="slide">` inside `<main class="deck">`.
 Speaker notes go in `<aside class="notes">` inside the slide (hidden on screen
-and in print). Utility classes available in the template: `.title-slide`,
-`.two-col`, `.muted`, `.big`.
+and in print), and start with a time estimate: `⏱ 1.5 min.` Utility classes
+available in the template: `.title-slide`, `.two-col`, `.muted`, `.big`,
+`.kicker`, `.dense`, `.cards`, `.callout`, `.num`, `.pill`, `.yes` / `.no`, and
+`dg-*` for inline SVG diagrams.
 Any `<img>` on a slide can be clicked to show it full size in a dialog; give it
 a meaningful `alt`.
+
+Decks are Vector Solutions branded: the template puts the logo and footer strip
+on every slide, from `assets/vector-logo.png`, `assets/vector-logo-white.png`
+and `assets/brand-title.jpg`. Add `.brand` to a slide for the gradient
+background with white text, and `.brand.photo` for the title background image
+(used on the title and Questions slides).

@@ -53,6 +53,7 @@ Open any `index.html` in a browser.
 - **← / ↑ / PageUp**: previous slide
 - **Home / End**: first / last slide
 - **F**: toggle fullscreen
+- **N**: show or hide the speaker notes, for rehearsing
 - **Click** the right two-thirds of the screen: next slide; the left third:
   previous slide
 - **Click an image**: show it full size; click again or **Esc** to close

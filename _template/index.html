@@ -6,23 +6,49 @@
 <title>{{TITLE}}</title>
 <style>
   :root {
+    /* Vector Solutions brand, sampled from the 2026-08 offsite deck's backgrounds and logo */
+    --b-deep: #1a439b;
+    --b-mid: #2c61ad;
+    --b-cyan: #2581c4;
+    --b-teal: #439ab8;
+    --b-green: #81c089;
+    --b-line-green: #9cc66b;
+    --b-line-blue: #5ba4e0;
+    --brand-gradient: linear-gradient(62deg, var(--b-green) 0%, var(--b-teal) 13%, var(--b-cyan) 30%, var(--b-mid) 58%, var(--b-deep) 100%);
+
     --bg: #ffffff;
-    --fg: #1a1d23;
-    --muted: #5f6673;
-    --accent: #2f6fdb;
-    --surface: #f3f5f8;
-    --border: #dde1e7;
+    --fg: #26323a;
+    --heading: var(--b-deep);
+    --muted: #5b6670;
+    --accent: #0076b8;
+    --surface: #eef4fa;
+    --border: #d3e0ee;
+    --ok: #2f8a48;
+    --bad: #c0392b;
+    --warn: #c25a1c;
+    --tint-green: #ebf5ea;
+    --motif-opacity: .55;
+    /* Footer from vector-template.pptx's slide master: logo, then the green-blue-light blue strip */
+    --logo: url("assets/vector-logo.png");
+    --footer-strip: linear-gradient(90deg, #96d448 0%, #293d9a 65.8%, #5ab7e6 100%);
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #14161a;
-      --fg: #e8eaee;
-      --muted: #9aa1ad;
-      --accent: #6b9cff;
-      --surface: #1e2127;
-      --border: #2e333b;
+      --bg: #0c1a35;
+      --fg: #e6edf6;
+      --heading: #a9cdf5;
+      --muted: #9fb0c4;
+      --accent: #5cb6f2;
+      --surface: #142a52;
+      --border: #26406d;
+      --ok: #7ccb8a;
+      --bad: #f0716a;
+      --warn: #f29a5c;
+      --tint-green: #16354a;
+      --motif-opacity: .35;
+      --logo: url("assets/vector-logo-white.png");
     }
   }
 
@@ -35,13 +61,22 @@
     position: absolute; inset: 0;
     display: none; flex-direction: column; justify-content: center;
     padding: 6vh 8vw;
-    font-size: clamp(16px, 2.2vw, 28px);
+    font-size: max(14px, min(2.2vw, 3.9vh));
     line-height: 1.45;
+    overflow: hidden;
   }
   .slide.active { display: flex; }
+  /* Footer on every slide: the logo bottom left, the strip to its right, the counter at the right */
+  .slide {
+    padding-bottom: 11vh;
+    background-image: var(--logo), var(--footer-strip);
+    background-repeat: no-repeat;
+    background-size: 14.6vw auto, 76vw 1.9vh;
+    background-position: 1.3vw calc(100% - 1.3vh), 16.8vw calc(100% - 2.9vh);
+  }
 
-  .slide h1 { font-size: 2.4em; line-height: 1.1; margin: 0 0 .4em; letter-spacing: -0.02em; }
-  .slide h2 { font-size: 1.6em; line-height: 1.15; margin: 0 0 .6em; letter-spacing: -0.01em; }
+  .slide h1 { font-size: 2.4em; line-height: 1.1; margin: 0 0 .4em; letter-spacing: -0.02em; color: var(--heading); }
+  .slide h2 { font-size: 1.6em; line-height: 1.15; margin: 0 0 .6em; letter-spacing: -0.01em; color: var(--heading); }
   .slide h3 { font-size: 1.1em; margin: 0 0 .3em; color: var(--accent); }
   .slide p, .slide li { max-width: 60ch; }
   .slide ul, .slide ol { padding-left: 1.2em; margin: 0; }
@@ -56,22 +91,86 @@
   .muted { color: var(--muted); }
   .big { font-size: 1.6em; font-weight: 600; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: start; }
+  .kicker { font-size: .55em; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8em; }
+  .dense { font-size: .62em; }
+  .dense p, .dense li { max-width: none; }
+  .slide table { border-collapse: collapse; width: 100%; }
+  .slide th, .slide td { text-align: left; vertical-align: top; padding: .4em .7em; border-bottom: 1px solid var(--border); }
+  .slide th { color: var(--heading); font-weight: 600; }
+  .slide thead th { background: var(--surface); color: var(--muted); border-bottom: 2px solid var(--border); }
+  .slide thead th:first-child { border-radius: 8px 0 0 0; }
+  .slide thead th:last-child { border-radius: 0 8px 0 0; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6vw; }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1em 1.1em; box-shadow: 0 6px 18px -12px rgba(26, 67, 155, .45); }
+  .card p { margin: .3em 0 0; }
+  .card h3 { margin: 0; }
+  .callout { background: linear-gradient(90deg, var(--surface), var(--tint-green)); border: 1px solid var(--border); padding: .6em 1em; border-radius: 12px; margin-top: 1em; max-width: none; }
+  .num { display: inline-grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--brand-gradient); color: #fff; font-weight: 700; font-size: .8em; margin-bottom: .5em; }
+  .pill { display: inline-block; font-size: .55em; font-weight: 600; padding: .2em .7em; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); vertical-align: middle; }
+  .pill.warn { color: var(--warn); border-color: currentColor; }
+  .yes { color: var(--ok); font-weight: 700; }
+  .no { color: var(--bad); font-weight: 700; }
+
+  /* Inline SVG diagrams: <svg class="diagram" viewBox="..."> with these classes, so they follow dark mode */
+  .diagram { width: 100%; height: auto; max-height: 46vh; }
+  .dg-box { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .dg-box.accent { stroke: var(--accent); }
+  .dg-text { fill: var(--fg); font-family: var(--font); font-size: 18px; }
+  .dg-small { fill: var(--muted); font-family: var(--font); font-size: 15px; }
+  .dg-mono { fill: var(--fg); font-family: var(--mono); font-size: 15px; }
+  .dg-line { stroke: var(--muted); stroke-width: 2.5; fill: none; }
+  .dg-line.accent { stroke: var(--accent); }
+  .dg-line.dashed { stroke-dasharray: 7 6; }
+  .dg-zone { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 8 6; }
+  .dg-dot { fill: var(--bg); stroke: var(--muted); stroke-width: 3; }
+  .dg-dot.accent { fill: var(--accent); stroke: var(--accent); }
+  .dg-arrowhead { fill: var(--muted); }
+  .dg-arrowhead.accent { fill: var(--accent); }
+
+  /* Rounded-diamond outlines: the motif from the brand backgrounds */
+  .slide::before {
+    content: ""; position: absolute; top: -10vw; right: -7vw; width: 28vw; height: 28vw; pointer-events: none; opacity: var(--motif-opacity);
+    background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke-width='3'%3E%3Crect x='95' y='95' width='210' height='210' rx='44' transform='rotate(45 200 200)' stroke='%239cc66b'/%3E%3Crect x='115' y='125' width='210' height='210' rx='44' transform='rotate(45 220 230)' stroke='%235ba4e0'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* Brand slides: gradient background, white text. Add .photo for the title background image. */
+  .slide.brand { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, var(--brand-gradient); color: #fff; }
+  .slide.brand::before { --motif-opacity: .85; top: -19vw; right: -13vw; width: 42vw; height: 42vw; }
+  .slide.brand.photo { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, #1a439b url("assets/brand-title.jpg") center / cover no-repeat; }
+  .slide.brand.photo::before { display: none; }
+  .slide.brand.photo > :not(.notes) { max-width: 52%; }
+  .slide.brand h1, .slide.brand h2, .slide.brand h3 { color: #fff; }
+  .slide.brand .muted { color: rgba(255, 255, 255, .82); }
+  .slide.brand .kicker { color: #cfeab0; }
+  .slide.brand code { background: rgba(255, 255, 255, .16); color: #fff; }
+  .slide.brand .card { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .3); box-shadow: none; backdrop-filter: blur(8px); }
+  .slide.brand .card .muted { color: #cfeab0; font-weight: 600; }
+  .slide.brand .callout { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .3); backdrop-filter: blur(8px); }
+  .slide.brand .num { background: #fff; color: var(--b-deep); }
 
   .notes { display: none; }
+  /* Press N: the current slide's speaker notes in a panel at the bottom, for rehearsing */
+  body.show-notes .slide.active .notes {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto;
+    background: var(--surface); border-top: 2px solid var(--accent);
+    padding: 12px 8vw 28px; font-size: max(15px, .9vw); line-height: 1.5; color: var(--fg);
+  }
 
-  .progress { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--accent); transition: width .2s ease; }
-  .counter { position: fixed; right: 16px; bottom: 12px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .counter { position: fixed; right: 1.3vw; bottom: calc(3.85vh - .65em); font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
+  body.on-brand .counter { color: rgba(255, 255, 255, .8); }
 
   /* Click a slide's image to see it full size; click again or Esc to close. */
   .slide img { cursor: zoom-in; }
   dialog.zoom { padding: 0; border: 0; background: transparent; max-width: 96vw; max-height: 96vh; overflow: visible; cursor: zoom-out; }
   dialog.zoom:focus, dialog.zoom:focus-visible { outline: none; }
-  dialog.zoom::backdrop { background: rgba(0, 0, 0, .8); }
+  dialog.zoom::backdrop { background: rgba(10, 20, 45, .82); }
   dialog.zoom img { display: block; max-width: 96vw; max-height: 96vh; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
 
   @media (max-width: 700px) {
-    .slide { padding: 6vh 16px; font-size: 18px; }
-    .two-col { grid-template-columns: 1fr; }
+    .slide { padding: 6vh 16px 11vh; font-size: 18px; }
+    .two-col, .cards, .cards.two { grid-template-columns: 1fr; }
   }
 
   @media print {
@@ -79,16 +178,20 @@
     html, body { height: auto; }
     .deck { height: auto; overflow: visible; }
     .slide { position: relative; display: flex !important; width: 1280px; height: 720px; font-size: 26px; page-break-after: always; break-after: page; }
-    .progress, .counter { display: none; }
+    .counter { display: none; }
+    .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.show-notes .slide.active .notes { display: none; }
   }
 </style>
 </head>
 <body>
 <main class="deck">
 
-  <section class="slide title-slide">
+  <section class="slide title-slide brand photo">
+    <p class="kicker">Topic or series</p>
     <h1>{{TITLE}}</h1>
-    <p class="muted">Subtitle or presenter name · {{DATE}}</p>
+    <p class="big muted" style="font-weight:400">Subtitle: what the audience gets out of it</p>
+    <p class="muted">Presenter name · Team<br><span style="font-size:.75em">{{DATE}}</span></p>
   </section>
 
   <section class="slide">
@@ -99,7 +202,31 @@
       <li>Options</li>
       <li>Recommendation</li>
     </ol>
-    <aside class="notes">Speaker notes go here. They're hidden on screen and in print.</aside>
+    <aside class="notes">⏱ 0.5 min. Speaker notes go here, starting with a time estimate. They're hidden on screen and in print; press N to show them while rehearsing.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Section name</p>
+    <h2>Cards and a callout</h2>
+    <div class="cards">
+      <div class="card">
+        <span class="num">1</span>
+        <h3>First reason</h3>
+        <p>One or two sentences.</p>
+      </div>
+      <div class="card">
+        <span class="num">2</span>
+        <h3>Second reason</h3>
+        <p>One or two sentences.</p>
+      </div>
+      <div class="card">
+        <span class="num">3</span>
+        <h3>Third reason</h3>
+        <p>One or two sentences.</p>
+      </div>
+    </div>
+    <p class="callout">The one thing to remember from this slide.</p>
+    <aside class="notes">⏱ 1 min. Use .cards.two for two cards.</aside>
   </section>
 
   <section class="slide">
@@ -122,27 +249,25 @@
     </div>
   </section>
 
-  <section class="slide title-slide">
-    <h2>Questions?</h2>
+  <section class="slide title-slide brand photo">
+    <h2 style="font-size:2.6em">Questions?</h2>
     <p class="muted">Sources are listed in this presentation's README.md</p>
   </section>
 
 </main>
-<div class="progress"></div>
 <div class="counter"></div>
 
 <script>
   (function () {
     const slides = Array.from(document.querySelectorAll('.slide'));
-    const progress = document.querySelector('.progress');
     const counter = document.querySelector('.counter');
     let current = 0;
 
     function show(i) {
       current = Math.max(0, Math.min(slides.length - 1, i));
       slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
-      progress.style.width = ((current + 1) / slides.length * 100) + '%';
       counter.textContent = (current + 1) + ' / ' + slides.length;
+      document.body.classList.toggle('on-brand', slides[current].classList.contains('brand'));
       history.replaceState(null, '', '#' + (current + 1));
     }
 
@@ -174,12 +299,15 @@
           if (document.fullscreenElement) document.exitFullscreen();
           else document.documentElement.requestFullscreen();
           break;
+        // Speaker notes overlay, for rehearsing with the time estimates.
+        case 'n': case 'N':
+          document.body.classList.toggle('show-notes'); break;
       }
     });
 
     // Click right two-thirds of the screen to advance, left third to go back.
     document.addEventListener('click', (e) => {
-      if (e.target.closest('a, button, input, select, textarea, pre, .slide img, dialog')) return;
+      if (e.target.closest('a, button, input, select, textarea, pre, .notes, .slide img, dialog')) return;
       show(e.clientX > window.innerWidth / 3 ? current + 1 : current - 1);
     });
 
