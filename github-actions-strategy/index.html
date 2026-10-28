@@ -342,19 +342,8 @@ jobs:
 
   <section class="slide">
     <p class="kicker">The paved road</p>
-    <h2>How migration happens</h2>
-    <ul>
-      <li><strong>DevOps defines the pattern and the migration steps:</strong> templates, how-to guides and a migration playbook</li>
-      <li><strong>DevOps will help</strong>, and in many cases will do the migration for you</li>
-      <li><strong>Want to do it yourselves?</strong> You'll be supported, when your wave starts</li>
-    </ul>
-    <p class="callout">Either way, you end up on the same pattern as every other repo, and <strong>every repo is migrated by April 1</strong>.</p>
-    <aside class="notes">⏱ 1 min. The deadline: every repo is off CircleCI and on GitHub Actions by April 1, 2027. The pilot, poc_echo_server_dotnet, has already moved to the standard CI. There's a .NET service migration playbook in github-actions/docs/migration.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker">The paved road</p>
     <h2>Migration timeline</h2>
+    <p style="font-size:.75em">DevOps writes the templates and the playbook, and will help, or do the migration for you. Either way, every repo ends up on the same pattern.</p>
     <div class="timeline">
       <span class="month" style="grid-column: 2 / 4">Nov</span>
       <span class="month" style="grid-column: 4 / 6">Dec</span>
@@ -375,8 +364,8 @@ jobs:
       <span class="row-label" style="grid-row: 5">Every repo off CircleCI</span>
       <span class="done" style="grid-row: 5">✓ Done</span>
     </div>
-    <p class="callout"><strong>Please don't migrate ahead of your wave.</strong> The workflows for your stack may not be ready yet. DevOps will reach out; pilots are agreed with DevOps first.</p>
-    <aside class="notes">⏱ 1 min. Timeline as of 2026-10-28. From the github-actions v1.0.0 release in mid-November, any new app deployed to EKS, and any new containerized Lambda, starts on GitHub Actions rather than CircleCI. Existing apps deployed to EKS migrate from mid-November and are done by the end of January. SPAs, existing Lambdas and everything else start in January and are done by the end of March; their deploy path (AWS ACK and the Promotion Manager) gets its own session. Everything is off CircleCI by April 1, 2027. Stress the ask: don't start early on your own. The shared workflows only implement some stacks today, so an early migration may have to be redone.</aside>
+    <p class="callout"><strong>Please don't migrate ahead of your wave.</strong> The workflows for your stack may not be ready yet. Want to go first? Volunteer as a pilot.</p>
+    <aside class="notes">⏱ 1.5 min. Timeline as of 2026-10-28. From the github-actions v1.0.0 release in mid-November, any new app deployed to EKS, and any new containerized Lambda, starts on GitHub Actions rather than CircleCI. Existing apps deployed to EKS migrate from mid-November and are done by the end of January. SPAs, existing Lambdas and everything else start in January and are done by the end of March; their deploy path (AWS ACK and the Promotion Manager) gets its own session. Everything is off CircleCI by April 1, 2027. Stress the ask: don't start early on your own. The shared workflows only implement some stacks today, so an early migration may have to be redone. Teams that want to do the migration themselves are supported once their wave starts; pilots are agreed with DevOps first. The pilot repo, poc_echo_server_dotnet, has already moved to the standard CI, and there's a .NET service migration playbook in github-actions/docs/migration.</aside>
   </section>
 
   <!-- ============ 3. What changes ============ -->
@@ -418,49 +407,21 @@ jobs:
       <div>
         <h3>Changes</h3>
         <ul>
-          <li><strong>The moving <code>main</code> image tag goes away.</strong> Every build gets its own tag</li>
-          <li><strong>Release branches are created automatically</strong>, one per minor version: <code>release/1.0.x</code></li>
-          <li>Fixes on a release branch are <strong>forward-ported</strong> to <code>main</code>. The release branch is never merged back</li>
-          <li><strong>New:</strong> <code>hotfix/X.Y.x</code>, only for plain release-please, only when a production fix can't wait for <code>main</code></li>
+          <li><strong>The moving <code>main</code> and <code>latest</code> image tags go away.</strong> One tag names one build, and it never moves:
+            <ul class="nowrap-code">
+              <li><code>main-412</code>: a <code>main</code> build under release-please</li>
+              <li><code>1.4.0</code>: a version</li>
+            </ul>
+          </li>
         </ul>
       </div>
     </div>
-    <p class="callout" style="font-size:.7em"><strong>Forward-port:</strong> a normal PR into <code>main</code> that copies one fix from a release (or hotfix) branch, so the next version has it too. Only that fix goes across, nothing else on the branch.</p>
-    <aside class="notes">⏱ 1.5 min. Compared with the Git Branching @ Vector page on Confluence. Branch names follow the same convention, and branch builds were already tagged with the branch name. What's new for tags is the run number on the end, so each build has its own tag, and the moving main tag going away. The real change is release branches: release-please creates them, named per minor version (the "x" is literal), and fixes flow forward to main instead of the release branch being merged back. Integration branches aren't covered by the new standards yet. If someone asks, they're still allowed, but the branch's builds get a branch-run tag and never a version.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker">What changes in your repo</p>
-    <h2>Why squash, not merge commits</h2>
-    <div class="two-col" style="font-size:.85em">
-      <div>
-        <h3>Merge commit: what lands on <code>main</code></h3>
-<pre>*   Merge pull request #123 from feat/DAR-102
-|\
-| * address review comments
-| * fix typo
-| * wip
-| * add clear button
-|/</pre>
-      </div>
-      <div>
-        <h3>Squash: what lands on <code>main</code></h3>
-<pre>* feat(search): add clear button (DAR-102) (#123)</pre>
-        <p class="muted" style="font-size:.72em; margin-top:.6em"><code>DAR-102</code> links the commit to its Jira ticket. GitHub adds the <code>(#123)</code> PR link itself.</p>
-      </div>
-    </div>
-    <ul class="dense" style="font-size:.72em; margin-top:.4em">
-      <li><strong>The version and changelog are read from commit titles on <code>main</code>.</strong> With squash, the only title is the PR title, and the title check makes sure it's right</li>
-      <li><strong>A clean, linear history</strong> that's easy to read, bisect and revert, one PR at a time</li>
-      <li><strong>Your branch commits can be as messy as you like.</strong> They never reach <code>main</code></li>
-    </ul>
-    <aside class="notes">⏱ 1.5 min. With merge commits, "wip" and "fix typo" become commits on main, and versioning would have to make sense of them. Under Continuous versioning, a merge commit in a SemVer module's range since its last tag fails the build. release-please repos are squash-only by standard. The squash setting is in each template's repository-settings.json: squash only, with the PR title as the commit title. Put the Jira key at the end of the PR title, e.g. "(DAR-102)", so the commit on main, and the changelog line, link back to the ticket. GitHub appends the PR number "(#123)" on squash, so you get both links.</aside>
+    <aside class="notes">⏱ 1 min. Compared with the Git Branching @ Vector page on Confluence. Branch names follow the same convention, and branch builds were already tagged with the branch name. What's new for tags is the run number on the end, so each build has its own tag, and the moving main and latest tags going away. Before, they pointed at whatever image was built most recently; they're removed as part of each repo's migration. Release branches change too, but only under one strategy, so they're covered with release-please. Integration branches aren't covered by the new standards yet. If someone asks, they're still allowed, but the branch's builds get a branch-run tag and never a version.</aside>
   </section>
 
   <section class="slide">
     <p class="kicker">What changes in your repo</p>
     <h2>One PR, one change</h2>
-    <p>A PR becomes <strong>one commit with one title and one type</strong>. So:</p>
     <ul class="dense" style="font-size:.78em">
       <li><strong>One branch = one feature or one fix.</strong> Two features in one PR become one changelog line and one version bump, and you can't revert one without the other</li>
       <li><strong>Don't mix a fix into a feature PR.</strong> Under <code>feat:</code>, the fix disappears from the changelog</li>
@@ -484,85 +445,36 @@ jobs:
       <li>release-please repos: <code>release/**</code> and <code>hotfix/**</code> are protected too</li>
       <li><span class="pill warn">proposed</span> <strong>Branches are deleted automatically after merge</strong>. This keeps the branch list clean, which matters once Dependabot starts opening PRs</li>
     </ul>
-    <p class="callout">Before, every team had its own rules, or none. Now they're templates in <code>cicd-standards</code>, applied the same way everywhere.</p>
-    <aside class="notes">⏱ 1 min. The rulesets are JSON templates in cicd-standards (templates/*/rulesets/), imported with gh api or GitHub's ruleset import. "Nobody can bypass" includes admins: the rule is the rule. Auto-delete is a proposal: GitHub's "Automatically delete head branches" setting (delete_branch_on_merge). It isn't in the repository-settings.json templates yet. Every Dependabot update and every squash-merged PR leaves a branch behind otherwise. A deleted branch can still be restored from the PR page if someone needs it.</aside>
+    <aside class="notes">⏱ 1 min. The rulesets are JSON templates in cicd-standards (templates/*/rulesets/), imported with gh api or GitHub's ruleset import. "Nobody can bypass" includes admins: the rule is the rule. Auto-delete is a proposal: GitHub's "Automatically delete head branches" setting (delete_branch_on_merge). It isn't in the repository-settings.json templates yet. Every Dependabot update and every squash-merged PR leaves a branch behind otherwise. A deleted branch can still be restored from the PR page if someone needs it. Before, every team had its own rules, or none. An org-wide branch protection baseline also lands on Nov 11; the standard rulesets sit on top of it, so teams don't need to do anything.</aside>
   </section>
 
   <section class="slide">
     <p class="kicker">What changes in your repo</p>
-    <h2>No more CI bot accounts</h2>
-    <p style="font-size:.8em">Every CI bot account, <code>cibot</code> included, is <strong>retired by the end of January</strong>. The release App takes over.</p>
-    <div class="dense" style="font-size:.6em">
-      <table>
-        <thead><tr><th></th><th><code>cibot</code> (before)</th><th><code>vectorlearning-release[bot]</code> (after)</th></tr></thead>
-        <tbody>
-          <tr><th>What it is</th><td class="before">A machine user, using a seat and a personal token</td><td>A GitHub App owned by the organization</td></tr>
-          <tr><th>Token lifetime</th><td class="before">Months, or no expiry</td><td>One hour, created fresh for each job</td></tr>
-          <tr><th>Commits to <code>main</code></th><td class="before"><span class="no">Yes</span></td><td><span class="yes">Never</span>. Branch rulesets block it</td></tr>
-          <tr><th>What it does</th><td class="before">Commits and tags</td><td>Opens release PRs, creates <code>v*</code> tags and GitHub Releases, creates <code>release/**</code> branches</td></tr>
-          <tr><th>Can change workflows</th><td class="before">Yes</td><td><span class="yes">No</span>. It has no permission to edit workflow files</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="callout" style="font-size:.8em"><strong>Nothing lands on <code>main</code> except a reviewed PR</strong>, and that includes the bot's own release PR.</p>
-    <aside class="notes">⏱ 1.5 min. Source: cicd-standards docs/ci/release-github-app.md. All CI bot accounts, not just cibot, are retired by the end of January 2027: any pipeline still using one, or its personal token, stops working then. With Continuous versioning, the version lives only in git tags. Nothing writes a version into a file, so a committed &lt;Version&gt; in a .csproj from an old pipeline should be deleted. With release-please, version files change only through the release PR, which a person approves.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker">What changes in your repo</p>
-    <h2>Where your version lives</h2>
-    <div class="cards dense" style="font-size:.66em">
+    <h2>No bot commits on <code>main</code></h2>
+    <div class="cards two dense" style="font-size:.64em">
       <div class="card">
         <p class="muted">Before</p>
-        <h3>dynamo-config</h3>
-        <ul>
-          <li>Read the version from a file: <code>dynamo-config.yml</code>, a <code>.csproj</code>, <code>package.json</code> or <code>Chart.yaml</code></li>
-          <li>Bumped it and <strong>committed straight to <code>main</code></strong>: <em>"Version auto-update by CircleCi [ci skip]"</em></li>
-          <li>Then pushed the tag</li>
-        </ul>
+        <h3><code>cibot</code> and dynamo-config</h3>
+        <p>A machine user with a long-lived token. It read the version from a file, bumped it and <strong>committed straight to <code>main</code></strong>: <em>"Version auto-update by CircleCi [ci skip]"</em></p>
       </div>
       <div class="card">
         <p class="muted">After</p>
+        <h3>The release App, <code>vectorlearning-release</code></h3>
+        <p>A one-hour token for each job. It opens release PRs and creates <code>v*</code> tags, GitHub Releases and <code>release/**</code> branches. It <strong>never commits to <code>main</code></strong> and can't edit workflow files.</p>
+      </div>
+      <div class="card">
+        <p class="muted">Where the version lives</p>
         <h3>Continuous versioning</h3>
-        <ul>
-          <li><strong>Git tags only.</strong> No file is read or written</li>
-          <li>The image tag carries the version</li>
-          <li>Delete any committed <code>&lt;Version&gt;</code> from your <code>.csproj</code></li>
-        </ul>
+        <p><strong>Git tags only.</strong> No file is read or written. Delete any committed <code>&lt;Version&gt;</code> from your <code>.csproj</code>.</p>
       </div>
       <div class="card">
-        <p class="muted">After</p>
+        <p class="muted">Where the version lives</p>
         <h3>release-please</h3>
-        <ul>
-          <li>Files change <strong>only in the release PR</strong>, which a person approves</li>
-          <li><strong>Services:</strong> <code>release-type: simple</code> writes just <code>version.txt</code> and <code>CHANGELOG.md</code></li>
-          <li><strong>Libraries:</strong> the stack's release type updates its package file, e.g. <code>package.json</code></li>
-        </ul>
+        <p>Version files change <strong>only in the release PR</strong>, which a person approves.</p>
       </div>
     </div>
-    <p class="callout" style="font-size:.8em">Either way, <strong>no more version-bump commits on <code>main</code></strong> from a bot.</p>
-    <aside class="notes">⏱ 1 min. This is what the old cibot commit actually was: dynamo-config's push-version-bumps commits the bumped file and pushes it to the branch with a token, then pushes the tags. Continuous versioning: the version lives in git tags only (cicd-standards, "Where does the version live?"). A package is the exception, because its version is part of the artifact; package versioning is still an open item. release-please: a service MUST use release-type simple, whatever its language. A language type such as node or python would rewrite a file inside the app at every release, which triggers a redundant build, and the app would report a different version from its image tag. A .NET library uses simple and passes the version to dotnet pack -p:Version=.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker">What changes in your repo</p>
-    <h2>Image tags never move</h2>
-    <div class="two-col">
-      <div>
-        <h3>Before</h3>
-        <p class="muted"><code>latest</code> and <code>main</code> pointed at whatever image was built most recently.</p>
-      </div>
-      <div>
-        <h3>After: one tag names one build</h3>
-        <ul class="dense" style="font-size:.75em">
-          <li><code>feat-DAR-102-107</code>: a branch build</li>
-          <li><code>main-412</code>: a <code>main</code> build (release-please)</li>
-          <li><code>1.4.0</code>: a version</li>
-        </ul>
-      </div>
-    </div>
-    <p class="callout"><strong>Build once, promote many.</strong> The image tested in staging is byte-for-byte the image that reaches production.</p>
-    <aside class="notes">⏱ 1 min. Every image also carries the label org.opencontainers.image.revision, set to the full commit SHA, so you can always trace an image back to its commit. Moving tags are removed as part of each repo's migration.</aside>
+    <p class="callout" style="font-size:.8em">Every CI bot account, <code>cibot</code> included, is <strong>retired by April 1</strong>.</p>
+    <aside class="notes">⏱ 1.5 min. Sources: cicd-standards docs/ci/release-github-app.md and "Where does the version live?". The bot, before and after: cibot was a machine user, using a seat and a personal token that lasted months or never expired, and it committed and tagged. The release App is a GitHub App owned by the organization, with a fresh one-hour token for each job; branch rulesets block it from committing to main, and it has no permission to edit workflow files. Nothing lands on main except a reviewed PR, including the App's own release PR. All CI bot accounts, not just cibot, are retired by April 1, 2027, the same date the migration finishes: any pipeline still using one, or its personal token, stops working then. The old version-bump commit was dynamo-config's push-version-bumps: it read the version from dynamo-config.yml, a .csproj, package.json or Chart.yaml, committed the bumped file with a token, then pushed the tags. Under Continuous versioning, a package is the exception, because its version is part of the artifact; package versioning is still an open item. Four-part versions go too: dynamo-config's X.Y.Z.N (e.g. 1.4.0.7284) becomes SemVer X.Y.Z, with git tag v1.4.0 and image tag 1.4.0, one format that people and tools (including the Promotion Manager) can read. The four-part format remains only as a bridge for repos migrating from dynamo-config, and new repos shouldn't use it. For a repo that has to stay four-part for a while, run-number-offset continues the build number from CircleCI's last one, so numbers never go backwards.</aside>
   </section>
 
   <!-- ============ 3b. Hardening ============ -->
@@ -580,34 +492,33 @@ jobs:
           <tr><td class="when">Nov 11</td><th>Actions can't approve PRs</th><td>Bots can't approve their own changes</td><td>Nothing, for normal work</td></tr>
           <tr><td class="when">Nov 11</td><th>SHA pinning required</th><td><code>@v4</code> on an action is rejected</td><td>Pin <code>@&lt;full-sha&gt; # v4</code>. Dependabot keeps it current</td></tr>
           <tr><td class="when">Nov 11</td><th>Approved actions only</th><td>Third-party actions not on the list are blocked</td><td>Use the paved road, or request a security review</td></tr>
-          <tr><td class="when">Nov 11</td><th>Org-wide branch protection</th><td>Every repo gets a baseline</td><td>Nothing. The standard rulesets sit on top</td></tr>
           <tr><td class="when">December</td><th>Tidy-ups</th><td>No new public repos, wikis off, stale repos archived, <code>claude-review.yml</code> hardened</td><td>Docs go in the repo or Confluence</td></tr>
-          <tr><td class="when">End of January</td><th>CI bot accounts retired</th><td><code>cibot</code> and other bot users, and their tokens, stop working</td><td>Move to the standard workflows. The release App tags and releases</td></tr>
+          <tr><td class="when">By April 1</td><th>CI bot accounts retired</th><td><code>cibot</code> and other bot users, and their tokens, stop working</td><td>Move to the standard workflows. The release App tags and releases</td></tr>
           <tr><td class="when">As repos migrate</td><th>Dependabot</th><td>Dependabot alerts and PRs appear</td><td>Review them like any other PR</td></tr>
         </tbody>
       </table>
     </div>
-    <aside class="notes">⏱ 2.5 min. Source: github-security-review remediation backlog (GHSEC-01, 03/10, 04, 05, 06, 08, 09, 11, 12, 15, 17). All of these are committed. OIDC to AWS comes first, on Nov 2: the static keys go then. Most of the rest lands on Nov 11, around the v1.0.0 release. Dependabot is switched on per repo as it migrates, and the tidy-ups follow in December. Lead with 2FA: it's the one that removes people. Enforcement is planned for the end of January 2027, so everyone needs to set it up before then.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker">GitHub hardening that affects you</p>
-    <h2>Which actions you can use</h2>
-    <ul class="codelist dense" style="font-size:.7em">
-      <li><span class="no">✗</span><span><code>uses: some-org/cool-action@main</code><br><span class="muted">not on the approved list, and points at a branch that can change</span></span></li>
-      <li><span class="no">✗</span><span><code>uses: actions/checkout@v4</code><br><span class="muted">a tag can be moved to different code. The SHA-pinning policy rejects it</span></span></li>
-      <li><span class="yes">✓</span><span><code>uses: amannn/action-semantic-pull-request@48f2562…0d50 # v6.1.1</code><br><span class="muted">approved, pinned to an exact commit, and the comment tells Dependabot which version it is</span></span></li>
-    </ul>
-    <p class="callout" style="font-size:.8em">DevOps <strong>curates and approves general-purpose actions</strong>. Need something that isn't on the list? It goes through a security review first.<br><strong>Actions: SHA. Vector's standard workflows: <code>@v1</code></strong>, so updates reach you without a change. You can pin an exact version if you prefer.</p>
-    <aside class="notes">⏱ 1.5 min. Why: a tag or branch can be moved to point at malicious code, and a workflow can hold your secrets and your AWS role. A full SHA can't change. The ✓ example is taken from github-actions' pr-title-lint.yml (SHA shortened here to fit). GitHub's SHA-pinning policy covers actions; reusable workflows are exempt, which is why the standard workflows can use a major-version tag.</aside>
+    <aside class="notes">⏱ 2.5 min. Source: github-security-review remediation backlog (GHSEC-01, 03/10, 04, 05, 06, 08, 09, 11, 12, 15, 17). All of these are committed. OIDC to AWS comes first, on Nov 2: the static keys go then. Most of the rest lands on Nov 11, around the v1.0.0 release. Dependabot is switched on per repo as it migrates, and the tidy-ups follow in December. Lead with 2FA: it's the one that removes people. Enforcement is planned for the end of January 2027, so everyone needs to set it up before then. Why SHA pinning: a tag or branch can be moved to point at malicious code, and a workflow can hold your secrets and your AWS role. A full SHA can't change; the "# v4" comment tells Dependabot which version it is. GitHub's SHA-pinning policy covers actions, and reusable workflows are exempt, which is why Vector's standard workflows are referenced as @v1: updates reach you without a change, and you can pin an exact version if you prefer. DevOps curates and approves general-purpose actions; anything else goes through a security review first. The org-wide branch protection baseline also lands on Nov 11, with nothing for teams to do.</aside>
   </section>
 
   <!-- ============ 4. Conventional Commits ============ -->
 
   <section class="slide">
     <p class="kicker">Conventional Commits</p>
-    <h2>Your PR title is now your version</h2>
+    <h2>Squash merge: your PR title is your commit, and your version</h2>
     <div class="two-col" style="grid-template-columns: 1fr 1fr">
+      <div style="font-size:.62em">
+        <h3>Merge commit: what lands on <code>main</code></h3>
+<pre>*   Merge pull request #123 from feat/DAR-102
+|\
+| * address review comments
+| * fix typo
+| * wip
+| * add clear button
+|/</pre>
+        <h3 style="margin-top:.6em">Squash: what lands on <code>main</code></h3>
+<pre>* feat(search): add clear button (DAR-102) (#123)</pre>
+      </div>
       <div class="dense" style="font-size:.72em">
         <table>
           <thead><tr><th>PR title starts with</th><th>Version bump</th></tr></thead>
@@ -617,17 +528,14 @@ jobs:
             <tr><td><code>feat!:</code> or a <code>BREAKING CHANGE:</code> footer</td><td>major <span class="muted">1.4.0 → 2.0.0</span></td></tr>
           </tbody>
         </table>
-        <p class="muted" style="margin-top:.8em">Also allowed: <code>refactor</code> <code>build</code> <code>ci</code> <code>chore</code> <code>docs</code> <code>style</code> <code>test</code> <code>revert</code></p>
-      </div>
-      <div>
-        <ul>
-          <li>Squash merge means <strong>only the PR title counts</strong></li>
-          <li>The required check <code>PR / Lint PR title</code> enforces it</li>
-          <li>Once it's on <code>main</code> it can't be fixed. <strong>A wrong title means a wrong version</strong></li>
-        </ul>
       </div>
     </div>
-    <aside class="notes">⏱ 2 min. The old branching page said "always use Conventional Commits" so that one day they could drive versioning. That day is here. Under Continuous versioning, any other type that changes a module's files still ships a patch, so a patch means "a build shipped", not just "a bug was fixed". With release branches, a major version needs Release-As (covered later).</aside>
+    <ul class="dense" style="font-size:.72em; margin-top:.6em">
+      <li>The PR title check enforces the format</li>
+      <li>Once it's on <code>main</code> it can't be fixed. <strong>A wrong title means a wrong version</strong></li>
+      <li><strong>Your branch commits can be as messy as you like.</strong> They never reach <code>main</code></li>
+    </ul>
+    <aside class="notes">⏱ 2.5 min. With merge commits, "wip" and "fix typo" become commits on main, and versioning would have to make sense of them. With squash, the only title on main is the PR title. It also gives a clean, linear history that's easy to read, bisect and revert, one PR at a time. Under Continuous versioning, a merge commit in a SemVer module's range since its last tag fails the build. release-please repos are squash-only by standard. The squash setting is in each template's repository-settings.json: squash only, with the PR title as the commit title. The old branching page said "always use Conventional Commits" so that one day they could drive versioning. That day is here. Under Continuous versioning, any other type that changes a module's files still ships a patch, so a patch means "a build shipped", not just "a bug was fixed". With release branches, a major version needs Release-As (covered later).</aside>
   </section>
 
   <section class="slide">
@@ -650,7 +558,8 @@ jobs:
         <p class="muted">It reads your diff, picks <code>feat</code> or <code>fix</code>, and flags anything breaking.</p>
       </div>
     </div>
-    <aside class="notes">⏱ 2 min. The pattern is type(scope): description (JIRA-KEY), the same as github-actions' own history, e.g. "feat(app-ci): the standard build pipeline as library reusable workflows (COREOPS-4509) (#87)". The scope is free-form: name the area of the code. The Jira key at the end links the commit to its ticket, and GitHub adds the (#PR) on merge. The ✗ "DAR-102 add clear button" fails because the key comes first and there's no type. GitHub's own "Revert …" title isn't conventional, so retitle it revert:. If you have time, show this live: ask Claude Code to open the PR used in Demo 1.</aside>
+    <p class="muted" style="font-size:.6em; margin-top:.8em"><code>DAR-102</code> links the commit to its Jira ticket. GitHub adds the <code>(#123)</code> PR link itself. Also allowed: <code>refactor</code> <code>build</code> <code>ci</code> <code>chore</code> <code>docs</code> <code>style</code> <code>test</code> <code>revert</code></p>
+    <aside class="notes">⏱ 2 min. The pattern is type(scope): description (JIRA-KEY), the same as github-actions' own history, e.g. "feat(app-ci): the standard build pipeline as library reusable workflows (COREOPS-4509) (#87)". The scope is free-form: name the area of the code. The ✗ "DAR-102 add clear button" fails because the key comes first and there's no type. GitHub's own "Revert …" title isn't conventional, so retitle it revert:. If you have time, show this live: ask Claude Code to open the PR used in Demo 1.</aside>
   </section>
 
   <!-- ============ 5. Versioning ============ -->
@@ -715,41 +624,6 @@ jobs:
   </section>
 
   <section class="slide">
-    <p class="kicker">Versioning</p>
-    <h2>Goodbye, four-part versions</h2>
-    <div class="two-col">
-      <div>
-        <h3>Before</h3>
-        <p class="big muted"><code>1.4.0.7284</code></p>
-        <p class="muted">Four-part <code>X.Y.Z.N</code> from dynamo-config. Not SemVer.</p>
-      </div>
-      <div>
-        <h3>After</h3>
-        <p class="big"><code>1.4.0</code></p>
-        <p>SemVer <code>X.Y.Z</code>. Git tag <code>v1.4.0</code>, image tag <code>1.4.0</code>.</p>
-      </div>
-    </div>
-    <ul class="dense" style="font-size:.7em; margin-top:1em">
-      <li>One format across every repo, which both people and tools (including the Promotion Manager) can read</li>
-      <li>The four-part format remains only as a <strong>bridge</strong> for repos migrating from dynamo-config. New repos shouldn't use it, and merge commits with it will be phased out</li>
-    </ul>
-    <aside class="notes">⏱ 1.5 min. For a repo moving from CircleCI that has to stay four-part for a while, run-number-offset continues the build number from CircleCI's last one, so numbers never go backwards. The goal is SemVer everywhere.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker">Where the rules live</p>
-    <h2><code>VectorLearning/cicd-standards</code></h2>
-    <div class="cards two dense" style="font-size:.72em">
-      <div class="card"><h3>Standards</h3><p>How builds are versioned, tagged and released: Versioning, Continuous versioning, release-please, the release App. <code>docs/ci/</code></p></div>
-      <div class="card"><h3>Templates</h3><p>Files you copy into your repo as-is: workflows, config files, repository settings and rulesets. <code>templates/</code></p></div>
-      <div class="card"><h3>How-to guides</h3><p>Step by step: set up Continuous versioning, set up release-please, fixes and hotfixes. <code>docs/how-to/</code></p></div>
-      <div class="card"><h3>Scenarios</h3><p>What happens in each situation, such as a re-run, a revert or a hotfix, and who acts. <code>docs/reference/</code></p></div>
-    </div>
-    <p class="callout" style="font-size:.8em">Written for <strong>engineers and for Claude Code</strong>. Each section stands on its own, so Claude can pull the exact rule it needs while it works in your repo.</p>
-    <aside class="notes">⏱ 1.5 min. This is the source of truth. The deck is a tour, and the standards are the detail. Many standards are still marked Draft, meaning on main but not yet binding; they become Adopted through review. The Claude Code skill on the "What's coming" slide builds on these templates.</aside>
-  </section>
-
-  <section class="slide">
     <p class="kicker">Where the rules live</p>
     <h2>The files that control your pipeline</h2>
     <div class="two-col dense" style="font-size:.6em">
@@ -778,7 +652,7 @@ jobs:
       </div>
     </div>
     <p class="muted" style="font-size:.6em; margin-top:1em">Both strategies also apply <code>repository-settings.json</code> (squash only) and the <code>rulesets/</code> templates once, during setup.</p>
-    <aside class="notes">⏱ 2 min. The message: you control your pipeline through these config files, not by editing workflow YAML. Continuous versioning: build-config.json says what to build, and version-config.json says how each module is versioned. release-please: the workflow you call is the strategy choice. release-please-config.json on main uses always-bump-minor with release branches; the release-branch copy is identical except always-bump-patch. A release-please repo must not set a version-format other than none in version-config.json, because two tools versioning one repo would disagree. In Demo 1, open build-config.json and version-config.json in poc_echo_server_dotnet. In Demo 2, open release-please-config.json and the manifest.</aside>
+    <aside class="notes">⏱ 2 min. The message: you control your pipeline through these config files, not by editing workflow YAML. Continuous versioning: build-config.json says what to build, and version-config.json says how each module is versioned. release-please: the workflow you call is the strategy choice. release-please-config.json on main uses always-bump-minor with release branches; the release-branch copy is identical except always-bump-patch. Release type: a service MUST use release-type simple, whatever its language, which writes just version.txt and CHANGELOG.md. A language type such as node or python would rewrite a file inside the app at every release, which triggers a redundant build, and the app would report a different version from its image tag. A library uses its stack's release type, which updates its package file (e.g. package.json); a .NET library uses simple and passes the version to dotnet pack -p:Version=. A release-please repo must not set a version-format other than none in version-config.json, because two tools versioning one repo would disagree. In Demo 1, open build-config.json and version-config.json in poc_echo_server_dotnet. In Demo 2, open release-please-config.json and the manifest.</aside>
   </section>
 
   <!-- ============ Demo 1 ============ -->
@@ -794,18 +668,7 @@ jobs:
       <li>Image <code>1.x.0</code> pushed, commit tagged <code>v1.x.0</code></li>
       <li>Bonus: a docs-only change builds nothing</li>
     </ol>
-    <aside class="notes">⏱ 7 min including the live run. Before the session: create the branch, have the change ready, and have the repo's Actions tab open. Steps: (1) open a PR titled "updated echo" and show the red check; (2) retitle it "feat: add echo timestamp", show the branch run and the image tag in the CI result summary; (3) squash-merge, show the main run's versions job choosing a minor bump, then the git tag and the ECR image; (4) if there's time, push a README change and show every module skipped. If anything goes wrong, use the next slide.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker demo">Demo 1 · backup</p>
-    <h2>If the demo gremlins win</h2>
-    <div class="cards">
-      <div class="placeholder">Screenshot: failed<br><code>PR / Lint PR title</code><br><span>assets/demo1-title-check.png</span></div>
-      <div class="placeholder">Screenshot: <code>main</code> run,<br>versions job + <code>CI result</code><br><span>assets/demo1-main-run.png</span></div>
-      <div class="placeholder">Screenshot: tag <code>v1.x.0</code><br>and ECR image <code>1.x.0</code><br><span>assets/demo1-tag-image.png</span></div>
-    </div>
-    <aside class="notes">Skip this slide if the live demo worked. Placeholders: capture these screenshots during a rehearsal and swap each placeholder div for an &lt;img&gt;.</aside>
+    <aside class="notes">⏱ 7 min including the live run. Before the session: create the branch, have the change ready, and have the repo's Actions tab open. Steps: (1) open a PR titled "updated echo" and show the red check; (2) retitle it "feat: add echo timestamp", show the branch run and the image tag in the CI result summary; (3) squash-merge, show the main run's versions job choosing a minor bump, then the git tag and the ECR image; (4) if there's time, push a README change and show every module skipped. If anything goes wrong, talk through the steps on this slide.</aside>
   </section>
 
   <!-- ============ 7. Why release-please ============ -->
@@ -813,16 +676,14 @@ jobs:
   <section class="slide">
     <p class="kicker">release-please</p>
     <h2>Why release-please</h2>
-    <div class="cards dense" style="font-size:.7em">
+    <div class="cards two dense" style="font-size:.7em">
       <div class="card"><h3>See it before it ships</h3><p>A release PR collects every change, with the version it will cut.</p></div>
       <div class="card"><h3>A changelog for free</h3><p><code>CHANGELOG.md</code> and a GitHub Release, written from your PR titles.</p></div>
       <div class="card"><h3>The version is calculated</h3><p><code>feat</code>, <code>fix</code> and <code>!</code> decide it. <code>Release-As</code> overrides it when you need to.</p></div>
       <div class="card"><h3>You decide when</h3><p>Nothing is released until someone merges the release PR.</p></div>
-      <div class="card"><h3>Ship what you tested</h3><p><code>main</code> builds are tagged <code>main-&lt;run&gt;</code>. Merging the release PR adds <code>X.Y.Z</code> to that same image. No rebuild.</p></div>
-      <div class="card"><h3>No bot commits on <code>main</code></h3><p>The release PR is reviewed and approved like any other.</p></div>
     </div>
     <p class="muted" style="font-size:.6em; margin-top:1em"><span class="pill warn">being finalized</span> The shared release-please workflows and the demo repo are in progress.</p>
-    <aside class="notes">⏱ 3 min (with the next slide). Under release-please every build, main included, is tagged &lt;branch&gt;-&lt;run&gt; (the branch name with / replaced by -). The SemVer tag exists only once a person merges the release PR: the retag job finds the main build of the commit before the release commit, checks its revision label, and adds X.Y.Z to the same image digest. That's the opposite of Continuous versioning, where the main build itself is tagged with the version. The changelog is the headline benefit: product, QA and support can see exactly what's in a version without asking a developer. Status: the behaviour comes from release-please's docs and source and hasn't yet been checked end to end in a demo repo (COREOPS-4428). The reusable workflows app-release-please.yml and app-release-please-release-branches.yml don't exist yet.</aside>
+    <aside class="notes">⏱ 2.5 min (with the next slide). The changelog is the headline benefit: product, QA and support can see exactly what's in a version without asking a developer. Status: the behaviour comes from release-please's docs and source and hasn't yet been checked end to end in a demo repo (COREOPS-4428). The reusable workflows app-release-please.yml and app-release-please-release-branches.yml don't exist yet.</aside>
   </section>
 
   <section class="slide">
@@ -867,11 +728,11 @@ jobs:
     </svg>
     <ul class="dense" style="font-size:.68em">
       <li>Every version cut from <code>main</code> gets <code>release/X.Y.x</code> <strong>automatically</strong></li>
-      <li>A regression fix or hotfix goes onto the release branch, and its release PR cuts <code>1.0.1</code>. The fix is then forward-ported to <code>main</code></li>
+      <li>A regression fix or hotfix goes onto the release branch, and its release PR cuts <code>1.0.1</code>. The fix is then <strong>forward-ported</strong>: a normal PR into <code>main</code> that copies just that fix. The release branch is never merged back</li>
       <li>Each <code>main</code> commit builds <code>main-10</code>, <code>main-11</code>… Merging the release PR adds the version to the last image</li>
       <li><code>main</code> keeps moving: its next version is always the next minor, <code>1.1.0</code></li>
     </ul>
-    <aside class="notes">Part of the 3 min above. The main-N labels are image tags: every main build is tagged main-&lt;run&gt;, and the release commit itself builds nothing (it only changes CHANGELOG.md, version.txt and the manifest), so v1.0.0 goes onto the image from the commit before it, main-11. Illustrative numbers: real run numbers are shared across branches, so they skip. Several release branches can exist at once: production on 1.0.2 from release/1.0.x while 1.1.0 is in regression. main is set to always-bump-minor, so a major version needs Release-As. An automatic forward-port action is planned (COREOPS-4416). Until it exists, forward-ports are opened by hand.</aside>
+    <aside class="notes">Part of the 2.5 min above. The "x" in release/X.Y.x is literal: one branch per minor version. Plain release-please has no release branches; it uses a hotfix/X.Y.x branch only when a production fix can't wait for main. The main-N labels are image tags: every main build is tagged main-&lt;run&gt; (the branch name with / replaced by -), the opposite of Continuous versioning, where the main build itself is tagged with the version. The SemVer tag exists only once a person merges the release PR. The release job checks the image's revision label and adds X.Y.Z to the same image digest, with no rebuild. The release commit itself builds nothing (it only changes CHANGELOG.md, version.txt and the manifest), so v1.0.0 goes onto the image from the commit before it, main-11. Illustrative numbers: real run numbers are shared across branches, so they skip. Several release branches can exist at once: production on 1.0.2 from release/1.0.x while 1.1.0 is in regression. main is set to always-bump-minor, so a major version needs Release-As. An automatic forward-port action is planned (COREOPS-4416). Until it exists, forward-ports are opened by hand.</aside>
   </section>
 
   <!-- ============ Demo 2 ============ -->
@@ -953,32 +814,11 @@ jobs:
     </svg>
     <ul class="dense" style="font-size:.7em">
       <li>CI's job ends when the versioned image is in ECR. <strong>It never deploys</strong></li>
-      <li>The Promotion Manager records in Git which image each environment runs, and ArgoCD makes the cluster match</li>
+      <li><strong>Build once, promote many:</strong> the image tested in staging is byte-for-byte the image that reaches production</li>
       <li>Promotion to production is a <strong>PR to <code>rendered-k8s-manifests</code></strong>, approved by the reviewer CODEOWNERS names</li>
+      <li><strong>Lambdas</strong> (through AWS ACK) and <strong>SPAs/MFEs</strong> <span class="pill warn">being finalized</span> follow the same path, instead of CircleCI approval jobs. Both get their own session</li>
     </ul>
-    <aside class="notes">⏱ 2 min. Optional test1–3 and uat environments are left out to keep the picture simple. A team can choose to deploy every main merge to develop automatically, for each service. That's an opt-in for one lower environment only.</aside>
-  </section>
-
-  <section class="slide">
-    <p class="kicker">CI builds, CD promotes</p>
-    <h2>No more CircleCI approval jobs</h2>
-    <div class="two-col" style="font-size:.85em">
-      <div>
-        <h3>Before</h3>
-        <p class="muted">SPAs/MFEs and Lambdas deployed from a CircleCI approval step.</p>
-      </div>
-      <div>
-        <h3>After</h3>
-        <p>GitHub Actions <strong>builds and packages</strong>. Nothing deploys from CI.</p>
-        <ul class="dense" style="font-size:.8em">
-          <li><strong>Lambdas</strong> move to <strong>AWS ACK</strong>: their manifests go in <code>rendered-k8s-manifests</code> and the <strong>Promotion Manager</strong> promotes them, the same as services</li>
-          <li><strong>SPAs/MFEs</strong> follow a similar path <span class="pill warn">being finalized</span></li>
-        </ul>
-      </div>
-    </div>
-    <p class="callout"><strong>Why not GitHub's own approvals?</strong> Deployment approvals are a GitHub Enterprise feature, and we're on the Team plan. The GitOps PR <em>is</em> the approval, and it's the audit trail too.</p>
-    <p class="muted" style="font-size:.6em">Both get their own walkthrough and demo in a later session.</p>
-    <aside class="notes">⏱ 1 min. Decided: Lambdas are managed through AWS Controllers for Kubernetes (ACK), so a Lambda is a Kubernetes manifest like any service, and it goes through the same promotion flow. SPAs will be similar; that strategy is still being finalized. Don't go into detail here, because both get a dedicated session. Message to teams: don't build deploy steps into your GitHub Actions workflows.</aside>
+    <aside class="notes">⏱ 2 min. The Promotion Manager records in Git which image each environment runs, and ArgoCD makes the cluster match. Every image carries the label org.opencontainers.image.revision, set to the full commit SHA, so you can always trace an image back to its commit. Optional test1–3 and uat environments are left out to keep the picture simple. A team can choose to deploy every main merge to develop automatically, for each service. That's an opt-in for one lower environment only. Before, SPAs/MFEs and Lambdas deployed from a CircleCI approval step. Decided: Lambdas are managed through AWS Controllers for Kubernetes (ACK), so a Lambda is a Kubernetes manifest like any service, in rendered-k8s-manifests, and it goes through the same promotion flow. SPAs will be similar; that strategy is still being finalized. Don't go into detail here, because both get a dedicated session with a demo. Message to teams: don't build deploy steps into your GitHub Actions workflows. If someone asks why not GitHub's own approvals: deployment approvals are a GitHub Enterprise feature, and we're on the Team plan. The GitOps PR is the approval, and it's the audit trail too.</aside>
   </section>
 
   <!-- ============ 10. What's next ============ -->
@@ -988,12 +828,11 @@ jobs:
     <h2>What to do now</h2>
     <div class="two-col dense" style="font-size:.75em">
       <div>
-        <h3>This week</h3>
+        <h3>Near term</h3>
         <ul>
-          <li>Set up <strong>2FA</strong>. It's enforced at the <strong>end of January</strong></li>
+          <li>Make sure everyone on your team has <strong>2FA</strong> enabled. It's enforced at the <strong>end of January</strong></li>
           <li>Start writing <strong>Conventional Commit PR titles</strong>, or let Claude write them</li>
           <li>Team leads: choose your <strong>versioning strategy</strong></li>
-          <li>List the <strong>third-party actions</strong> you'd need</li>
           <li><strong>Don't migrate early</strong>: wait for your wave</li>
         </ul>
       </div>
@@ -1002,11 +841,10 @@ jobs:
         <ul>
           <li><code>VectorLearning/cicd-standards</code>: versioning, the release App, how-to guides, templates</li>
           <li><code>VectorLearning/github-actions</code>: the workflows and actions</li>
-          <li>Migration: DevOps reaches out, or volunteer as a pilot</li>
         </ul>
       </div>
     </div>
-    <aside class="notes">⏱ 2 min. Add the support channel or contact here (not yet confirmed). If there's a migration schedule or sign-up, point to it.</aside>
+    <aside class="notes">⏱ 2 min. cicd-standards is the source of truth: standards (docs/ci), templates to copy as-is, how-to guides and scenarios (what happens in each situation, and who acts). It's written for engineers and for Claude Code. Many standards are still marked Draft, meaning on main but not yet binding; they become Adopted through review. Add the support channel or contact here (not yet confirmed). If there's a migration schedule or sign-up, point to it.</aside>
   </section>
 
   <section class="slide brand">
@@ -1035,7 +873,7 @@ jobs:
       </div>
     </div>
     <p class="callout">Every repo is migrated by <strong>April 1</strong>. Want to go first? Talk to DevOps after this session.</p>
-    <aside class="notes">⏱ 1.5 min. End on the call for pilots: that's the action you want from the room. Name the kind of project you're looking for (an active .NET or Python service with a team willing to give feedback). SBOM generation is planned for the standard workflows (cicd-standards lists it under pipeline security and supply chain); today docker/build-images builds with sbom: false, so don't give a date. The April 1, 2027 deadline is for the whole migration off CircleCI. If people ask about @v1 before mid-November: until v1.0.0 ships, the library is pre-1.0, and the moving tag is @v0.N.</aside>
+    <aside class="notes">⏱ 1.5 min. End on the call for pilots: that's the action you want from the room. Name the kind of project you're looking for (an active .NET or Python service with a team willing to give feedback). SBOM generation is planned for the standard workflows (cicd-standards lists it under pipeline security and supply chain); today docker/build-images builds with sbom: false, so don't give a date. The April 1, 2027 deadline is for the whole migration off CircleCI.</aside>
   </section>
 
   <section class="slide title-slide brand photo">
