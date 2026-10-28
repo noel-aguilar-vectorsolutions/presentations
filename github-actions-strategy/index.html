@@ -133,6 +133,18 @@
   .placeholder { border: 2px dashed var(--border); border-radius: 12px; min-height: 34vh; text-align: center; padding: 10vh 1em 1em; color: var(--muted); font-size: .7em; overflow-wrap: anywhere; }
   .stack { display: flex; flex-direction: column; gap: 1.2em; }
   .diagram { width: 100%; height: auto; max-height: 46vh; }
+
+  /* Migration timeline: half-month columns, Nov to Mar, then April 1 */
+  .timeline { display: grid; grid-template-columns: minmax(0, 2.6fr) repeat(10, minmax(0, 1fr)) minmax(0, 1.4fr); row-gap: .5em; align-items: center; font-size: .62em; }
+  .timeline .month { grid-row: 1; color: var(--muted); font-weight: 600; border-left: 1px solid var(--border); padding-left: .4em; }
+  .timeline .row-label { grid-column: 1; font-weight: 600; color: var(--heading); padding-right: .8em; }
+  .timeline .bar { border-radius: 999px; padding: .35em .9em; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .timeline .bar.a { background: var(--b-cyan); }
+  .timeline .bar.b { background: var(--b-mid); }
+  .timeline .bar.c { background: var(--b-teal); }
+  .timeline .bar.open { background: linear-gradient(90deg, var(--b-green), rgba(129, 192, 137, .15)); color: var(--fg); }
+  .timeline .done { grid-column: 12; text-align: center; font-weight: 700; color: var(--ok); }
+
   .dg-box { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
   .dg-box.accent { stroke: var(--accent); }
   .dg-text { fill: var(--fg); font-family: var(--font); font-size: 18px; }
@@ -334,10 +346,37 @@ jobs:
     <ul>
       <li><strong>DevOps defines the pattern and the migration steps:</strong> templates, how-to guides and a migration playbook</li>
       <li><strong>DevOps will help</strong>, and in many cases will do the migration for you</li>
-      <li><strong>Want to do it yourselves?</strong> You'll be supported</li>
+      <li><strong>Want to do it yourselves?</strong> You'll be supported, when your wave starts</li>
     </ul>
-    <p class="callout">Either way, you end up on the same pattern as every other repo.</p>
-    <aside class="notes">⏱ 1 min. No CircleCI shut-off date has been set, so don't give one. The pilot, poc_echo_server_dotnet, has already moved to the standard CI. There's a .NET service migration playbook in github-actions/docs/migration.</aside>
+    <p class="callout">Either way, you end up on the same pattern as every other repo, and <strong>every repo is migrated by April 1</strong>.</p>
+    <aside class="notes">⏱ 1 min. The deadline: every repo is off CircleCI and on GitHub Actions by April 1, 2027. The pilot, poc_echo_server_dotnet, has already moved to the standard CI. There's a .NET service migration playbook in github-actions/docs/migration.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">The paved road</p>
+    <h2>Migration timeline</h2>
+    <div class="timeline">
+      <span class="month" style="grid-column: 2 / 4">Nov</span>
+      <span class="month" style="grid-column: 4 / 6">Dec</span>
+      <span class="month" style="grid-column: 6 / 8">Jan</span>
+      <span class="month" style="grid-column: 8 / 10">Feb</span>
+      <span class="month" style="grid-column: 10 / 12">Mar</span>
+      <span class="month" style="grid-column: 12 / 13">Apr 1</span>
+
+      <span class="row-label" style="grid-row: 2">New EKS apps and containerized Lambdas</span>
+      <span class="bar open" style="grid-row: 2; grid-column: 3 / 13">Start on GitHub Actions from v1.0.0</span>
+
+      <span class="row-label" style="grid-row: 3">Existing apps deployed to EKS</span>
+      <span class="bar a" style="grid-row: 3; grid-column: 3 / 8">Mid-Nov to end of Jan</span>
+
+      <span class="row-label" style="grid-row: 4">SPAs, Lambdas and other projects</span>
+      <span class="bar c" style="grid-row: 4; grid-column: 6 / 12">January to end of March</span>
+
+      <span class="row-label" style="grid-row: 5">Every repo off CircleCI</span>
+      <span class="done" style="grid-row: 5">✓ Done</span>
+    </div>
+    <p class="callout"><strong>Please don't migrate ahead of your wave.</strong> The workflows for your stack may not be ready yet. DevOps will reach out; pilots are agreed with DevOps first.</p>
+    <aside class="notes">⏱ 1 min. Timeline as of 2026-10-28. From the github-actions v1.0.0 release in mid-November, any new app deployed to EKS, and any new containerized Lambda, starts on GitHub Actions rather than CircleCI. Existing apps deployed to EKS migrate from mid-November and are done by the end of January. SPAs, existing Lambdas and everything else start in January and are done by the end of March; their deploy path (AWS ACK and the Promotion Manager) gets its own session. Everything is off CircleCI by April 1, 2027. Stress the ask: don't start early on your own. The shared workflows only implement some stacks today, so an early migration may have to be redone.</aside>
   </section>
 
   <!-- ============ 3. What changes ============ -->
@@ -641,6 +680,7 @@ jobs:
         <thead><tr><th></th><th>Continuous versioning</th><th>Plain release-please</th><th>release-please with release branches</th></tr></thead>
         <tbody>
           <tr><th>In short</th><td>Every merge to <code>main</code> that builds cuts a version</td><td>A release PR batches changes, and merging it cuts the version</td><td>Same, plus <code>release/X.Y.x</code> created for every version</td></tr>
+          <tr><th>Image tag from a <code>main</code> build</th><td>The version it cuts, <code>1.4.0</code></td><td><code>main-412</code>. <code>1.4.0</code> is added to that image when the release PR merges</td><td>Same as plain. <code>release/1.4.x</code> builds are <code>release-1.4.x-57</code></td></tr>
           <tr><th>Batching</th><td>None: one merge, one version</td><td>The release PR collects everything since the last version</td><td>Same as plain</td></tr>
           <tr><th>Changelog</th><td class="before">None generated</td><td><code>CHANGELOG.md</code> + GitHub Release</td><td><code>CHANGELOG.md</code> + GitHub Release</td></tr>
           <tr><th>Regression fails</th><td>Fix on <code>main</code>. The next merge is the next version</td><td>Fix on <code>main</code>. Hold other merges to keep it small</td><td>Fix on <code>release/X.Y.x</code>, forward-port to <code>main</code></td></tr>
@@ -778,17 +818,17 @@ jobs:
       <div class="card"><h3>A changelog for free</h3><p><code>CHANGELOG.md</code> and a GitHub Release, written from your PR titles.</p></div>
       <div class="card"><h3>The version is calculated</h3><p><code>feat</code>, <code>fix</code> and <code>!</code> decide it. <code>Release-As</code> overrides it when you need to.</p></div>
       <div class="card"><h3>You decide when</h3><p>Nothing is released until someone merges the release PR.</p></div>
-      <div class="card"><h3>Ship what you tested</h3><p>The image already built from <code>main</code> is re-tagged <code>X.Y.Z</code>, not rebuilt.</p></div>
+      <div class="card"><h3>Ship what you tested</h3><p><code>main</code> builds are tagged <code>main-&lt;run&gt;</code>. Merging the release PR adds <code>X.Y.Z</code> to that same image. No rebuild.</p></div>
       <div class="card"><h3>No bot commits on <code>main</code></h3><p>The release PR is reviewed and approved like any other.</p></div>
     </div>
     <p class="muted" style="font-size:.6em; margin-top:1em"><span class="pill warn">being finalized</span> The shared release-please workflows and the demo repo are in progress.</p>
-    <aside class="notes">⏱ 3 min (with the next slide). The changelog is the headline benefit: product, QA and support can see exactly what's in a version without asking a developer. Status: the behaviour comes from release-please's docs and source and hasn't yet been checked end to end in a demo repo (COREOPS-4428). The reusable workflows app-release-please.yml and app-release-please-release-branches.yml don't exist yet.</aside>
+    <aside class="notes">⏱ 3 min (with the next slide). Under release-please every build, main included, is tagged &lt;branch&gt;-&lt;run&gt; (the branch name with / replaced by -). The SemVer tag exists only once a person merges the release PR: the retag job finds the main build of the commit before the release commit, checks its revision label, and adds X.Y.Z to the same image digest. That's the opposite of Continuous versioning, where the main build itself is tagged with the version. The changelog is the headline benefit: product, QA and support can see exactly what's in a version without asking a developer. Status: the behaviour comes from release-please's docs and source and hasn't yet been checked end to end in a demo repo (COREOPS-4428). The reusable workflows app-release-please.yml and app-release-please-release-branches.yml don't exist yet.</aside>
   </section>
 
   <section class="slide">
     <p class="kicker">release-please</p>
     <h2>How release branches work</h2>
-    <svg class="diagram" viewBox="0 0 1000 330" role="img" aria-label="main cuts v1.0.0, which creates release/1.0.x. A fix on release/1.0.x releases 1.0.1 and is forward-ported to main. main later cuts v1.1.0, which creates release/1.1.x.">
+    <svg class="diagram" viewBox="0 0 1000 330" role="img" aria-label="Each commit to main builds an image tagged main-10, main-11 and so on. Merging the release PR cuts v1.0.0 and adds 1.0.0 to the main-11 image, and creates release/1.0.x. A fix on release/1.0.x releases 1.0.1 and is forward-ported to main. main later cuts v1.1.0, which creates release/1.1.x.">
       <defs>
         <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
         <marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -796,16 +836,23 @@ jobs:
       <!-- main -->
       <text class="dg-mono" x="10" y="85">main</text>
       <line class="dg-line" x1="70" y1="80" x2="975" y2="80" marker-end="url(#ah)"/>
-      <circle class="dg-dot" cx="120" cy="80" r="9"/>
+      <circle class="dg-dot" cx="105" cy="80" r="9"/>
+      <text class="dg-mono" x="105" y="115" text-anchor="middle">main-10</text>
       <circle class="dg-dot" cx="190" cy="80" r="9"/>
+      <text class="dg-mono" x="190" y="115" text-anchor="middle">main-11</text>
       <circle class="dg-dot accent" cx="270" cy="80" r="11"/>
-      <text class="dg-mono" x="245" y="50">v1.0.0</text>
+      <text class="dg-mono" x="270" y="30" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="270" y="52" text-anchor="middle">on main-11</text>
       <circle class="dg-dot" cx="390" cy="80" r="9"/>
+      <text class="dg-mono" x="390" y="115" text-anchor="middle">main-12</text>
       <circle class="dg-dot" cx="560" cy="80" r="9"/>
-      <text class="dg-small" x="520" y="50">forward-port</text>
+      <text class="dg-small" x="560" y="52" text-anchor="middle">forward-port</text>
+      <text class="dg-mono" x="590" y="115">main-13</text>
       <circle class="dg-dot accent" cx="740" cy="80" r="11"/>
-      <text class="dg-mono" x="715" y="50">v1.1.0</text>
+      <text class="dg-mono" x="740" y="30" text-anchor="middle">v1.1.0</text>
+      <text class="dg-small" x="740" y="52" text-anchor="middle">on main-13</text>
       <circle class="dg-dot" cx="860" cy="80" r="9"/>
+      <text class="dg-mono" x="860" y="115" text-anchor="middle">main-14</text>
       <!-- release/1.0.x -->
       <path class="dg-line accent" d="M270,91 C270,150 300,190 340,190 L640,190" marker-end="url(#aha)"/>
       <text class="dg-mono" x="290" y="225">release/1.0.x</text>
@@ -821,9 +868,10 @@ jobs:
     <ul class="dense" style="font-size:.68em">
       <li>Every version cut from <code>main</code> gets <code>release/X.Y.x</code> <strong>automatically</strong></li>
       <li>A regression fix or hotfix goes onto the release branch, and its release PR cuts <code>1.0.1</code>. The fix is then forward-ported to <code>main</code></li>
+      <li>Each <code>main</code> commit builds <code>main-10</code>, <code>main-11</code>… Merging the release PR adds the version to the last image</li>
       <li><code>main</code> keeps moving: its next version is always the next minor, <code>1.1.0</code></li>
     </ul>
-    <aside class="notes">Part of the 3 min above. Several release branches can exist at once: production on 1.0.2 from release/1.0.x while 1.1.0 is in regression. main is set to always-bump-minor, so a major version needs Release-As. An automatic forward-port action is planned (COREOPS-4416). Until it exists, forward-ports are opened by hand.</aside>
+    <aside class="notes">Part of the 3 min above. The main-N labels are image tags: every main build is tagged main-&lt;run&gt;, and the release commit itself builds nothing (it only changes CHANGELOG.md, version.txt and the manifest), so v1.0.0 goes onto the image from the commit before it, main-11. Illustrative numbers: real run numbers are shared across branches, so they skip. Several release branches can exist at once: production on 1.0.2 from release/1.0.x while 1.1.0 is in regression. main is set to always-bump-minor, so a major version needs Release-As. An automatic forward-port action is planned (COREOPS-4416). Until it exists, forward-ports are opened by hand.</aside>
   </section>
 
   <!-- ============ Demo 2 ============ -->
@@ -833,9 +881,9 @@ jobs:
     <h2>release-please with release branches</h2>
     <p class="muted">A Python app: <code>release-please-demo</code></p>
     <ol>
-      <li>Merge a couple of <code>feat:</code> and <code>fix:</code> PRs. The release PR updates its version and changelog</li>
+      <li>Merge a couple of <code>feat:</code> and <code>fix:</code> PRs. Each <code>main</code> build pushes <code>main-&lt;run&gt;</code>, with no version, and the release PR updates its version and changelog</li>
       <li>Open the release PR and read the generated <code>CHANGELOG.md</code></li>
-      <li>Merge it: tag <code>v1.1.0</code>, a GitHub Release, image re-tagged <code>1.1.0</code></li>
+      <li>Merge it: tag <code>v1.1.0</code>, a GitHub Release, and the tested <code>main-&lt;run&gt;</code> image gets <code>1.1.0</code></li>
       <li><code>release/1.1.x</code> appears on its own</li>
       <li>A fix on <code>release/1.1.x</code> becomes <code>1.1.1</code> and is forward-ported to <code>main</code></li>
     </ol>
@@ -946,6 +994,7 @@ jobs:
           <li>Start writing <strong>Conventional Commit PR titles</strong>, or let Claude write them</li>
           <li>Team leads: choose your <strong>versioning strategy</strong></li>
           <li>List the <strong>third-party actions</strong> you'd need</li>
+          <li><strong>Don't migrate early</strong>: wait for your wave</li>
         </ul>
       </div>
       <div>
@@ -963,7 +1012,7 @@ jobs:
   <section class="slide brand">
     <p class="kicker">What's coming</p>
     <h2>Coming soon, and we need you</h2>
-    <div class="cards" style="font-size:.82em">
+    <div class="cards" style="font-size:.72em; grid-template-columns: repeat(4, minmax(0, 1fr))">
       <div class="card">
         <p class="muted">Mid-November</p>
         <h3><code>github-actions</code> v1.0.0</h3>
@@ -975,13 +1024,18 @@ jobs:
         <p>Sets up your repo for you: <code>ci.yml</code>, config files, rulesets and versioning, following the standards.</p>
       </div>
       <div class="card">
+        <p class="muted">Coming soon</p>
+        <h3>SBOM generation</h3>
+        <p>A software bill of materials for what you build, generated by the standard workflows. Nothing to set up.</p>
+      </div>
+      <div class="card">
         <p class="muted">Now</p>
         <h3>Pilot projects wanted</h3>
         <p>We're looking for a couple of test projects to migrate first. You get hands-on help and shape the paved road.</p>
       </div>
     </div>
-    <p class="callout">Interested in being a pilot? Talk to DevOps after this session.</p>
-    <aside class="notes">⏱ 1.5 min. End on the call for pilots: that's the action you want from the room. Name the kind of project you're looking for (an active .NET or Python service with a team willing to give feedback). If people ask about @v1 before mid-November: until v1.0.0 ships, the library is pre-1.0, and the moving tag is @v0.N.</aside>
+    <p class="callout">Every repo is migrated by <strong>April 1</strong>. Want to go first? Talk to DevOps after this session.</p>
+    <aside class="notes">⏱ 1.5 min. End on the call for pilots: that's the action you want from the room. Name the kind of project you're looking for (an active .NET or Python service with a team willing to give feedback). SBOM generation is planned for the standard workflows (cicd-standards lists it under pipeline security and supply chain); today docker/build-images builds with sbom: false, so don't give a date. The April 1, 2027 deadline is for the whole migration off CircleCI. If people ask about @v1 before mid-November: until v1.0.0 ships, the library is pre-1.0, and the moving tag is @v0.N.</aside>
   </section>
 
   <section class="slide title-slide brand photo">

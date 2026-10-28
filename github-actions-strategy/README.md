@@ -23,20 +23,20 @@ Estimates from the speaker notes. The target is 60 minutes.
 |---|---|---:|
 | Title + agenda | 1–2 | 1 |
 | Why we're moving | 3–4 | 3.5 |
-| The paved road | 5–8 | 6 |
-| What changes in your repo (incl. why squash, one PR one change, rules, where the version lives) | 9–16 | 11.5 |
-| GitHub hardening that affects you | 17–18 | 4 |
-| Conventional Commits | 19–20 | 4 |
-| Versioning: three strategies | 21–24 | 7 |
-| cicd-standards and the config files for each strategy | 25–26 | 3.5 |
-| Demo 1: Continuous versioning (+ backup) | 27–28 | 7 |
-| Why release-please + release branches | 29–30 | 3 |
-| Demo 2: release-please with release branches (+ changelog, backup) | 31–33 | 9 |
-| CI builds, CD promotes | 34–35 | 3 |
-| What's next | 36 | 2 |
-| What's coming: v1.0.0, Claude Code skill, pilot projects | 37 | 1.5 |
-| Q&A | 38 | 2 |
-| **Total** | | **~68** |
+| The paved road (incl. migration timeline) | 5–9 | 7 |
+| What changes in your repo (incl. why squash, one PR one change, rules, where the version lives) | 10–17 | 11.5 |
+| GitHub hardening that affects you | 18–19 | 4 |
+| Conventional Commits | 20–21 | 4 |
+| Versioning: three strategies | 22–25 | 7 |
+| cicd-standards and the config files for each strategy | 26–27 | 3.5 |
+| Demo 1: Continuous versioning (+ backup) | 28–29 | 7 |
+| Why release-please + release branches | 30–31 | 3 |
+| Demo 2: release-please with release branches (+ changelog, backup) | 32–34 | 9 |
+| CI builds, CD promotes | 35–36 | 3 |
+| What's next | 37 | 2 |
+| What's coming: v1.0.0, Claude Code skill, pilot projects | 38 | 1.5 |
+| Q&A | 39 | 2 |
+| **Total** | | **~69** |
 
 ## Sources
 
@@ -49,7 +49,8 @@ Estimates from the speaker notes. The target is 60 minutes.
   - `README.md`: CI/CD definitions, the delivery model, build once and promote many, production promotion by PR to `rendered-k8s-manifests`, scope (EKS only for now)
   - `docs/ci/versioning.md`: the three strategies, how to choose, cut vs released, PR title rules, image tag rules, version format
   - `docs/ci/versioning-continuous.md`: the Continuous versioning flow, what moves the version, where the version lives, the four-part format and `run-number-offset`
-  - `docs/ci/versioning-release-please.md`: "Which release type should I use?" (services use `simple`, libraries use their stack's type; slide 15); plain release-please vs release branches, release branch rules, forward-ports, hotfix branches, known limitations (no live test yet, no monorepos)
+  - `docs/ci/versioning-release-please.md`: "Which release type should I use?" (services use `simple`, libraries use their stack's type; slide 16); plain release-please vs release branches, release branch rules, forward-ports, hotfix branches, known limitations (no live test yet, no monorepos)
+  - At `origin/main` `607bfff`: `docs/ci/versioning.md` "How are builds tagged?" and `docs/ci/versioning-release-please.md` "How are images tagged?" / "What happens when the release PR merges?": under release-please every build, `main` included, is tagged `<branch>-<run>` (`main-412`), and the SemVer tag is added to that image only when the release PR merges (slides 23, 30 and 32)
   - `docs/ci/release-github-app.md`: the `vectorlearning-release` App compared with PATs, its permissions and limits
   - `templates/continuous-versioning/ci.yml`, `build-config.json`, `version-config.json`, `rulesets/`: the `ci.yml` snippet, ruleset contents, and the config-files slide
   - `templates/release-please/` (at `origin/main` `09324e0`): `release-please-config.json`, `release-please-config.release-branch.json`, repository settings and rulesets, for the config-files slide
@@ -58,10 +59,11 @@ Estimates from the speaker notes. The target is 60 minutes.
   - `README.md`: action domains and reusable workflows
   - `decisions/0001-actions-library-structure-and-versioning.md`: the case for consolidating rather than transcribing the orbs; the 2026-09-26 amendment on SHA pinning
 - [`VectorLearning/vsp-ci`](https://github.com/VectorLearning/vsp-ci) at `origin/main` `77a8171` (2026-09-25): `src/commands/` has 35 commands, mostly .NET, one Python unit-test command and none for Node or Java. Three image-scan commands, one deprecated (`docker-scan-image`, Rapid7 end-of-life). Used for slide 4
-- [`VectorLearning/dynamo-config`](https://github.com/VectorLearning/dynamo-config) at `origin/main` `66b7b25`: last changed 2022-06-20 (slide 4). `src/scripts/bump-version.sh`, `push-version-bumps.sh` and `docs/dynamo-config-schema.md`: reads the version from `dynamo-config.yml` or a `version-source` file (`.csproj`, `package.json`, `Chart.yaml`), and commits the bump to the branch as "Version auto-update by CircleCi [ci skip]" (slide 15)
+- [`VectorLearning/dynamo-config`](https://github.com/VectorLearning/dynamo-config) at `origin/main` `66b7b25`: last changed 2022-06-20 (slide 4). `src/scripts/bump-version.sh`, `push-version-bumps.sh` and `docs/dynamo-config-schema.md`: reads the version from `dynamo-config.yml` or a `version-source` file (`.csproj`, `package.json`, `Chart.yaml`), and commits the bump to the branch as "Version auto-update by CircleCi [ci skip]" (slide 16)
 - `infrastructure-ci-orb` is deliberately excluded from slide 4: it's for infrastructure, not application CI
   - `.github/workflows/README.md`: only the `dotnet` stack is implemented in the build path
   - Tests at `origin/main` `5527dcd`: all 12 actions under `actions/` have test suites, and each of the 5 reusable workflows has a `.bats` suite, run by `ci-self-test.yml`. Used for slide 5
+  - `actions/docker/build-images/action.yml` at `origin/main`: builds with `sbom: false` today, so SBOM generation is still to come (slide 38)
   - `.github/workflows/pr-title-lint.yml`: the allowed PR title types; the pinned `amannn/action-semantic-pull-request` example
 - `~/workspaces/cowork/github-security-review` (local, private):
   - `github-org-security-review.md` (snapshot 2026-09-25): the Actions baseline (allowed actions, SHA pinning, `GITHUB_TOKEN` defaults, Team plan limits)
@@ -76,7 +78,7 @@ Estimates from the speaker notes. The target is 60 minutes.
 
 ### Data & assets
 - `assets/brand-title.jpg`: the title and Questions background (gradient with the photo diamond), taken unchanged (2400×1350) from `ppt/media/image1.jpeg` in `2026-08-nj-rubric-update.pptx` (see below)
-- `assets/`: demo backup screenshots still to be captured (see the placeholders on slides 28 and 33)
+- `assets/`: demo backup screenshots still to be captured (see the placeholders on slides 29 and 34)
 
 ## Notes
 
@@ -85,20 +87,23 @@ Decided by Noel Aguilar (2026-10-27):
 - Demo 1: Continuous versioning, .NET, on `poc_echo_server_dotnet`. Demo 2: release-please with release branches, Python, on `release-please-demo`
 - Lambdas move to AWS ACK, with manifests in `rendered-k8s-manifests`, promoted by the Promotion Manager. SPAs are similar, with the strategy being finalized. Both get a later session with a demo
 - 2FA enforcement is planned for the end of January 2027 (as of 2026-10-28)
-- All CI bot accounts (`cibot` and any others) are retired by the end of January 2027 (slides 14 and 17)
-- Every hardening item on slide 17 is confirmed, with dates (2026-10-28): OIDC to AWS on Nov 2; `GITHUB_TOKEN` read-only, Actions can't approve PRs, SHA pinning, approved actions only and org-wide branch protection on Nov 11; Dependabot as each repo migrates; tidy-ups in December; 2FA at the end of January 2027
+- All CI bot accounts (`cibot` and any others) are retired by the end of January 2027 (slides 15 and 18)
+- Every hardening item on slide 18 is confirmed, with dates (2026-10-28): OIDC to AWS on Nov 2; `GITHUB_TOKEN` read-only, Actions can't approve PRs, SHA pinning, approved actions only and org-wide branch protection on Nov 11; Dependabot as each repo migrates; tidy-ups in December; 2FA at the end of January 2027
 - Actions are pinned by SHA. Standard reusable workflows are referenced as `@v<major>`, and teams may pin an exact version instead
 - release-please will support monorepos
 - `github-actions` v1.0.0 (first official release) ships by mid-November 2026
 - A Claude Code skill to help set up repos is being built
 - DevOps is looking for a couple of test projects to migrate first
+- Every repo is migrated off CircleCI by April 1, 2027 (slides 8, 9 and 38; decided 2026-10-28)
+- Migration waves (slide 9, 2026-10-28): new apps deployed to EKS and new containerized Lambdas start on GitHub Actions once `github-actions` v1.0.0 ships; existing apps deployed to EKS migrate from mid-November to the end of January; SPAs, Lambdas and other projects from January to the end of March. Teams must not migrate ahead of their wave, because the workflows for their stack may not be ready
+- SBOM generation is coming to the standard workflows; no date yet (slide 38)
 
 Proposed (not yet in the standards):
 
-- Delete branches automatically after merge (`delete_branch_on_merge`), to keep the branch list clean as Dependabot opens PRs. It isn't in the `repository-settings.json` templates yet. Shown on slide 13 with a "proposed" label
+- Delete branches automatically after merge (`delete_branch_on_merge`), to keep the branch list clean as Dependabot opens PRs. It isn't in the `repository-settings.json` templates yet. Shown on slide 14 with a "proposed" label
 
 Open items before presenting:
 
-- **`release-please-demo`** is empty on GitHub (2026-10-27). Set it up before the session, or present slides 31–33 as a walkthrough
+- **`release-please-demo`** is empty on GitHub (2026-10-27). Set it up before the session, or present slides 32–34 as a walkthrough
 - **Out of step with the standards:** the `ci.yml` template and github-actions ADR-0001 (2026-09-26 amendment) still pin `app-ci.yml` by SHA, and `versioning-release-please.md` still says monorepos aren't covered. The deck follows the decisions above
-- Support channel or contact for slide 36
+- Support channel or contact for slide 37
