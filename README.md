@@ -44,4 +44,4 @@ Open any `index.html` in a browser.
 
 | Presentation | Description | Date |
 |---|---|---|
-| _None yet_ | | |
+| [Moving to GitHub Actions](github-actions-strategy/) | For dev teams and leads: what changes moving from CircleCI to GitHub Actions: paved road, versioning, release-please, hardening | 2026-10-27 |

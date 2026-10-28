@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moving to GitHub Actions</title>
+<style>
+  :root {
+    /* Vector Solutions brand, sampled from the 2026-08 offsite deck's backgrounds and logo */
+    --b-deep: #1a439b;
+    --b-mid: #2c61ad;
+    --b-cyan: #2581c4;
+    --b-teal: #439ab8;
+    --b-green: #81c089;
+    --b-line-green: #9cc66b;
+    --b-line-blue: #5ba4e0;
+    --brand-gradient: linear-gradient(62deg, var(--b-green) 0%, var(--b-teal) 13%, var(--b-cyan) 30%, var(--b-mid) 58%, var(--b-deep) 100%);
+
+    --bg: #ffffff;
+    --fg: #26323a;
+    --heading: var(--b-deep);
+    --muted: #5b6670;
+    --accent: #0076b8;
+    --surface: #eef4fa;
+    --border: #d3e0ee;
+    --ok: #2f8a48;
+    --bad: #c0392b;
+    --warn: #c25a1c;
+    --tint-green: #ebf5ea;
+    --motif-opacity: .55;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1a35;
+      --fg: #e6edf6;
+      --heading: #a9cdf5;
+      --muted: #9fb0c4;
+      --accent: #5cb6f2;
+      --surface: #142a52;
+      --border: #26406d;
+      --ok: #7ccb8a;
+      --bad: #f0716a;
+      --warn: #f29a5c;
+      --tint-green: #16354a;
+      --motif-opacity: .35;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
+
+  .deck { height: 100vh; width: 100vw; overflow: hidden; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column; justify-content: center;
+    padding: 6vh 8vw;
+    font-size: clamp(14px, min(2.2vw, 3.9vh), 28px);
+    line-height: 1.45;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+
+  .slide h1 { font-size: 2.4em; line-height: 1.1; margin: 0 0 .4em; letter-spacing: -0.02em; color: var(--heading); }
+  .slide h2 { font-size: 1.6em; line-height: 1.15; margin: 0 0 .6em; letter-spacing: -0.01em; color: var(--heading); }
+  .slide h3 { font-size: 1.1em; margin: 0 0 .3em; color: var(--accent); }
+  .slide p, .slide li { max-width: 60ch; }
+  .slide ul, .slide ol { padding-left: 1.2em; margin: 0; }
+  .slide li + li { margin-top: .4em; }
+  .slide a { color: var(--accent); }
+  .slide img { max-width: 100%; max-height: 60vh; object-fit: contain; }
+  .slide code { font-family: var(--mono); font-size: .85em; background: var(--surface); padding: .1em .3em; border-radius: 4px; }
+  .slide pre { font-family: var(--mono); font-size: .7em; background: var(--surface); border: 1px solid var(--border); padding: 1em; border-radius: 8px; overflow: auto; }
+
+  .title-slide { justify-content: center; }
+  .title-slide h1 { font-size: 3em; }
+  .muted { color: var(--muted); }
+  .big { font-size: 1.6em; font-weight: 600; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: start; }
+
+  /* Additions for this deck */
+  .kicker { font-size: .55em; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8em; }
+  .kicker.demo { color: var(--warn); }
+  .dense { font-size: .62em; }
+  .dense p, .dense li { max-width: none; }
+  .slide table { border-collapse: collapse; width: 100%; }
+  .slide th, .slide td { text-align: left; vertical-align: top; padding: .4em .7em; border-bottom: 1px solid var(--border); }
+  .slide th { color: var(--heading); font-weight: 600; }
+  .slide thead th { background: var(--surface); color: var(--muted); border-bottom: 2px solid var(--border); }
+  .slide thead th:first-child { border-radius: 8px 0 0 0; }
+  .slide thead th:last-child { border-radius: 0 8px 0 0; }
+  .slide td.before { color: var(--muted); }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6vw; }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1em 1.1em; box-shadow: 0 6px 18px -12px rgba(26, 67, 155, .45); }
+  .card p { margin: .3em 0 0; }
+  .card h3 { margin: 0; }
+  .callout { background: linear-gradient(90deg, var(--surface), var(--tint-green)); border: 1px solid var(--border); padding: .6em 1em; border-radius: 12px; margin-top: 1em; max-width: none; }
+  .num { display: inline-grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--brand-gradient); color: #fff; font-weight: 700; font-size: .8em; margin-bottom: .5em; }
+
+  /* Rounded-diamond outlines: the motif from the brand backgrounds */
+  .slide::before {
+    content: ""; position: absolute; top: -10vw; right: -7vw; width: 28vw; height: 28vw; pointer-events: none; opacity: var(--motif-opacity);
+    background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke-width='3'%3E%3Crect x='95' y='95' width='210' height='210' rx='44' transform='rotate(45 200 200)' stroke='%239cc66b'/%3E%3Crect x='115' y='125' width='210' height='210' rx='44' transform='rotate(45 220 230)' stroke='%235ba4e0'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* Brand slides: gradient background, white text */
+  .slide.brand { background: var(--brand-gradient); color: #fff; }
+  .slide.brand::before { --motif-opacity: .85; top: -19vw; right: -13vw; width: 42vw; height: 42vw; }
+  .slide.brand.photo { background: #1a439b url("assets/brand-title.jpg") center / cover no-repeat; }
+  .slide.brand.photo::before { display: none; }
+  .slide.brand.photo > :not(.notes) { max-width: 52%; }
+  .slide.brand h1, .slide.brand h2, .slide.brand h3 { color: #fff; }
+  .slide.brand .muted { color: rgba(255, 255, 255, .82); }
+  .slide.brand .kicker { color: #cfeab0; }
+  .slide.brand .kicker.demo { color: #fdd38c; }
+  .slide.brand code { background: rgba(255, 255, 255, .16); color: #fff; }
+  .slide.brand .card { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .3); box-shadow: none; backdrop-filter: blur(8px); }
+  .slide.brand .card .muted { color: #cfeab0; font-weight: 600; }
+  .slide.brand .callout { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .3); backdrop-filter: blur(8px); }
+  .slide.brand .num { background: #fff; color: var(--b-deep); }
+  .pill { display: inline-block; font-size: .55em; font-weight: 600; padding: .2em .7em; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); vertical-align: middle; }
+  .pill.warn { color: var(--warn); border-color: currentColor; }
+  .slide td.when { color: var(--warn); font-weight: 600; white-space: nowrap; }
+  .yes { color: var(--ok); font-weight: 700; }
+  .no { color: var(--bad); font-weight: 700; }
+  .nowrap-code code { white-space: nowrap; }
+  .codelist { list-style: none; padding: 0; }
+  .codelist li { display: grid; grid-template-columns: 1.4em 1fr; gap: .4em; }
+  .placeholder { border: 2px dashed var(--border); border-radius: 12px; min-height: 34vh; text-align: center; padding: 10vh 1em 1em; color: var(--muted); font-size: .7em; overflow-wrap: anywhere; }
+  .stack { display: flex; flex-direction: column; gap: 1.2em; }
+  .diagram { width: 100%; height: auto; max-height: 46vh; }
+  .dg-box { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .dg-box.accent { stroke: var(--accent); }
+  .dg-text { fill: var(--fg); font-family: var(--font); font-size: 18px; }
+  .dg-small { fill: var(--muted); font-family: var(--font); font-size: 15px; }
+  .dg-mono { fill: var(--fg); font-family: var(--mono); font-size: 15px; }
+  .dg-line { stroke: var(--muted); stroke-width: 2.5; fill: none; }
+  .dg-line.accent { stroke: var(--accent); }
+  .dg-line.dashed { stroke-dasharray: 7 6; }
+  .dg-zone { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 8 6; }
+  .dg-dot { fill: var(--bg); stroke: var(--muted); stroke-width: 3; }
+  .dg-dot.accent { fill: var(--accent); stroke: var(--accent); }
+  .dg-arrowhead { fill: var(--muted); }
+  .dg-arrowhead.accent { fill: var(--accent); }
+
+  .notes { display: none; }
+  body.show-notes .slide.active .notes {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto;
+    background: var(--surface); border-top: 2px solid var(--accent);
+    padding: 12px 8vw 28px; font-size: 15px; line-height: 1.5; color: var(--fg);
+  }
+
+  .progress { position: fixed; left: 0; bottom: 0; height: 5px; background: var(--brand-gradient); transition: width .2s ease; z-index: 2; }
+  .counter { position: fixed; right: 16px; bottom: 12px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
+  body.on-brand .counter { color: rgba(255, 255, 255, .8); }
+
+  @media (max-width: 700px) {
+    .slide { padding: 6vh 16px; font-size: 18px; }
+    .two-col, .cards, .cards.two { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { height: auto; }
+    .deck { height: auto; overflow: visible; }
+    .slide { position: relative; display: flex !important; width: 1280px; height: 720px; font-size: 26px; page-break-after: always; break-after: page; }
+    .progress, .counter { display: none; }
+    .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.show-notes .slide.active .notes { display: none; }
+  }
+</style>
+</head>
+<body>
+<main class="deck">
+
+  <!-- ============ Opening ============ -->
+
+  <section class="slide title-slide brand photo">
+    <p class="kicker">CircleCI → GitHub Actions</p>
+    <h1>Moving to GitHub Actions</h1>
+    <p class="big muted" style="font-weight:400">What changes for your team, and why it's worth it</p>
+    <p class="muted">Noel Aguilar · DevOps</p>
+    <aside class="notes">⏱ 0.5 min. Introduce yourself. This is a presentation with two live demos, not a hands-on workshop. Ask people to hold questions for the end, unless something is blocking their understanding.</aside>
+  </section>
+
+  <section class="slide">
+    <h2>What we'll cover</h2>
+    <ol>
+      <li>Why we're moving</li>
+      <li>The paved road DevOps is building</li>
+      <li>What changes in your repo, including GitHub hardening</li>
+      <li>Conventional Commits and versioning <span class="muted">· demo</span></li>
+      <li>release-please and release branches <span class="muted">· demo</span></li>
+      <li>CI builds, CD promotes</li>
+      <li>What's next</li>
+    </ol>
+    <aside class="notes">⏱ 0.5 min. The thread through everything: one way of building, versioning and promoting apps, maintained by DevOps, so teams don't each have to.</aside>
+  </section>
+
+  <!-- ============ 1. Why ============ -->
+
+  <section class="slide">
+    <p class="kicker">Why we're moving</p>
+    <h2>Three reasons</h2>
+    <div class="cards">
+      <div class="card">
+        <span class="num">1</span>
+        <h3>Cost</h3>
+        <p><strong>80%</strong> of our CircleCI bill is per active user. We already pay for GitHub seats, so with GitHub Actions <strong>we only pay for the compute we use</strong>.</p>
+      </div>
+      <div class="card">
+        <span class="num">2</span>
+        <h3>Claude Code leans to GitHub Actions</h3>
+        <p>When you ask Claude Code to build or fix a pipeline, it reaches for GitHub Actions. We're going with the grain.</p>
+      </div>
+      <div class="card">
+        <span class="num">3</span>
+        <h3>One place, not two</h3>
+        <p>Code, PRs, checks, releases, changelogs and security alerts all live in GitHub. No more switching to CircleCI to find out why a check failed.</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 2 min. Cost: about 80% of the CircleCI cost is for active users. GitHub doesn't charge per user for Actions, because we already pay for everyone's GitHub seat, so we only pay for the compute we use. That per-user 80% goes away. Claude Code: AI-assisted work on pipelines and releases goes much more smoothly on GitHub Actions and the gh CLI. One place: GitHub's checks UI, the release PR, the changelog and Dependabot all sit next to the code.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Why we're moving</p>
+    <h2>Consolidate, don't just copy across</h2>
+    <p>Our CircleCI setup grew team by team, and it shows:</p>
+    <ul>
+      <li><code>vsp-ci</code> has 35 commands, almost all for .NET. There's one for Python unit tests and <strong>none for Node or Java</strong>, so those teams build their own</li>
+      <li>It has <strong>three</strong> image-scan commands, and one of them is a deprecated no-op</li>
+      <li><code>dynamo-config</code>, which produces our four-part versions, hasn't changed since <strong>June 2022</strong></li>
+    </ul>
+    <p class="callout">Porting each orb one-for-one would carry all of that forward. Instead, the migration gives us <strong>one shared action per capability</strong>, for every stack.</p>
+    <aside class="notes">⏱ 1.5 min. Checked against the orb sources: vsp-ci src/commands at origin/main 77a8171 (2026-09-25), and dynamo-config at origin/main 66b7b25 (2022-06-20). The deprecated command is docker-scan-image: its Rapid7 scanner is end-of-life, so it only prints a warning. The other two are docker-scan-image-veracode (container scan) and veracode-scan-image (scans the build output). The point: this isn't just a lift-and-shift. We're using the move to fix how fragmented things had become.</aside>
+  </section>
+
+  <!-- ============ 2. Paved road ============ -->
+
+  <section class="slide">
+    <p class="kicker">The paved road</p>
+    <h2>DevOps maintains the pipeline, so you don't have to</h2>
+    <div class="two-col dense" style="font-size:.75em">
+      <div>
+        <h3>Reusable workflows</h3>
+        <ul>
+          <li><code>app-ci</code>: the standard CI. Works out which modules changed, then builds, tests, scans and publishes them, and reports one <code>CI result</code></li>
+          <li><code>app-sast</code>: static code security scan</li>
+          <li><code>helm-validate</code>: lint and render your charts</li>
+          <li><code>pr-title-lint</code>: the Conventional Commit check</li>
+          <li>release-please workflows <span class="pill warn">coming</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Shared actions, by area</h3>
+        <p><code>docker</code> · <code>test</code> · <code>security</code> · <code>release</code> · <code>packages</code> · <code>helm</code> · <code>git</code> · <code>build</code></p>
+        <p class="muted">All in <code>VectorLearning/github-actions</code>. One action per job, with a <code>stack:</code> input where only the language changes.</p>
+      </div>
+    </div>
+    <p class="callout" style="font-size:.75em"><strong>Every action and reusable workflow has unit tests</strong>, run in the library's own CI before any release reaches your repo.</p>
+    <aside class="notes">⏱ 2 min. Walk the left column. app-ci is the one most teams will use: their ci.yml calls it and nothing else. app-build-publish exists for teams that need extra jobs of their own (the flexible path). Tests: as of origin/main 5527dcd, all 12 actions have test suites, and each of the 5 reusable workflows has its own .bats suite. They run in the library's ci-self-test workflow. Compare that with the CircleCI orbs: a change to a shared pipeline is tested before teams get it.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">The paved road</p>
+    <h2>Your repo's entire CI</h2>
+    <div class="two-col" style="grid-template-columns: 1.4fr 1fr; font-size:.88em">
+<pre>name: build-test-publish
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ci:
+    name: CI
+    permissions:
+      contents: write   # the release tag
+      id-token: write   # AWS through OIDC
+    uses: VectorLearning/github-actions/
+      .github/workflows/app-ci.yml@v1
+    secrets:
+      VERACODE_SRCCLR_API_TOKEN: …</pre>
+      <div class="stack">
+<pre>// build-config.json
+{
+  "image-namespace": "example",
+  "modules": {
+    "src/Services/Example": {
+      "stack": "dotnet"
+    }
+  }
+}</pre>
+        <p class="muted" style="font-size:.7em">Copy <code>ci.yml</code> as-is. What gets built lives in <code>build-config.json</code>.</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. Trimmed from cicd-standards templates/continuous-versioning/ci.yml (the `uses:` line is split over two lines here to fit; in the file it's one). Point out what's missing: no docker commands, no scan setup, no tagging logic. All of that is DevOps's job now. @v1 is a major-version tag: DevOps ships fixes and improvements under it, and your repo picks them up without a change. A team that wants control can pin an exact version instead. v1.0.0 of github-actions ships mid-November; until then the library is pre-1.0 and the moving tag is @v0.N.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">The paved road</p>
+    <h2>Opinionated on purpose</h2>
+    <div class="two-col dense" style="font-size:.78em">
+      <div class="card">
+        <h3>On the paved road</h3>
+        <ul>
+          <li>DevOps maintains, upgrades and secures it</li>
+          <li>The same pipeline in every repo, so moving between teams means nothing new to learn</li>
+          <li>Versioning, scanning and tagging are built in</li>
+          <li>Standards are written so Claude Code can follow them</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Off the paved road</h3>
+        <ul>
+          <li>Allowed, but <strong>you</strong> own the workflow, its upgrades and its security fixes</li>
+          <li>The org rules still apply: rulesets, SHA pinning, the actions allowlist</li>
+          <li>Every custom pipeline is another one to keep alive</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:1em"><strong>Single repos and monorepos</strong> are both supported. <strong>Stacks:</strong> .NET, Python, Node and Java, rolling out stack by stack. Today you'll see .NET and Python.</p>
+    <aside class="notes">⏱ 1.5 min. This is the sell. Consistency is the feature, and sprawl is what we're trying to avoid. Opting out is a real option, but it means the team runs its own pipeline. Stacks: as of 2026-10-27, app-ci's build path implements dotnet; node, python and java exist as inputs, and app-sast already scans all four. Demo 1 is .NET, Demo 2 is Python. Don't promise dates you don't have.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">The paved road</p>
+    <h2>How migration happens</h2>
+    <ul>
+      <li><strong>DevOps defines the pattern and the migration steps:</strong> templates, how-to guides and a migration playbook</li>
+      <li><strong>DevOps will help</strong>, and in many cases will do the migration for you</li>
+      <li><strong>Want to do it yourselves?</strong> You'll be supported</li>
+    </ul>
+    <p class="callout">Either way, you end up on the same pattern as every other repo.</p>
+    <aside class="notes">⏱ 1 min. No CircleCI shut-off date has been set, so don't give one. The pilot, poc_echo_server_dotnet, has already moved to the standard CI. There's a .NET service migration playbook in github-actions/docs/migration.</aside>
+  </section>
+
+  <!-- ============ 3. What changes ============ -->
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>Before and after</h2>
+    <div class="dense" style="font-size:.52em">
+      <table>
+        <thead><tr><th></th><th>Before (CircleCI)</th><th>After (GitHub Actions)</th></tr></thead>
+        <tbody>
+          <tr><th>Branch protection</th><td class="before">Different rules in each team</td><td><strong>One standard set of rulesets</strong> from templates</td></tr>
+          <tr><th>Merging</th><td class="before">Merge commits</td><td><strong>Squash only</strong>. The PR title becomes the commit</td></tr>
+          <tr><th>Bot</th><td class="before"><code>cibot</code> account committed to <code>main</code> and tagged</td><td><strong>Release GitHub App</strong>: creates tags and release PRs only, <strong>never commits to <code>main</code></strong></td></tr>
+          <tr><th>Version format</th><td class="before">Four-part <code>X.Y.Z.N</code></td><td><strong>SemVer <code>X.Y.Z</code></strong></td></tr>
+          <tr><th>Image tags</th><td class="before">Moving <code>latest</code> / <code>main</code></td><td><code>&lt;branch&gt;-&lt;run&gt;</code> or the version. <strong>Tags never move</strong></td></tr>
+          <tr><th>Dependencies</th><td class="before">Updated by hand</td><td><strong>Dependabot</strong> alerts and PRs</td></tr>
+          <tr><th>Actions</th><td class="before">Anything, by tag</td><td><strong>Approved list only, pinned by SHA</strong></td></tr>
+          <tr><th>Release branches</th><td class="before">Created by hand, <code>release/1.0.0</code></td><td>Created automatically, <code>release/X.Y.x</code></td></tr>
+          <tr><th>Deploys</th><td class="before">CircleCI approval jobs</td><td><strong>ArgoCD Promotion Manager</strong>. CI never deploys</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <aside class="notes">⏱ 2.5 min. The overview: each row gets its own slide or section next. Don't go into detail here. Tell people "you'll see each of these in a minute".</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>Branching: mostly the same</h2>
+    <div class="two-col dense" style="font-size:.75em">
+      <div>
+        <h3>Stays the same</h3>
+        <ul class="nowrap-code">
+          <li><code>main</code> is the default branch</li>
+          <li>Developer branches: <code>&lt;category&gt;/&lt;JIRA&gt;-&lt;description&gt;</code><br><code>feat/DAR-102-add-clear-button</code> · <code>fix/DAR-103-resolve-oom</code> · <code>chore/update-deps</code></li>
+          <li>Branch builds are tagged with the branch name, now with the run number added: <code>feat-DAR-102-add-clear-button-107</code></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Changes</h3>
+        <ul>
+          <li><strong>The moving <code>main</code> image tag goes away.</strong> Every build gets its own tag</li>
+          <li><strong>Release branches are created automatically</strong>, one per minor version: <code>release/1.0.x</code></li>
+          <li>Fixes on a release branch are <strong>forward-ported</strong> to <code>main</code>. The release branch is never merged back</li>
+          <li><strong>New:</strong> <code>hotfix/X.Y.x</code>, only for plain release-please, only when a production fix can't wait for <code>main</code></li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout" style="font-size:.7em"><strong>Forward-port:</strong> a normal PR into <code>main</code> that copies one fix from a release (or hotfix) branch, so the next version has it too. Only that fix goes across, nothing else on the branch.</p>
+    <aside class="notes">⏱ 1.5 min. Compared with the Git Branching @ Vector page on Confluence. Branch names follow the same convention, and branch builds were already tagged with the branch name. What's new for tags is the run number on the end, so each build has its own tag, and the moving main tag going away. The real change is release branches: release-please creates them, named per minor version (the "x" is literal), and fixes flow forward to main instead of the release branch being merged back. Integration branches aren't covered by the new standards yet. If someone asks, they're still allowed, but the branch's builds get a branch-run tag and never a version.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>Why squash, not merge commits</h2>
+    <div class="two-col" style="font-size:.85em">
+      <div>
+        <h3>Merge commit: what lands on <code>main</code></h3>
+<pre>*   Merge pull request #123 from feat/DAR-102
+|\
+| * address review comments
+| * fix typo
+| * wip
+| * add clear button
+|/</pre>
+      </div>
+      <div>
+        <h3>Squash: what lands on <code>main</code></h3>
+<pre>* feat(search): add clear button (DAR-102) (#123)</pre>
+        <p class="muted" style="font-size:.72em; margin-top:.6em"><code>DAR-102</code> links the commit to its Jira ticket. GitHub adds the <code>(#123)</code> PR link itself.</p>
+      </div>
+    </div>
+    <ul class="dense" style="font-size:.72em; margin-top:.4em">
+      <li><strong>The version and changelog are read from commit titles on <code>main</code>.</strong> With squash, the only title is the PR title, and the title check makes sure it's right</li>
+      <li><strong>A clean, linear history</strong> that's easy to read, bisect and revert, one PR at a time</li>
+      <li><strong>Your branch commits can be as messy as you like.</strong> They never reach <code>main</code></li>
+    </ul>
+    <aside class="notes">⏱ 1.5 min. With merge commits, "wip" and "fix typo" become commits on main, and versioning would have to make sense of them. Under Continuous versioning, a merge commit in a SemVer module's range since its last tag fails the build. release-please repos are squash-only by standard. The squash setting is in each template's repository-settings.json: squash only, with the PR title as the commit title. Put the Jira key at the end of the PR title, e.g. "(DAR-102)", so the commit on main, and the changelog line, link back to the ticket. GitHub appends the PR number "(#123)" on squash, so you get both links.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>One PR, one change</h2>
+    <p>A PR becomes <strong>one commit with one title and one type</strong>. So:</p>
+    <ul class="dense" style="font-size:.78em">
+      <li><strong>One branch = one feature or one fix.</strong> Two features in one PR become one changelog line and one version bump, and you can't revert one without the other</li>
+      <li><strong>Don't mix a fix into a feature PR.</strong> Under <code>feat:</code>, the fix disappears from the changelog</li>
+      <li><strong>Keep branches small and short-lived.</strong> Split unrelated work into separate PRs</li>
+      <li><strong>Start a fresh branch after a merge.</strong> Your old branch's commits aren't on <code>main</code> (only the squashed copy is), so carrying on with it brings conflicts</li>
+    </ul>
+    <ul class="codelist dense" style="font-size:.66em; margin-top:1em">
+      <li><span class="no">✗</span><span><code>feat/DAR-102-search-export-and-oom-fix</code> <span class="muted">→ one PR, one line, three changes</span></span></li>
+      <li><span class="yes">✓</span><span><code>feat/DAR-102-add-clear-button</code> · <code>feat/DAR-110-export-csv</code> · <code>fix/DAR-103-resolve-oom</code> <span class="muted">→ three PRs, three changelog lines</span></span></li>
+    </ul>
+    <aside class="notes">⏱ 1.5 min. This is the habit change. Teams used to long-lived feature branches that accumulate several pieces of work will feel it most. If work genuinely has to ship together, it can still go in separate PRs that merge back to back. The fresh-branch point catches people out: after a squash merge the remote branch is gone (with the proposed auto-delete), but a local copy still has the original commits. Rebasing or merging main into it brings conflicts with your own squashed change.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>One set of rules, in every repo</h2>
+    <ul class="dense nowrap-code" style="font-size:.85em">
+      <li><code>main</code>: PR required, at least 1 approval by default (the team can set more), no force push, no deletes, <strong>nobody can bypass</strong></li>
+      <li>Required checks: <code>CI / CI result</code> and <code>PR / Lint PR title</code>, accepted only from GitHub Actions</li>
+      <li>Version tags (<code>v*</code>) can't be moved or deleted</li>
+      <li>release-please repos: <code>release/**</code> and <code>hotfix/**</code> are protected too</li>
+      <li><span class="pill warn">proposed</span> <strong>Branches are deleted automatically after merge</strong>. This keeps the branch list clean, which matters once Dependabot starts opening PRs</li>
+    </ul>
+    <p class="callout">Before, every team had its own rules, or none. Now they're templates in <code>cicd-standards</code>, applied the same way everywhere.</p>
+    <aside class="notes">⏱ 1 min. The rulesets are JSON templates in cicd-standards (templates/*/rulesets/), imported with gh api or GitHub's ruleset import. "Nobody can bypass" includes admins: the rule is the rule. Auto-delete is a proposal: GitHub's "Automatically delete head branches" setting (delete_branch_on_merge). It isn't in the repository-settings.json templates yet. Every Dependabot update and every squash-merged PR leaves a branch behind otherwise. A deleted branch can still be restored from the PR page if someone needs it.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>From <code>cibot</code> to the release App</h2>
+    <div class="dense" style="font-size:.6em">
+      <table>
+        <thead><tr><th></th><th><code>cibot</code> (before)</th><th><code>vectorlearning-release[bot]</code> (after)</th></tr></thead>
+        <tbody>
+          <tr><th>What it is</th><td class="before">A machine user, using a seat and a personal token</td><td>A GitHub App owned by the organization</td></tr>
+          <tr><th>Token lifetime</th><td class="before">Months, or no expiry</td><td>One hour, created fresh for each job</td></tr>
+          <tr><th>Commits to <code>main</code></th><td class="before"><span class="no">Yes</span></td><td><span class="yes">Never</span>. Branch rulesets block it</td></tr>
+          <tr><th>What it does</th><td class="before">Commits and tags</td><td>Opens release PRs, creates <code>v*</code> tags and GitHub Releases, creates <code>release/**</code> branches</td></tr>
+          <tr><th>Can change workflows</th><td class="before">Yes</td><td><span class="yes">No</span>. It has no permission to edit workflow files</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout" style="font-size:.8em"><strong>Nothing lands on <code>main</code> except a reviewed PR</strong>, and that includes the bot's own release PR.</p>
+    <aside class="notes">⏱ 1.5 min. Source: cicd-standards docs/ci/release-github-app.md. With Continuous versioning, the version lives only in git tags. Nothing writes a version into a file, so a committed &lt;Version&gt; in a .csproj from an old pipeline should be deleted. With release-please, version files change only through the release PR, which a person approves.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>Where your version lives</h2>
+    <div class="cards dense" style="font-size:.66em">
+      <div class="card">
+        <p class="muted">Before</p>
+        <h3>dynamo-config</h3>
+        <ul>
+          <li>Read the version from a file: <code>dynamo-config.yml</code>, a <code>.csproj</code>, <code>package.json</code> or <code>Chart.yaml</code></li>
+          <li>Bumped it and <strong>committed straight to <code>main</code></strong>: <em>"Version auto-update by CircleCi [ci skip]"</em></li>
+          <li>Then pushed the tag</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="muted">After</p>
+        <h3>Continuous versioning</h3>
+        <ul>
+          <li><strong>Git tags only.</strong> No file is read or written</li>
+          <li>The image tag carries the version</li>
+          <li>Delete any committed <code>&lt;Version&gt;</code> from your <code>.csproj</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="muted">After</p>
+        <h3>release-please</h3>
+        <ul>
+          <li>Files change <strong>only in the release PR</strong>, which a person approves</li>
+          <li><strong>Services:</strong> <code>release-type: simple</code> writes just <code>version.txt</code> and <code>CHANGELOG.md</code></li>
+          <li><strong>Libraries:</strong> the stack's release type updates its package file, e.g. <code>package.json</code></li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout" style="font-size:.8em">Either way, <strong>no more version-bump commits on <code>main</code></strong> from a bot.</p>
+    <aside class="notes">⏱ 1 min. This is what the old cibot commit actually was: dynamo-config's push-version-bumps commits the bumped file and pushes it to the branch with a token, then pushes the tags. Continuous versioning: the version lives in git tags only (cicd-standards, "Where does the version live?"). A package is the exception, because its version is part of the artifact; package versioning is still an open item. release-please: a service MUST use release-type simple, whatever its language. A language type such as node or python would rewrite a file inside the app at every release, which triggers a redundant build, and the app would report a different version from its image tag. A .NET library uses simple and passes the version to dotnet pack -p:Version=.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What changes in your repo</p>
+    <h2>Image tags never move</h2>
+    <div class="two-col">
+      <div>
+        <h3>Before</h3>
+        <p class="muted"><code>latest</code> and <code>main</code> pointed at whatever image was built most recently.</p>
+      </div>
+      <div>
+        <h3>After: one tag names one build</h3>
+        <ul class="dense" style="font-size:.75em">
+          <li><code>feat-DAR-102-107</code>: a branch build</li>
+          <li><code>main-412</code>: a <code>main</code> build (release-please)</li>
+          <li><code>1.4.0</code>: a version</li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout"><strong>Build once, promote many.</strong> The image tested in staging is byte-for-byte the image that reaches production.</p>
+    <aside class="notes">⏱ 1 min. Every image also carries the label org.opencontainers.image.revision, set to the full commit SHA, so you can always trace an image back to its commit. Moving tags are removed as part of each repo's migration.</aside>
+  </section>
+
+  <!-- ============ 3b. Hardening ============ -->
+
+  <section class="slide">
+    <p class="kicker">GitHub hardening that affects you</p>
+    <h2>What you'll notice, and when</h2>
+    <div class="dense" style="font-size:.5em">
+      <table>
+        <thead><tr><th>When</th><th>Change</th><th>What you'll notice</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><strong>January</strong></td><th>2FA enforced org-wide</th><td>Members without 2FA are <strong>removed from the org</strong> when it's switched on</td><td><strong>Set up 2FA now</strong></td></tr>
+          <tr><td class="when">TBD</td><th><code>GITHUB_TOKEN</code> read-only by default</th><td>A workflow that writes (tags, comments, packages) fails</td><td>Declare <code>permissions:</code> on each job. The standard workflows already do</td></tr>
+          <tr><td class="when">TBD</td><th>Actions can't approve PRs</th><td>Bots can't approve their own changes</td><td>Nothing, for normal work</td></tr>
+          <tr><td class="when">TBD</td><th>SHA pinning required</th><td><code>@v4</code> on an action is rejected</td><td>Pin <code>@&lt;full-sha&gt; # v4</code>. Dependabot keeps it current</td></tr>
+          <tr><td class="when">TBD</td><th>Approved actions only</th><td>Third-party actions not on the list are blocked</td><td>Use the paved road, or request a security review</td></tr>
+          <tr><td class="when">TBD</td><th>OIDC to AWS</th><td>The static AWS keys in org secrets are deleted</td><td>Assume a role through OIDC. It's built into the standard workflows</td></tr>
+          <tr><td class="when">TBD</td><th>Dependabot</th><td>Dependabot alerts and PRs appear</td><td>Review them like any other PR</td></tr>
+          <tr><td class="when">TBD</td><th>Org-wide branch protection</th><td>Every repo gets a baseline</td><td>Nothing. The standard rulesets sit on top</td></tr>
+          <tr><td class="when">TBD</td><th>Tidy-ups</th><td>No new public repos, wikis off, stale repos archived, <code>claude-review.yml</code> hardened</td><td>Docs go in the repo or Confluence</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <aside class="notes">⏱ 2.5 min. Source: github-security-review remediation backlog (GHSEC-01, 03/10, 04, 05, 06, 08, 09, 11, 12, 15, 17). All of these are committed. Most roll out around the github-actions v1.0.0 release in mid-November, some start earlier, and 2FA enforcement is in January. Fill in each TBD in the When column with its date. Lead with 2FA: it's the one that removes people. Enforcement happens in January, so everyone needs to set it up before then.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">GitHub hardening that affects you</p>
+    <h2>Which actions you can use</h2>
+    <ul class="codelist dense" style="font-size:.7em">
+      <li><span class="no">✗</span><span><code>uses: some-org/cool-action@main</code><br><span class="muted">not on the approved list, and points at a branch that can change</span></span></li>
+      <li><span class="no">✗</span><span><code>uses: actions/checkout@v4</code><br><span class="muted">a tag can be moved to different code. The SHA-pinning policy rejects it</span></span></li>
+      <li><span class="yes">✓</span><span><code>uses: amannn/action-semantic-pull-request@48f2562…0d50 # v6.1.1</code><br><span class="muted">approved, pinned to an exact commit, and the comment tells Dependabot which version it is</span></span></li>
+    </ul>
+    <p class="callout" style="font-size:.8em">DevOps <strong>curates and approves general-purpose actions</strong>. Need something that isn't on the list? It goes through a security review first.<br><strong>Actions: SHA. Vector's standard workflows: <code>@v1</code></strong>, so updates reach you without a change. You can pin an exact version if you prefer.</p>
+    <aside class="notes">⏱ 1.5 min. Why: a tag or branch can be moved to point at malicious code, and a workflow can hold your secrets and your AWS role. A full SHA can't change. The ✓ example is taken from github-actions' pr-title-lint.yml (SHA shortened here to fit). GitHub's SHA-pinning policy covers actions; reusable workflows are exempt, which is why the standard workflows can use a major-version tag.</aside>
+  </section>
+
+  <!-- ============ 4. Conventional Commits ============ -->
+
+  <section class="slide">
+    <p class="kicker">Conventional Commits</p>
+    <h2>Your PR title is now your version</h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr">
+      <div class="dense" style="font-size:.72em">
+        <table>
+          <thead><tr><th>PR title starts with</th><th>Version bump</th></tr></thead>
+          <tbody>
+            <tr><td><code>feat:</code></td><td>minor <span class="muted">1.4.0 → 1.5.0</span></td></tr>
+            <tr><td><code>fix:</code> · <code>perf:</code></td><td>patch <span class="muted">1.4.0 → 1.4.1</span></td></tr>
+            <tr><td><code>feat!:</code> or a <code>BREAKING CHANGE:</code> footer</td><td>major <span class="muted">1.4.0 → 2.0.0</span></td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:.8em">Also allowed: <code>refactor</code> <code>build</code> <code>ci</code> <code>chore</code> <code>docs</code> <code>style</code> <code>test</code> <code>revert</code></p>
+      </div>
+      <div>
+        <ul>
+          <li>Squash merge means <strong>only the PR title counts</strong></li>
+          <li>The required check <code>PR / Lint PR title</code> enforces it</li>
+          <li>Once it's on <code>main</code> it can't be fixed. <strong>A wrong title means a wrong version</strong></li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 2 min. The old branching page said "always use Conventional Commits" so that one day they could drive versioning. That day is here. Under Continuous versioning, any other type that changes a module's files still ships a patch, so a patch means "a build shipped", not just "a bug was fixed". With release branches, a major version needs Release-As (covered later).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Conventional Commits</p>
+    <h2>Good titles, and an easy way to write them</h2>
+    <div class="two-col">
+      <ul class="codelist dense" style="font-size:.72em">
+        <li><span class="yes">✓</span><code>feat(search): add clear button (DAR-102)</code></li>
+        <li><span class="yes">✓</span><code>fix(export): resolve OOM (DAR-103)</code></li>
+        <li><span class="yes">✓</span><code>feat(api)!: remove v1 endpoints (DAR-120)</code></li>
+        <li><span class="yes">✓</span><code>revert: add clear button (DAR-102)</code></li>
+        <li><span class="no">✗</span><code>Updated stuff</code></li>
+        <li><span class="no">✗</span><code>DAR-102 add clear button</code></li>
+        <li><span class="no">✗</span><code>Revert "add clear button"</code></li>
+      </ul>
+      <div class="card">
+        <h3>Let Claude do it</h3>
+        <p>Claude Code writes Conventional Commit titles very reliably. Ask it to:</p>
+        <p><code>open a PR for this branch with a Conventional Commit title</code></p>
+        <p class="muted">It reads your diff, picks <code>feat</code> or <code>fix</code>, and flags anything breaking.</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 2 min. The pattern is type(scope): description (JIRA-KEY), the same as github-actions' own history, e.g. "feat(app-ci): the standard build pipeline as library reusable workflows (COREOPS-4509) (#87)". The scope is free-form: name the area of the code. The Jira key at the end links the commit to its ticket, and GitHub adds the (#PR) on merge. The ✗ "DAR-102 add clear button" fails because the key comes first and there's no type. GitHub's own "Revert …" title isn't conventional, so retitle it revert:. If you have time, show this live: ask Claude Code to open the PR used in Demo 1.</aside>
+  </section>
+
+  <!-- ============ 5. Versioning ============ -->
+
+  <section class="slide">
+    <p class="kicker">Versioning</p>
+    <h2>Cut is not released</h2>
+    <div class="cards two">
+      <div class="card">
+        <h3>Cut</h3>
+        <p>The git tag is created, for example <code>v1.0.0</code>. A release candidate.</p>
+      </div>
+      <div class="card">
+        <h3>Released</h3>
+        <p>The Promotion Manager promotes that version to <strong>production</strong>.</p>
+      </div>
+    </div>
+    <p class="callout"><code>1.0.0</code> fails regression, <code>1.0.1</code> passes, and production goes straight to <code>1.0.1</code>. That's normal. Not every cut version ships.</p>
+    <aside class="notes">⏱ 1 min. This holds for all three strategies. "Continuous versioning" is not continuous deployment: nothing goes to production automatically. The Promotion Manager, not the list of tags, is the record of what was released.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Versioning</p>
+    <h2>Three ways to version</h2>
+    <div class="dense" style="font-size:.5em">
+      <table>
+        <thead><tr><th></th><th>Continuous versioning</th><th>Plain release-please</th><th>release-please with release branches</th></tr></thead>
+        <tbody>
+          <tr><th>In short</th><td>Every merge to <code>main</code> that builds cuts a version</td><td>A release PR batches changes, and merging it cuts the version</td><td>Same, plus <code>release/X.Y.x</code> created for every version</td></tr>
+          <tr><th>Batching</th><td>None: one merge, one version</td><td>The release PR collects everything since the last version</td><td>Same as plain</td></tr>
+          <tr><th>Changelog</th><td class="before">None generated</td><td><code>CHANGELOG.md</code> + GitHub Release</td><td><code>CHANGELOG.md</code> + GitHub Release</td></tr>
+          <tr><th>Regression fails</th><td>Fix on <code>main</code>. The next merge is the next version</td><td>Fix on <code>main</code>. Hold other merges to keep it small</td><td>Fix on <code>release/X.Y.x</code>, forward-port to <code>main</code></td></tr>
+          <tr><th>Hotfix while <code>main</code> has unreleased work</th><td class="before">Not covered</td><td><code>hotfix/X.Y.x</code>, created only when needed</td><td>The release branch already exists</td></tr>
+          <tr><th>Keep merging during regression?</th><td>Yes, but each merge is a new version</td><td>Better to hold merges</td><td><span class="yes">Yes</span></td></tr>
+          <tr><th>Monorepos</th><td><span class="yes">Supported</span></td><td>Coming</td><td>Coming</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <aside class="notes">⏱ 3 min. All three read the version from Conventional Commit titles. They differ in when a version is cut and how a cut version gets fixed. None is the default. A repo uses exactly one, chosen by the workflow it calls (release-please) or version-config.json (Continuous versioning). Monorepo support for release-please is planned. As of 2026-10-27 the release-please standard still says "Monorepos are not covered yet", so a monorepo team that needs release-please now should talk to DevOps.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Versioning</p>
+    <h2>Which one fits your team?</h2>
+    <div class="cards">
+      <div class="card">
+        <p class="muted">You ship each change as it lands</p>
+        <h3>Continuous versioning</h3>
+      </div>
+      <div class="card">
+        <p class="muted">You ship batches after regression testing, and can pause merges to <code>main</code> meanwhile</p>
+        <h3>Plain release-please</h3>
+      </div>
+      <div class="card">
+        <p class="muted">You keep merging during regression, or must hotfix production without shipping unreleased work</p>
+        <h3>release-please with release branches</h3>
+      </div>
+    </div>
+    <p class="callout"><strong>Cutting release branches by hand today?</strong> You move to release-please with release branches. Same idea, now automated.</p>
+    <aside class="notes">⏱ 1.5 min. Ask the room: "Which of these sounds like your team?" Team leads should leave with a first guess. The choice is rarely changed once a repo starts, so it's worth a conversation within the team.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Versioning</p>
+    <h2>Goodbye, four-part versions</h2>
+    <div class="two-col">
+      <div>
+        <h3>Before</h3>
+        <p class="big muted"><code>1.4.0.7284</code></p>
+        <p class="muted">Four-part <code>X.Y.Z.N</code> from dynamo-config. Not SemVer.</p>
+      </div>
+      <div>
+        <h3>After</h3>
+        <p class="big"><code>1.4.0</code></p>
+        <p>SemVer <code>X.Y.Z</code>. Git tag <code>v1.4.0</code>, image tag <code>1.4.0</code>.</p>
+      </div>
+    </div>
+    <ul class="dense" style="font-size:.7em; margin-top:1em">
+      <li>One format across every repo, which both people and tools (including the Promotion Manager) can read</li>
+      <li>The four-part format remains only as a <strong>bridge</strong> for repos migrating from dynamo-config. New repos shouldn't use it, and merge commits with it will be phased out</li>
+    </ul>
+    <aside class="notes">⏱ 1.5 min. For a repo moving from CircleCI that has to stay four-part for a while, run-number-offset continues the build number from CircleCI's last one, so numbers never go backwards. The goal is SemVer everywhere.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Where the rules live</p>
+    <h2><code>VectorLearning/cicd-standards</code></h2>
+    <div class="cards two dense" style="font-size:.72em">
+      <div class="card"><h3>Standards</h3><p>How builds are versioned, tagged and released: Versioning, Continuous versioning, release-please, the release App. <code>docs/ci/</code></p></div>
+      <div class="card"><h3>Templates</h3><p>Files you copy into your repo as-is: workflows, config files, repository settings and rulesets. <code>templates/</code></p></div>
+      <div class="card"><h3>How-to guides</h3><p>Step by step: set up Continuous versioning, set up release-please, fixes and hotfixes. <code>docs/how-to/</code></p></div>
+      <div class="card"><h3>Scenarios</h3><p>What happens in each situation, such as a re-run, a revert or a hotfix, and who acts. <code>docs/reference/</code></p></div>
+    </div>
+    <p class="callout" style="font-size:.8em">Written for <strong>engineers and for Claude Code</strong>. Each section stands on its own, so Claude can pull the exact rule it needs while it works in your repo.</p>
+    <aside class="notes">⏱ 1.5 min. This is the source of truth. The deck is a tour, and the standards are the detail. Many standards are still marked Draft, meaning on main but not yet binding; they become Adopted through review. The Claude Code skill on the "What's coming" slide builds on these templates.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Where the rules live</p>
+    <h2>The files that control your pipeline</h2>
+    <div class="two-col dense" style="font-size:.6em">
+      <div>
+        <h3>Continuous versioning</h3>
+        <table>
+          <tbody>
+            <tr><td><code>.github/workflows/ci.yml</code></td><td>Calls <code>app-ci</code>. Copy as-is</td></tr>
+            <tr><td><code>.github/workflows/pr-title.yml</code></td><td>The Conventional Commit check</td></tr>
+            <tr><td><code>build-config.json</code></td><td><strong>What to build</strong>: modules, stack, image namespace</td></tr>
+            <tr><td><code>version-config.json</code></td><td><strong>How to version</strong>: <code>"version-format": "semver"</code>, each module's folder, first version, extra paths</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>release-please</h3>
+        <table>
+          <tbody>
+            <tr><td><code>ci.yml</code> · <code>pr-title.yml</code></td><td>The same build and title check</td></tr>
+            <tr><td><code>.github/workflows/release-please.yml</code></td><td><strong>Picks the strategy</strong>: calls <code>app-release-please</code> or <code>app-release-please-release-branches</code></td></tr>
+            <tr><td><code>release-please-config.json</code></td><td>Release type, <code>versioning</code>, <code>exclude-paths</code></td></tr>
+            <tr><td><code>.release-please-manifest.json</code></td><td>The current version</td></tr>
+            <tr><td><code>release-please-config.release-branch.json</code></td><td>Release branches only: patches on <code>release/X.Y.x</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="muted" style="font-size:.6em; margin-top:1em">Both strategies also apply <code>repository-settings.json</code> (squash only) and the <code>rulesets/</code> templates once, during setup.</p>
+    <aside class="notes">⏱ 2 min. The message: you control your pipeline through these config files, not by editing workflow YAML. Continuous versioning: build-config.json says what to build, and version-config.json says how each module is versioned. release-please: the workflow you call is the strategy choice. release-please-config.json on main uses always-bump-minor with release branches; the release-branch copy is identical except always-bump-patch. A release-please repo must not set a version-format other than none in version-config.json, because two tools versioning one repo would disagree. In Demo 1, open build-config.json and version-config.json in poc_echo_server_dotnet. In Demo 2, open release-please-config.json and the manifest.</aside>
+  </section>
+
+  <!-- ============ Demo 1 ============ -->
+
+  <section class="slide brand">
+    <p class="kicker demo">Live demo 1</p>
+    <h2>Continuous versioning</h2>
+    <p class="muted">A .NET service: the pilot repo, <code>poc_echo_server_dotnet</code></p>
+    <ol>
+      <li>Open a PR with a sloppy title, and watch <code>PR / Lint PR title</code> fail</li>
+      <li>Fix the title. The branch build pushes <code>feat-…-&lt;run&gt;</code>, with no version</li>
+      <li>Squash-merge, and the <code>main</code> build computes the next minor from <code>feat:</code></li>
+      <li>Image <code>1.x.0</code> pushed, commit tagged <code>v1.x.0</code></li>
+      <li>Bonus: a docs-only change builds nothing</li>
+    </ol>
+    <aside class="notes">⏱ 7 min including the live run. Before the session: create the branch, have the change ready, and have the repo's Actions tab open. Steps: (1) open a PR titled "updated echo" and show the red check; (2) retitle it "feat: add echo timestamp", show the branch run and the image tag in the CI result summary; (3) squash-merge, show the main run's versions job choosing a minor bump, then the git tag and the ECR image; (4) if there's time, push a README change and show every module skipped. If anything goes wrong, use the next slide.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker demo">Demo 1 · backup</p>
+    <h2>If the demo gremlins win</h2>
+    <div class="cards">
+      <div class="placeholder">Screenshot: failed<br><code>PR / Lint PR title</code><br><span>assets/demo1-title-check.png</span></div>
+      <div class="placeholder">Screenshot: <code>main</code> run,<br>versions job + <code>CI result</code><br><span>assets/demo1-main-run.png</span></div>
+      <div class="placeholder">Screenshot: tag <code>v1.x.0</code><br>and ECR image <code>1.x.0</code><br><span>assets/demo1-tag-image.png</span></div>
+    </div>
+    <aside class="notes">Skip this slide if the live demo worked. Placeholders: capture these screenshots during a rehearsal and swap each placeholder div for an &lt;img&gt;.</aside>
+  </section>
+
+  <!-- ============ 7. Why release-please ============ -->
+
+  <section class="slide">
+    <p class="kicker">release-please</p>
+    <h2>Why release-please</h2>
+    <div class="cards dense" style="font-size:.7em">
+      <div class="card"><h3>See it before it ships</h3><p>A release PR collects every change, with the version it will cut.</p></div>
+      <div class="card"><h3>A changelog for free</h3><p><code>CHANGELOG.md</code> and a GitHub Release, written from your PR titles.</p></div>
+      <div class="card"><h3>The version is calculated</h3><p><code>feat</code>, <code>fix</code> and <code>!</code> decide it. <code>Release-As</code> overrides it when you need to.</p></div>
+      <div class="card"><h3>You decide when</h3><p>Nothing is released until someone merges the release PR.</p></div>
+      <div class="card"><h3>Ship what you tested</h3><p>The image already built from <code>main</code> is re-tagged <code>X.Y.Z</code>, not rebuilt.</p></div>
+      <div class="card"><h3>No bot commits on <code>main</code></h3><p>The release PR is reviewed and approved like any other.</p></div>
+    </div>
+    <p class="muted" style="font-size:.6em; margin-top:1em"><span class="pill warn">being finalized</span> The shared release-please workflows and the demo repo are in progress.</p>
+    <aside class="notes">⏱ 3 min (with the next slide). The changelog is the headline benefit: product, QA and support can see exactly what's in a version without asking a developer. Status: the behaviour comes from release-please's docs and source and hasn't yet been checked end to end in a demo repo (COREOPS-4428). The reusable workflows app-release-please.yml and app-release-please-release-branches.yml don't exist yet.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">release-please</p>
+    <h2>How release branches work</h2>
+    <svg class="diagram" viewBox="0 0 1000 330" role="img" aria-label="main cuts v1.0.0, which creates release/1.0.x. A fix on release/1.0.x releases 1.0.1 and is forward-ported to main. main later cuts v1.1.0, which creates release/1.1.x.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- main -->
+      <text class="dg-mono" x="10" y="85">main</text>
+      <line class="dg-line" x1="70" y1="80" x2="975" y2="80" marker-end="url(#ah)"/>
+      <circle class="dg-dot" cx="120" cy="80" r="9"/>
+      <circle class="dg-dot" cx="190" cy="80" r="9"/>
+      <circle class="dg-dot accent" cx="270" cy="80" r="11"/>
+      <text class="dg-mono" x="245" y="50">v1.0.0</text>
+      <circle class="dg-dot" cx="390" cy="80" r="9"/>
+      <circle class="dg-dot" cx="560" cy="80" r="9"/>
+      <text class="dg-small" x="520" y="50">forward-port</text>
+      <circle class="dg-dot accent" cx="740" cy="80" r="11"/>
+      <text class="dg-mono" x="715" y="50">v1.1.0</text>
+      <circle class="dg-dot" cx="860" cy="80" r="9"/>
+      <!-- release/1.0.x -->
+      <path class="dg-line accent" d="M270,91 C270,150 300,190 340,190 L640,190" marker-end="url(#aha)"/>
+      <text class="dg-mono" x="290" y="225">release/1.0.x</text>
+      <circle class="dg-dot" cx="430" cy="190" r="9"/>
+      <text class="dg-small" x="410" y="170">fix</text>
+      <circle class="dg-dot accent" cx="500" cy="190" r="11"/>
+      <text class="dg-mono" x="478" y="225">v1.0.1</text>
+      <path class="dg-line dashed" d="M436,182 C470,140 520,110 552,88" marker-end="url(#ah)"/>
+      <!-- release/1.1.x -->
+      <path class="dg-line accent" d="M740,91 C740,190 770,280 810,280 L975,280" marker-end="url(#aha)"/>
+      <text class="dg-mono" x="820" y="315">release/1.1.x</text>
+    </svg>
+    <ul class="dense" style="font-size:.68em">
+      <li>Every version cut from <code>main</code> gets <code>release/X.Y.x</code> <strong>automatically</strong></li>
+      <li>A regression fix or hotfix goes onto the release branch, and its release PR cuts <code>1.0.1</code>. The fix is then forward-ported to <code>main</code></li>
+      <li><code>main</code> keeps moving: its next version is always the next minor, <code>1.1.0</code></li>
+    </ul>
+    <aside class="notes">Part of the 3 min above. Several release branches can exist at once: production on 1.0.2 from release/1.0.x while 1.1.0 is in regression. main is set to always-bump-minor, so a major version needs Release-As. An automatic forward-port action is planned (COREOPS-4416). Until it exists, forward-ports are opened by hand.</aside>
+  </section>
+
+  <!-- ============ Demo 2 ============ -->
+
+  <section class="slide brand">
+    <p class="kicker demo">Live demo 2</p>
+    <h2>release-please with release branches</h2>
+    <p class="muted">A Python app: <code>release-please-demo</code></p>
+    <ol>
+      <li>Merge a couple of <code>feat:</code> and <code>fix:</code> PRs. The release PR updates its version and changelog</li>
+      <li>Open the release PR and read the generated <code>CHANGELOG.md</code></li>
+      <li>Merge it: tag <code>v1.1.0</code>, a GitHub Release, image re-tagged <code>1.1.0</code></li>
+      <li><code>release/1.1.x</code> appears on its own</li>
+      <li>A fix on <code>release/1.1.x</code> becomes <code>1.1.1</code> and is forward-ported to <code>main</code></li>
+    </ol>
+    <aside class="notes">⏱ 9 min including the run. Repo: VectorLearning/release-please-demo. As of 2026-10-27 it's empty on GitHub, so set it up and rehearse before the session. If it isn't ready, present this as a walkthrough using the next two slides. Before the session: have two feature branches with PRs ready to merge, and the open release PR in a tab. Spend the most time on step 2. The changelog is the benefit people will remember.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">release-please</p>
+    <h2>The changelog writes itself</h2>
+<pre style="font-size:.6em">## [1.1.0](https://github.com/VectorLearning/&lt;repo&gt;/compare/v1.0.0...v1.1.0) (2026-11-03)
+
+### Features
+
+* **search:** add clear button (DAR-102) (#123) (a1b2c3d)
+* **export:** export reports as CSV (DAR-110) (#127) (e4f5a6b)
+
+### Bug Fixes
+
+* **export:** resolve OOM on large reports (DAR-103) (#125) (c7d8e9f)</pre>
+    <p class="muted" style="font-size:.7em">Illustrative. Each line is a squash-merged PR title, which is why titles matter.</p>
+    <aside class="notes">⏱ Part of Demo 2. If the live demo worked, show the real one instead. The same text becomes the GitHub Release notes. Who benefits: QA knows what to test, support knows what changed, and product can read it without asking.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker demo">Demo 2 · backup</p>
+    <h2>Walkthrough</h2>
+    <div class="cards">
+      <div class="placeholder">Screenshot: release PR<br>with version + changelog<br><span>assets/demo2-release-pr.png</span></div>
+      <div class="placeholder">Screenshot: GitHub Release<br><code>v1.1.0</code><br><span>assets/demo2-github-release.png</span></div>
+      <div class="placeholder">Screenshot: branch list showing<br><code>release/1.1.x</code><br><span>assets/demo2-release-branch.png</span></div>
+    </div>
+    <aside class="notes">Use if the demo repo isn't ready or the live run fails. Capture these screenshots once COREOPS-4428's demo repo exists.</aside>
+  </section>
+
+  <!-- ============ 9. CI builds, CD promotes ============ -->
+
+  <section class="slide">
+    <p class="kicker">CI builds, CD promotes</p>
+    <h2>GitHub Actions stops at the image</h2>
+    <svg class="diagram" viewBox="0 0 1000 260" role="img" aria-label="CI on GitHub Actions builds and publishes an image to ECR. The ArgoCD Promotion Manager then promotes that same image through develop, staging and production.">
+      <defs>
+        <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <rect class="dg-zone" x="5" y="20" width="430" height="200" rx="14"/>
+      <text class="dg-small" x="20" y="45">CI · GitHub Actions</text>
+      <rect class="dg-zone" x="455" y="20" width="540" height="200" rx="14"/>
+      <text class="dg-small" x="470" y="45">CD · ArgoCD Promotion Manager</text>
+
+      <rect class="dg-box" x="25" y="80" width="170" height="90" rx="10"/>
+      <text class="dg-text" x="110" y="118" text-anchor="middle">lint · test</text>
+      <text class="dg-text" x="110" y="144" text-anchor="middle">build · scan</text>
+      <line class="dg-line" x1="195" y1="125" x2="250" y2="125" marker-end="url(#ah2)"/>
+      <rect class="dg-box accent" x="255" y="80" width="160" height="90" rx="10"/>
+      <text class="dg-text" x="335" y="118" text-anchor="middle">image in ECR</text>
+      <text class="dg-mono" x="335" y="144" text-anchor="middle">1.4.0</text>
+
+      <line class="dg-line" x1="415" y1="125" x2="490" y2="125" marker-end="url(#ah2)"/>
+      <rect class="dg-box" x="495" y="80" width="140" height="90" rx="10"/>
+      <text class="dg-text" x="565" y="130" text-anchor="middle">develop</text>
+      <line class="dg-line" x1="635" y1="125" x2="670" y2="125" marker-end="url(#ah2)"/>
+      <rect class="dg-box" x="675" y="80" width="140" height="90" rx="10"/>
+      <text class="dg-text" x="745" y="130" text-anchor="middle">staging</text>
+      <line class="dg-line" x1="815" y1="125" x2="850" y2="125" marker-end="url(#ah2)"/>
+      <rect class="dg-box accent" x="855" y="80" width="130" height="90" rx="10"/>
+      <text class="dg-text" x="920" y="130" text-anchor="middle">production</text>
+      <text class="dg-small" x="740" y="205" text-anchor="middle">the same image at every step · production by approved PR</text>
+    </svg>
+    <ul class="dense" style="font-size:.7em">
+      <li>CI's job ends when the versioned image is in ECR. <strong>It never deploys</strong></li>
+      <li>The Promotion Manager records in Git which image each environment runs, and ArgoCD makes the cluster match</li>
+      <li>Promotion to production is a <strong>PR to <code>rendered-k8s-manifests</code></strong>, approved by the reviewer CODEOWNERS names</li>
+    </ul>
+    <aside class="notes">⏱ 2 min. Optional test1–3 and uat environments are left out to keep the picture simple. A team can choose to deploy every main merge to develop automatically, for each service. That's an opt-in for one lower environment only.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">CI builds, CD promotes</p>
+    <h2>No more CircleCI approval jobs</h2>
+    <div class="two-col" style="font-size:.85em">
+      <div>
+        <h3>Before</h3>
+        <p class="muted">SPAs/MFEs and Lambdas deployed from a CircleCI approval step.</p>
+      </div>
+      <div>
+        <h3>After</h3>
+        <p>GitHub Actions <strong>builds and packages</strong>. Nothing deploys from CI.</p>
+        <ul class="dense" style="font-size:.8em">
+          <li><strong>Lambdas</strong> move to <strong>AWS ACK</strong>: their manifests go in <code>rendered-k8s-manifests</code> and the <strong>Promotion Manager</strong> promotes them, the same as services</li>
+          <li><strong>SPAs/MFEs</strong> follow a similar path <span class="pill warn">being finalized</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout"><strong>Why not GitHub's own approvals?</strong> Deployment approvals are a GitHub Enterprise feature, and we're on the Team plan. The GitOps PR <em>is</em> the approval, and it's the audit trail too.</p>
+    <p class="muted" style="font-size:.6em">Both get their own walkthrough and demo in a later session.</p>
+    <aside class="notes">⏱ 1 min. Decided: Lambdas are managed through AWS Controllers for Kubernetes (ACK), so a Lambda is a Kubernetes manifest like any service, and it goes through the same promotion flow. SPAs will be similar; that strategy is still being finalized. Don't go into detail here, because both get a dedicated session. Message to teams: don't build deploy steps into your GitHub Actions workflows.</aside>
+  </section>
+
+  <!-- ============ 10. What's next ============ -->
+
+  <section class="slide">
+    <p class="kicker">What's next</p>
+    <h2>What to do now</h2>
+    <div class="two-col dense" style="font-size:.75em">
+      <div>
+        <h3>This week</h3>
+        <ul>
+          <li>Set up <strong>2FA</strong>. It's enforced in <strong>January</strong></li>
+          <li>Start writing <strong>Conventional Commit PR titles</strong>, or let Claude write them</li>
+          <li>Team leads: choose your <strong>versioning strategy</strong></li>
+          <li>List the <strong>third-party actions</strong> you'd need</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Where to read more</h3>
+        <ul>
+          <li><code>VectorLearning/cicd-standards</code>: versioning, the release App, how-to guides, templates</li>
+          <li><code>VectorLearning/github-actions</code>: the workflows and actions</li>
+          <li>Migration: DevOps reaches out, or volunteer as a pilot</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 2 min. Add the support channel or contact here (not yet confirmed). If there's a migration schedule or sign-up, point to it.</aside>
+  </section>
+
+  <section class="slide brand">
+    <p class="kicker">What's coming</p>
+    <h2>Coming soon, and we need you</h2>
+    <div class="cards" style="font-size:.82em">
+      <div class="card">
+        <p class="muted">Mid-November</p>
+        <h3><code>github-actions</code> v1.0.0</h3>
+        <p>The first official release of the shared workflows and actions. From then on, <code>@v1</code> is a stable target.</p>
+      </div>
+      <div class="card">
+        <p class="muted">In progress</p>
+        <h3>A Claude Code skill</h3>
+        <p>Sets up your repo for you: <code>ci.yml</code>, config files, rulesets and versioning, following the standards.</p>
+      </div>
+      <div class="card">
+        <p class="muted">Now</p>
+        <h3>Pilot projects wanted</h3>
+        <p>We're looking for a couple of test projects to migrate first. You get hands-on help and shape the paved road.</p>
+      </div>
+    </div>
+    <p class="callout">Interested in being a pilot? Talk to DevOps after this session.</p>
+    <aside class="notes">⏱ 1.5 min. End on the call for pilots: that's the action you want from the room. Name the kind of project you're looking for (an active .NET or Python service with a team willing to give feedback). If people ask about @v1 before mid-November: until v1.0.0 ships, the library is pre-1.0, and the moving tag is @v0.N.</aside>
+  </section>
+
+  <section class="slide title-slide brand photo">
+    <h2 style="font-size:2.6em">Questions?</h2>
+    <p class="muted">Sources are listed in this presentation's README.md</p>
+    <aside class="notes">⏱ 2 min (1 minute moved to the "What's coming" slide).</aside>
+  </section>
+
+</main>
+<div class="progress"></div>
+<div class="counter"></div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const progress = document.querySelector('.progress');
+    const counter = document.querySelector('.counter');
+    let current = 0;
+
+    function show(i) {
+      current = Math.max(0, Math.min(slides.length - 1, i));
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+      progress.style.width = ((current + 1) / slides.length * 100) + '%';
+      counter.textContent = (current + 1) + ' / ' + slides.length;
+      document.body.classList.toggle('on-brand', slides[current].classList.contains('brand'));
+      history.replaceState(null, '', '#' + (current + 1));
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key) {
+        case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+          e.preventDefault(); show(current + 1); break;
+        case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+          e.preventDefault(); show(current - 1); break;
+        case 'Home': show(0); break;
+        case 'End': show(slides.length - 1); break;
+        case 'f': case 'F':
+          if (document.fullscreenElement) document.exitFullscreen();
+          else document.documentElement.requestFullscreen();
+          break;
+        // Speaker notes overlay, for rehearsing with the time estimates.
+        case 'n': case 'N':
+          document.body.classList.toggle('show-notes'); break;
+      }
+    });
+
+    // Click right two-thirds of the screen to advance, left third to go back.
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('a, button, input, select, textarea, pre, .notes')) return;
+      show(e.clientX > window.innerWidth / 3 ? current + 1 : current - 1);
+    });
+
+    const fromHash = parseInt(location.hash.slice(1), 10);
+    show(Number.isFinite(fromHash) ? fromHash - 1 : 0);
+  })();
+</script>
+</body>
+</html>
