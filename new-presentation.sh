@@ -31,6 +31,6 @@ for f in "$slug/index.html" "$slug/README.md"; do
 done
 
 echo "Created $slug/"
-echo "  - edit $slug/index.html"
+echo "  - edit $slug/index.html, then run ./export-markdown.py $slug"
 echo "  - record sources in $slug/README.md"
 echo "  - add a row to the Index table in README.md"
