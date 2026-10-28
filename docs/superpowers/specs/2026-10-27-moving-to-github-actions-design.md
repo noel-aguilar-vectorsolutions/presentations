@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-27
 **Owner / presenter:** Noel Aguilar
-**Deliverable:** a new presentation in this repo, `github-actions-strategy/`, built from `_template/`
+**Deliverable:** a new presentation in this repo, `moving-to-github-actions/`, built from `_template/`
 following the conventions in [`CLAUDE.md`](../../../CLAUDE.md).
 
 ## Intent
@@ -62,7 +62,7 @@ After the session, a developer or team lead should:
 ## Constraints
 
 - **60 minutes total**, including demos and Q&A.
-- Repo conventions (from `CLAUDE.md`): created with `./new-presentation.sh github-actions-strategy
+- Repo conventions (from `CLAUDE.md`): created with `./new-presentation.sh moving-to-github-actions
   "<Title>"`; self-contained `index.html` (inline CSS/JS, no build step); images in `assets/`;
   CDN libraries only with a pinned version; `README.md` in the folder lists **every source**; add a
   row to the root `README.md` Index table; don't modify `_template/`.
