@@ -46,12 +46,12 @@ December 2026*
 - ✓ An SPA
 - ✓ An MFE host shell whose MFEs ship in the same release (mfe-example)
 
-#### Not a site
+#### Delivered another way
 
-- ✗ A frontend that runs as a pod: an EKS workload
-- ✗ Independently released MFEs: [coming]
+- → A frontend that runs as a pod: as an EKS workload
+- → An independently released MFE: as a versioned asset on the shared CDN, loaded by its host site [coming]
 
-**Speaker notes:** ⏱ 2 min. Four words, one line each. A frontend is what a team builds: browser code, however it's hosted. An SPA is a standalone frontend: it owns a hostname and users go to it directly. An MFE is loaded into an existing site at runtime and never has a hostname of its own. A site is where an SPA is published: a hostname-rooted static origin on S3 and CloudFront. The site module doesn't know or care whether it holds an SPA, a Storybook or three HTML files. Today an SPA, or a shell whose MFEs ship in the same release, like mfe-example, is delivered as a site. A frontend that runs as a pod, like scheduling-frontend, is delivered like any EKS workload. Independently released MFEs on the shared CDN are a follow-on epic, not built yet; last content slide. Source: strategy §4.0–4.2.
+**Speaker notes:** ⏱ 2 min. Four words, one line each. A frontend is what a team builds: browser code, however it's hosted. An SPA is a standalone frontend: it owns a hostname and users go to it directly. An MFE is loaded into an existing site at runtime and never has a hostname of its own. A site is where an SPA is published: a hostname-rooted static origin on S3 and CloudFront. The site module doesn't know or care whether it holds an SPA, a Storybook or three HTML files. Today an SPA, or a shell whose MFEs ship in the same release, like mfe-example, is delivered as a site. A frontend that runs as a pod, like scheduling-frontend, is delivered like any EKS workload. Independently released MFEs will be supported, but not as sites: an MFE has no hostname, so it's published to the shared CDN as a versioned asset, and its host site's import map pins the version. That's a follow-on epic, not built yet; last content slide. Source: strategy §4.0–4.2.
 
 ---
 
