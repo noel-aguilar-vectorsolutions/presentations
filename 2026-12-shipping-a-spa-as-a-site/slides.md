@@ -92,14 +92,14 @@ The image is never run as a service: it holds the built files, and the Job copie
 
 | Phase | Produces | Who | Where |
 |---|---|---|---|
-| 1. Infrastructure | The site (bucket, distribution, function, DNS; the KeyValueStore for versioned), its SSM parameters, the publisher's role and ServiceAccount; the ECR repository | Product team, DevOps approves (unit); DevOps (ECR) | `<product>-infrastructure`; lvsf-infrastructure |
+| 1. Infrastructure | **Once per app and environment, not per release:** the site (bucket, distribution, function, DNS; the KeyValueStore for versioned), its SSM parameters, the publisher's role and ServiceAccount. The ECR repository, once per app | Product team, DevOps approves (unit); DevOps (ECR) | `<product>-infrastructure`; lvsf-infrastructure |
 | 2. App repository | A build that fits the method; `Dockerfile`; `helm/<app>/` | Product team | The app's repository |
 | 3. CI | The release image in ECR, built once per version | Product team | `.github/workflows/` |
 | 4. CD | The ArgoCD registration, once; then each promotion publishes a release | DevOps (registration); product team (promotions) | argo-app-of-apps; Promotion Manager UI |
 
 > Teams do most of this themselves, starting with the site unit in their own infrastructure repo.
 
-**Speaker notes:** ⏱ 1.5 min. The two DevOps steps: the ECR repository (one line in lvsf-infrastructure's repo_list.tf, in core-resources, us-east-2) and the ArgoCD registration (one argo-app-of-apps PR: the ApplicationSet and the promotion config). DevOps also approves the unit, through code owners on application/. Everything else is the product team's. An in-place app that ships its bundle inside its API image, as vs-skills does, needs no separate ECR repository: the Job reads the bundle from that image. Source: how-to "Who does what".
+**Speaker notes:** ⏱ 1.5 min. Phase 1 is setup, not part of every release: one site unit per app and environment (develop, staging, prod each get their own), and one ECR repository per app, shared by every environment. After that, a release is only phases 3 and 4. The two DevOps steps: the ECR repository (one line in lvsf-infrastructure's repo_list.tf, in core-resources, us-east-2) and the ArgoCD registration (one argo-app-of-apps PR: the ApplicationSet and the promotion config). DevOps also approves the unit, through code owners on application/. Everything else is the product team's. An in-place app that ships its bundle inside its API image, as vs-skills does, needs no separate ECR repository: the Job reads the bundle from that image. Source: how-to "Who does what".
 
 ---
 
