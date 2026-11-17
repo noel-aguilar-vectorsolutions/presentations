@@ -216,7 +216,7 @@
     <h1>GitHub Org Hardening</h1>
     <p class="big muted" style="font-weight:400">What changes, when, and what it asks of teams</p>
     <p class="muted">Noel Aguilar · DevOps<br><span style="font-size:.75em">November 2026</span></p>
-    <aside class="notes">⏱ 0.5 min. Introduce yourself. Fifteen minutes: about twelve of slides, then questions. This covers the organization-level security settings DevOps is changing in GitHub. The CI/CD changes themselves (paved road, versioning, release-please) are in the Moving to GitHub Actions session.</aside>
+    <aside class="notes">⏱ 0.5 min. Introduce yourself. About twenty-two minutes: the hardening plan, a short separate section on people, teams and access, then questions. This covers the organization-level security settings DevOps is changing in GitHub. The CI/CD changes themselves (paved road, versioning, release-please) are in the Moving to GitHub Actions session.</aside>
   </section>
 
   <section class="slide">
@@ -409,10 +409,120 @@
     <aside class="notes">⏱ 1.5 min. For leads: the only thing every person must do is set up 2FA. The rest is a short list of named repos, and each gets a report with the exact change. The 46 pinning repos and the 3 permissions repos are listed in the two team reports on Confluence, linked on this slide and on slide 5. The retiring actions are in survey-library, devsec and document-auditor. If a bot or job in your repo pushes straight to main (version bumps, generated files), tell us before the rule is switched on in November so we can move it to a PR or let its GitHub App through. A written announcement with the details goes out to teams. For leadership: these five numbers are what we'll report against; they come from the same scan we'll re-run after each change, so progress is measured, not assumed.</aside>
   </section>
 
+  <section class="slide title-slide brand">
+    <p class="kicker">A separate stream · proposed</p>
+    <h2 style="font-size:2.6em">People, teams and access</h2>
+    <p class="big muted" style="font-weight:400">Who can reach our code, and how they got that access</p>
+    <aside class="notes">⏱ 0.25 min. That's the hardening plan. This last part is a separate stream: who has access and how it's granted. It isn't part of the Q4 or Q1 plan, and nothing here has a ticket or a date yet. It's the direction DevOps proposes.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Where we are today · collected 2026-11-11</p>
+    <h2>Access grew one person at a time</h2>
+    <div class="cards stats">
+      <div class="card"><p class="stat">102 <span class="of">of 362</span></p><p>people's GitHub accounts don't follow our username standard. 20 look like personal accounts.</p></div>
+      <div class="card"><p class="stat">303 <span class="of">of 370</span></p><p>members get their access through one team, with read on about 290 repos and write on 64.</p></div>
+      <div class="card"><p class="stat">38%</p><p>of repo access is granted to individuals, not teams. Two-thirds of those grants are admin.</p></div>
+      <div class="card"><p class="stat">117</p><p>active repos have no team or person granted. Only org owners can reach them.</p></div>
+      <div class="card"><p class="stat">21 <span class="of">of 175</span></p><p>teams are unused: no members, or no access to anything active.</p></div>
+      <div class="card"><p class="stat">12</p><p>outside collaborators. Half look like our own staff, added to one repo instead of the org.</p></div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. These come from a read-only collection on 11 November, made as a GitHub App rather than with anyone's personal token. Usernames: the standard is firstname-lastname-vectorsolutions, with -ctr- for contractors. 102 of the 362 people don't match. Most are small slips (capital letters, -ctr at the end because that's where it goes in the email address, a typo), and those can be renamed in place. 20 have no company marker at all and read as personal accounts, including one org owner. The second number is the vector-engineering team: 303 people, including 55 contractors, get read on about 290 active repos and write on 64 through it. So the org's base permission is "none", but in practice almost everyone can read almost everything. Third: of about 2,700 grants on active repos, 38% go straight to a person rather than a team, and two-thirds of those are admin. That's mostly because whoever creates a repo becomes its admin. 117 active repos have no grant at all, so only the 16 owners can reach them. 21 teams are unused. And the 12 outside collaborators: six look like staff or contractors who were added to one repo instead of joining the org. None of this is anyone's fault: it's what GitHub's defaults produce over several years.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose <span class="pill">proposed · not yet planned</span></p>
+    <h2>Access through teams, on standard accounts</h2>
+    <div class="cards dense six">
+      <div class="card"><h3>Standard accounts</h3><p>About 80 people rename in place and keep their history. 20 accounts that look personal are replaced. Contractors are marked <code style="white-space:nowrap">-ctr</code>.</p></div>
+      <div class="card"><h3>One team pattern</h3><p>Per product: a dev team with write, and a maintainers team under it. Every team has a named owner, and every repo a CODEOWNERS file naming its team.</p></div>
+      <div class="card"><h3>Access through teams</h3><p>194 times, someone was added to a repo individually with access their team already gives them. Those go first, changing nothing. The rest move into product teams.</p></div>
+      <div class="card"><h3>Repos start with an owner</h3><p>You request a repo through a self-service front door, and an App creates it with its teams, CODEOWNERS and the baseline.</p></div>
+      <div class="card"><h3>Clean up</h3><p>Unused teams removed. Repos with no owner get an owning team, or are archived.</p></div>
+      <div class="card"><h3>Outside collaborators sponsored</h3><p>Staff become members. The rest get a named sponsor and an end date. A monthly check flags new ones.</p></div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. This is the direction, not a commitment: no epic, no dates. Standard accounts: a GitHub username can be changed in place, so most people keep everything, including their commit history; the 20 accounts that look personal need a new company account instead. We call them personal from the username alone, since GitHub doesn't show us the email behind an account; a few may turn out to be company accounts with the wrong name, and those just rename. One team pattern: each product gets a dev team with write, and a maintainers team under it with maintain; no team gets admin, which is the next slide. Read for everyone else comes from the org-wide engineering team, kept read-only. Every team has a named owner managing its members, which 30 teams lack today. CODEOWNERS: only 175 of 776 active repos have one today, so most repos have no named owner for review; every repo gets one, naming its team. Access through teams: 194 times, someone was added to a repo individually with access their team already gives them; for instance, added with write to a repo their team already has write on. Removing those changes nothing, so they go first. The other personal grants move into the product teams. Repos start with an owner: today any member can create a repo and becomes its admin, which is where most of the personal admin grants come from. Instead, the person who needs a repo requests it through a self-service front door, and an App creates it with its teams, a CODEOWNERS file and the baseline already in place. Nobody creates repos by hand, DevOps included. It's proposed, not built, and it's what the next two slides depend on. Clean-up: the unused teams, and the 117 repos nobody owns. Outside collaborators: on our GitHub plan we can't stop repo admins inviting them, so the control is sponsorship plus a monthly read-only check. What it will ask of people: rename an account if asked, and leads naming a maintainer for each team. Questions about this part are welcome now, but it'll come back as its own plan.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose · the access model <span class="pill">proposed · not yet planned</span></p>
+    <h2>Nobody gets repo admin, by default</h2>
+    <div class="two-col">
+      <div>
+        <h3>Who gets what</h3>
+        <table class="dense">
+          <thead><tr><th>Who</th><th>On repos</th></tr></thead>
+          <tbody>
+            <tr><td>Org owners (about 10)</td><td><strong>Admin</strong> on every repo, through their org role</td></tr>
+            <tr><td>All engineers</td><td>Read, through the org-wide engineering team</td></tr>
+            <tr><td>A product's dev team</td><td>Write on its repos</td></tr>
+            <tr><td>Its maintainers team</td><td>Maintain</td></tr>
+            <tr><td>A product's admins team</td><td>Admin, only on repos that deploy from GitHub, and only if needed</td></tr>
+            <tr><td>GitOps and infrastructure repos</td><td>Every merge approved by the owning team and DevOps</td></tr>
+            <tr><td>Individuals</td><td>Nothing directly; access comes through a team</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Admin-only, done on request</h3>
+        <ul class="dense">
+          <li>Granting access: people, teams, outside collaborators</li>
+          <li>Branch protection and rulesets</li>
+          <li>Deployment environments and their secrets</li>
+          <li>Webhooks and deploy keys</li>
+          <li>Visibility, archiving, deleting, transferring</li>
+        </ul>
+        <p class="callout dense">Maintainers keep the day-to-day: merging, releases, most settings, Actions secrets and deploys.</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. The default is that no team and no person gets admin on a repo. Org owners already have admin everywhere through their role, and Q1 brings them down to about ten. We're not proposing an org-admin team: it would be a second, less visible owner group. Maintain is the highest role a team normally gets. It covers what leads do every day: merging, releases, repo settings like merge options and topics, and Actions secrets and deploys, which only need write. What it can't do is exactly what went wrong in the findings: it can't grant access, so a maintainer can't add an outside collaborator; it can't weaken branch protection or rulesets; and it can't delete, archive, transfer or change visibility. Those, plus webhooks and deploy keys, become a request. The exception is deployment environments, which need admin. Most of our deploys go through GitOps, not Actions; only the Windows, GovCloud and Azure deploys run from Actions. Where one of those needs a team to manage its environment, the product gets a small admins team: one to three named people, admin only on the repos that deploy, and reviewed each quarter. DevOps sets the environments up as part of migrating those repos. GitOps and infrastructure repos are different: a merge there is a deploy or an infrastructure change. Today the main GitOps repos already require a code-owner review, but about 312 people can write to them, so the CODEOWNERS file is the real gate, and every merge needs the owning team and DevOps. On our plan there's no in-between role: custom repository roles need Enterprise Cloud, so it's maintain or admin.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose · getting there <span class="pill">proposed · not yet planned</span></p>
+    <h2>Three steps, so nobody is blocked</h2>
+    <div class="cards">
+      <div class="card"><h3>1. Admin moves into teams</h3><p>Personal grants fold into each product's teams. Maintainers keep admin for now, so nothing breaks.</p></div>
+      <div class="card"><h3>2. Build the request paths</h3><p>One front door, signed in with Okta, for new repos and access changes. Every repo gets a CODEOWNERS file.</p></div>
+      <div class="card"><h3>3. Drop to maintain</h3><p>Members can no longer create repos; only the App does. Maintainers drop to maintain; an admins team only where a deploy needs one.</p></div>
+    </div>
+    <p class="callout">The repo-creation App is the dependency. Step 3 waits until it works.</p>
+    <aside class="notes">⏱ 1.25 min. We don't take admin away first. Step one moves the roughly thousand admin grants on active repos, today spread across people and teams, into one maintainers team per product. Maintainers keep admin for now, so nobody loses the ability to do their job; the gain is that admin becomes a short, named list per product instead of a thousand scattered grants. Step two builds the request paths: one front door, an internal app behind AVA so people sign in with Okta, where you ask for a new repo or an access change. It doesn't change GitHub itself; it opens a pull request to the github-org-config repo, where our GitHub Apps are already managed, and after review a repo-creation App makes the change. That's also when every repo gets a CODEOWNERS file: the App adds one to every new repo, and existing repos get one through a pull request. Step three only happens once the App works: we turn off repo creation for members, which today makes every creator an admin, and maintainers drop to maintain. Products that deploy from Actions and need an environment get their small admins team then. While admin is still in place, a monthly read-only check flags new outside collaborators and new personal admin grants, so nothing grows back unseen. And the Q4 org rule already stops repo admins from removing the pull-request requirement on main.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose · joining and leaving <span class="pill">proposed · not yet planned</span></p>
+    <h2>Every GitHub account tied to an Okta identity</h2>
+    <div class="two-col">
+      <div>
+        <h3>One way in, one way out</h3>
+        <ul class="dense">
+          <li><strong>Joining:</strong> through the front door, signed in with Okta. It checks the username against the standard and records which Okta person owns which GitHub account.</li>
+          <li><strong>Leaving:</strong> when an Okta account is deactivated, the matching GitHub account is removed from the org.</li>
+          <li><strong>A daily check:</strong> flags anyone in GitHub with no Okta owner, and anyone whose Okta account is no longer active.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Not SSO, but most of the benefit</h3>
+        <table class="dense">
+          <thead><tr><th></th><th>SSO + SCIM<br><span class="muted">Enterprise Cloud</span></th><th>Front door<br><span class="muted">our Team plan</span></th></tr></thead>
+          <tbody>
+            <tr><td>Each account tied to a person in Okta</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Removed when someone leaves</td><td>Immediately</td><td>Within a day</td></tr>
+            <tr><td>Okta needed to sign in to GitHub</td><td class="yes">✓</td><td class="no">✗ GitHub login and 2FA</td></tr>
+            <tr><td>Extra licence cost</td><td>Yes</td><td>None</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="callout">Leaving Okta means leaving GitHub: within a day, not the moment the account is deactivated.</p>
+    <aside class="notes">⏱ 1.25 min. Today nothing removes a leaver from GitHub unless someone remembers; the security review rates that High. The usual fix is SSO plus SCIM. SSO makes you sign in to GitHub through Okta. SCIM is the standard way Okta creates and removes accounts in another system automatically: deactivate someone in Okta, and their account goes. On GitHub both need Enterprise Cloud, which isn't part of this plan. The front door gives us most of the SCIM half on the Team plan. Everyone joins through it, signed in with Okta, so we record which Okta person owns each GitHub account. When Okta deactivates someone, we know which GitHub account to remove. What it doesn't give us is the sign-in half: people still sign in to GitHub with their GitHub login and 2FA, so between deactivation and removal a leaver's account, tokens and SSH keys still work. A daily check keeps that to a day at first; an Okta hook can bring it down to minutes later. Two conditions make it hold. Everyone already in the org gets matched to their Okta identity once, which fits with the account renames. And the front door has to be the only way in: the daily check also flags anyone added another way, such as an owner inviting someone by hand or an admin adding an outside collaborator, and removing repo admin closes most of those paths.</aside>
+  </section>
+
   <section class="slide title-slide brand photo">
     <h2 style="font-size:2.6em">Questions?</h2>
     <p class="muted">Epic COREOPS-4617 · Team reports: <a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29594746887/GitHub+Actions+workflows+that+need+a+permissions+block">permissions</a> · <a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29595041793/GitHub+Actions+action+references+to+pin+to+a+commit+SHA">pinning</a><br>Sources are listed in this presentation's README.md</p>
-    <aside class="notes">⏱ 3 min. Likely questions: Will my pipeline break? Only if it's on one of the named lists, and you'll get the fix first. What about SSO or secret scanning? They need GitHub Enterprise Cloud, which isn't part of this plan; everything here runs on the Team plan we have. Does the org ruleset need an approval? Required approvals (0 or 1) is still being decided; the rule requires a PR either way. What if I need an action that isn't approved? Raise a COREOPS ticket.</aside>
+    <aside class="notes">⏱ 3 min. Likely questions: Will my pipeline break? Only if it's on one of the named lists, and you'll get the fix first. What about SSO or secret scanning? They need GitHub Enterprise Cloud, which isn't part of this plan; everything here runs on the Team plan we have. For leavers, the front door on the previous slide covers most of what SSO and SCIM would. Does the org ruleset need an approval? Required approvals (0 or 1) is still being decided; the rule requires a PR either way. What if I need an action that isn't approved? Raise a COREOPS ticket.</aside>
   </section>
 
 </main>

@@ -165,3 +165,166 @@ whether slides 5 and 6 use `.cards` or a table.
    and ruleset, and Dependabot per repo as it migrates. Should it be updated to match, separately?
 4. **Q1 items aren't in Jira yet.** Should the Q1 slide show them as "planned" (no tickets), or will
    you create a Q1 epic before presenting?
+
+---
+
+## Addendum (2026-11-11): people, teams and access, a separate stream
+
+**Decision (presenter, 2026-11-11):** the user, team and repo-access findings are a **separate
+stream**, not part of the Q4/Q1 hardening plan. They get their own section **after** the hardening
+slides and before Questions. Nothing in slides 1–8 changes to absorb them. If the stream later joins
+the plan, slides 4, 7 and 8 get adjusted then.
+
+### Intent
+
+Show the room the second problem: who has access, and how access is granted. Then show the
+direction DevOps proposes. Tone stays **inform**, but this part is explicitly **proposed**: no
+epic, no dates, no commitments. That keeps it apart from the Q4 work (ticketed) and the Q1 work
+(planned).
+
+### Structure and timing
+
+| # | Slide | ~Min |
+|---|---|---|
+| 9 | Section divider: *People, teams and access*, a separate stream, proposed | 0.25 |
+| 10 | **Where we are today**: six numbers, one each, in the style of slide 3 | 1.5 |
+| 11 | **What we propose**: six moves, in the style of slide 6, marked *proposed* | 1.5 |
+| 12 | **The access model: nobody gets repo admin, by default**: who gets which role, and what becomes a request | 1.5 |
+| 13 | **Getting there**: three steps, with the repo-creation App as the dependency | 1.25 |
+| 14 | **Joining and leaving, tied to Okta** (added 2026-11-12): the front door as a SCIM-like substitute on Team | 1.25 |
+| 15 | Questions (unchanged) | 3 |
+
+The section adds **about 7 minutes**, so the session runs **about 22 minutes**. Left over target on purpose:
+the presenter will trim later if needed. Slide 6 to 30 seconds, per the review, is the obvious first cut.
+
+### Content
+
+**Slide 10: where we are** (`analysis/people-2026-11-11`, collected 2026-11-11 as the read-only
+`vectorlearning-org-reader` GitHub App):
+
+| Number | What it says |
+|---|---|
+| 102 of 362 | human accounts don't follow the username standard; 20 look like personal accounts, including one org owner |
+| 303 of 370 | members get access through one team, `vector-engineering` (read on ~290 active repos, write on 64) |
+| 38% | of repo access goes to individuals, not teams; two-thirds of those grants are admin |
+| 117 | active repos with no team or person granted; only org owners can reach them |
+| 21 of 175 | teams are unused: no members, or no access to anything active |
+| 12 | outside collaborators; half look like our own staff added to a single repo |
+
+**Slide 11: what we propose:**
+
+- **Standard accounts:** about 80 rename in place, keeping their history; 20 personal accounts are
+  replaced; contractors are marked `-ctr`.
+- **One team pattern:** per product, a dev team with write, and a maintainers team under it. Every
+  team has a named owner, and **every repo has a CODEOWNERS file naming its team**. Today 175 of 776
+  active repos have one.
+- **Access through teams:** "194 times, someone was added to a repo individually with access their team
+  already gives them." Those go first and change nothing. The rest move into product teams.
+- **Repos start with an owner:** the requester asks through a self-service front door, and an App creates
+  each repo with its teams, CODEOWNERS and the baseline. Nobody creates repos by hand, DevOps included
+  (presenter, 2026-11-12).
+- **Clean up:** unused teams removed; ownerless repos get an owning team, or are archived.
+- **Outside collaborators sponsored:** staff become members; the rest get a named sponsor and an end
+  date; a monthly read-only check flags new ones.
+
+**Slide 12: the access model.** Added 2026-11-11 at the presenter's request ("call out that nobody gets
+repo admin"), then refined the same day:
+
+| Who | On repos |
+|---|---|
+| Org owners (about 10, after Q1) | Admin on every repo, through the org role |
+| All engineers | Read, through the org-wide engineering team (kept read-only) |
+| A product's dev team | Write |
+| Its maintainers team (child of dev) | Maintain |
+| A product's admins team | Admin, **only on repos that deploy from GitHub, and only if needed** |
+| GitOps and infrastructure repos | Every merge approved by the owning team and DevOps (CODEOWNERS) |
+| Individuals | Nothing directly |
+
+- **No org-admin team,** now or later.
+- **Admin-only, done on request:** granting access; branch protection and rulesets; deployment
+  environments and their secrets; webhooks and deploy keys; visibility, archiving, deleting,
+  transferring.
+- **Maintainers keep:** merging, releases, most settings, Actions secrets and deploys. Write is
+  enough for repo secrets and for running deploys.
+- **Deploys:** most go through **GitOps**, not Actions (Lambdas later through ACK). Only the
+  **Windows, GovCloud and Azure** deploys run from Actions. DevOps sets up their environments while
+  migrating them.
+- **Admins teams** have one to three named people, admin only on the deploying repos, created on
+  request with a recorded reason, and reviewed each quarter. The monthly check flags admin outside
+  them.
+- **GitOps and infrastructure repos:** a merge is a deploy. Today `argo-app-of-apps` and
+  `rendered-k8s-manifests` require a PR, 1 approval and code-owner review, but about 312 people can
+  write to them. `argo-app-of-apps-dev` requires no PR. Of 35 `*-infrastructure` repos, 32 require
+  at least 1 approval and 31 code-owner review.
+- **No in-between role on Team:** custom repository roles need Enterprise Cloud.
+
+**Slide 13: getting there:**
+
+1. **Admin moves into teams:** personal grants fold into each product's teams. The maintainers team
+   keeps **admin** for now, so nothing breaks. It is named `-maintainers` from day one, so only its
+   permission changes later.
+2. **Build the request paths:** one front door, an internal app behind AVA with Okta sign-in, for new
+   repos and access changes. It opens PRs to `github-org-config`; after review, a repo-creation App (a
+   separate App with write access) makes the change. Every repo gets a CODEOWNERS file: the App adds one
+   to new repos, and existing repos get one by PR.
+3. **Drop to maintain:** repo creation is turned off for members and only the App creates repos; maintainers drop to maintain; an admins team only
+   where a deploy needs one.
+
+Callout: *the repo-creation App is the dependency; step 3 waits until it works.* The interim risk,
+admins adding outside collaborators, is covered by the monthly check. The Q4 org ruleset still binds
+repo admins.
+
+**Slide 14: joining and leaving, tied to Okta** (added 2026-11-12, presenter's request):
+
+- Left: one way in (join through the front door; it checks the username standard and records which Okta
+  person owns which GitHub account), one way out (Okta deactivation removes the GitHub account), and a
+  daily check both ways (GitHub accounts with no Okta owner; Okta owners no longer active).
+- Right: a comparison with SSO + SCIM on Enterprise Cloud. Tied to Okta ✓ / ✓; removed when someone leaves:
+  immediately / within a day; Okta needed to sign in to GitHub ✓ / ✗; extra licence: yes / none.
+- Callout: leaving Okta means leaving GitHub, within a day rather than the moment the account is deactivated.
+- Notes explain SCIM in a sentence, state the gap honestly (tokens and SSH keys work until removal), and name
+  the two conditions: backfill existing members, and the front door is the only way in.
+- Framing: **not SSO**. It's the SCIM half (lifecycle), not the SSO half (sign-in). Don't call it SSO on a slide.
+
+### Anti-goals for this section
+
+- **No named individuals on slides.** Logins appear in the review, not the deck. Use counts only.
+- **No blame.** These gaps grew from open defaults and from creators becoming admins, not from
+  anyone's mistake.
+- **No dates or tickets.** Everything is *proposed*.
+
+### Sources (addendum)
+
+- CODEOWNERS coverage (175 of 776 active repos; 140 name only teams, 14 teams and people, 21 only people):
+  batched GraphQL for `.github/CODEOWNERS`, `CODEOWNERS` and `docs/CODEOWNERS` on every active repo, as
+  the App, 2026-11-11. Result in `analysis/people-2026-11-11/codeowners.json`
+- GitOps and IaC protection and writer counts: `rules/branches/<b>` and `branches/<b>/protection` per repo,
+  plus team and direct grants from `analysis/people-2026-11-11`, as the App, 2026-11-11. GitOps repos
+  identified from Argo and ACK manifests in the local clones (`~/workspaces/org-repos/VectorLearning`)
+- Which workflows use deployment environments (3 of 102 Actions repos): `data/2026-11-11/workflows.json`,
+  parsed as YAML
+- Deploy approach (GitOps for most; Actions only for Windows, GovCloud and Azure; Lambdas later through
+  ACK): Noel Aguilar, 2026-11-11
+
+- GitHub docs, [repository roles for an organization](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/repository-roles-for-an-organization):
+  Maintain ✗ / Admin ✓ for managing access, branch protection and rulesets, visibility, archiving,
+  deleting or transferring, webhooks and deploy keys. Write and above can manage Actions secrets
+- GitHub docs, [using secrets in GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions)
+  (repo secrets need `write`; environment secrets need `admin`) and
+  [managing environments](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment)
+  (configuring an environment needs `admin`)
+- GitHub docs, [about custom repository roles](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/about-custom-repository-roles):
+  Enterprise Cloud only
+
+- Self-service requests proposal (front door behind AVA, registry, offboarding): `~/workspaces/cowork/github-security-review/self-service-github-requests-proposal.md`
+- Security review finding 3 (no central deprovisioning, High) and SCIM `404` on Team: `github-org-security-review.md`
+- People, teams and access review: `~/workspaces/cowork/github-security-review/analysis/people-and-teams-review.md`
+- Data: `analysis/people-2026-11-11/` (`summary.json`), collected 2026-11-11 with
+  `scripts/collect_people.py` and `scripts/analyze_people.py`, as the `vectorlearning-org-reader` App
+
+### Open questions (addendum)
+
+5. **Same session or its own?** At about 22 minutes, keep it here, trim slide 6, or present the stream
+   separately?
+6. **Ownership:** who owns the people stream: DevOps alone, or with engineering managers? Renames and
+   team moves need managers' help.
