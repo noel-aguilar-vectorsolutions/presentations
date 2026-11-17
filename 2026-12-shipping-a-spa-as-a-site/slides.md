@@ -152,13 +152,13 @@ In both, a path whose last segment has no `.` is a client-side route and gets th
 
 *Two methods*
 
-- **In-place**: A plain build, and you don't need instant rollback. Or your build can't put the version in its URLs.
+- **In-place**: Your build stays as it is, served from the root, and you can live without instant rollback.
 
-- **Versioned**: Instant rollback, a release per hostname, or test environments sharing develop's distribution.
+- **Versioned**: One build change: the version in your URLs (Vite `base`, webpack `publicPath`). In return: instant rollback, a release per hostname, test environments sharing develop's distribution.
 
 > **Choose once.** Switching an existing site's method isn't supported: you'd stand up a new distribution.
 
-**Speaker notes:** ⏱ 1.5 min. The method is chosen once per site, with routing on modules/site; it's required and has no default, so every unit states it. Why you can't switch: the bucket layout, the viewer-request function and the publisher's permissions all differ between the two. Switching means a new site with the other method, then moving the hostnames. If you're unsure: versioned costs a build change (versioned URLs from RELEASE_VERSION) and gives you one-write rollback and a release per hostname. Source: how-to "Which to choose"; modules/site variables.tf, routing.
+**Speaker notes:** ⏱ 1.5 min. The method is chosen once per site, with routing on modules/site; it's required and has no default, so every unit states it. Why you can't switch: the bucket layout, the viewer-request function and the publisher's permissions all differ between the two. Switching means a new site with the other method, then moving the hostnames. It's a trade-off, not a capability: almost any modern build can put the version in its URLs with one setting (Vite base, webpack publicPath, Angular --deploy-url), set from RELEASE_VERSION as mfe-example does. The version has to be in the URL because the function picks the live version only when a page loads; a tab still open on the old release keeps fetching its own chunks by their versioned URLs after a promotion or rollback. The publisher refuses a versioned image whose index.html doesn't reference /releases/\<pkg>/\<version>/. The rare build that really can't, say hard-coded root paths or a service worker that must control the whole site, goes in-place. Source: how-to "Which to choose" and step 3; modules/site variables.tf, routing, and viewer-request-versioned.js.
 
 ---
 
