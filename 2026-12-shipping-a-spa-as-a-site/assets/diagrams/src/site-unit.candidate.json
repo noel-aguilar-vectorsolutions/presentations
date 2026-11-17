@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "What the site unit creates, per environment",
+    "locale": "en",
+    "output": "tmp/archify/site-unit.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "components": [
+    {
+      "id": "dns",
+      "type": "cloud",
+      "label": "DNS records",
+      "sublabel": "A/AAAA per hostname",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        140,
+        58
+      ]
+    },
+    {
+      "id": "dist",
+      "type": "cloud",
+      "label": "CloudFront",
+      "sublabel": "+ viewer-request function",
+      "pos": [
+        220,
+        60
+      ],
+      "size": [
+        170,
+        58
+      ]
+    },
+    {
+      "id": "bucket",
+      "type": "database",
+      "label": "Site bucket",
+      "sublabel": "S3",
+      "pos": [
+        460,
+        60
+      ],
+      "size": [
+        140,
+        58
+      ]
+    },
+    {
+      "id": "ssm",
+      "type": "backend",
+      "label": "SSM parameters",
+      "sublabel": "bucket, distribution_id",
+      "pos": [
+        40,
+        190
+      ],
+      "size": [
+        150,
+        58
+      ]
+    },
+    {
+      "id": "role",
+      "type": "security",
+      "label": "Publisher identity",
+      "sublabel": "IRSA role + <app>-site-publisher",
+      "pos": [
+        430,
+        190
+      ],
+      "size": [
+        200,
+        58
+      ]
+    },
+    {
+      "id": "kvs",
+      "type": "database",
+      "label": "KeyValueStore",
+      "sublabel": "host → version",
+      "pos": [
+        700,
+        60
+      ],
+      "size": [
+        150,
+        58
+      ]
+    },
+    {
+      "id": "cfg",
+      "type": "cloud",
+      "label": "/config/* behavior",
+      "sublabel": "per-host files",
+      "pos": [
+        880,
+        60
+      ],
+      "size": [
+        150,
+        58
+      ]
+    },
+    {
+      "id": "ssm2",
+      "type": "backend",
+      "label": "SSM, versioned",
+      "sublabel": "kvs_arn, retention",
+      "pos": [
+        880,
+        190
+      ],
+      "size": [
+        150,
+        58
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Both methods",
+      "wraps": [
+        "dns",
+        "dist",
+        "bucket",
+        "ssm",
+        "role"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Versioned only",
+      "wraps": [
+        "kvs",
+        "cfg",
+        "ssm2"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "dns-dist",
+      "from": "dns",
+      "to": "dist",
+      "variant": "emphasis"
+    },
+    {
+      "id": "dist-bucket",
+      "from": "dist",
+      "to": "bucket",
+      "label": "reads",
+      "variant": "emphasis"
+    },
+    {
+      "id": "dist-kvs",
+      "from": "dist",
+      "to": "kvs",
+      "label": "looks up the host",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "role-bucket",
+      "from": "role",
+      "to": "bucket",
+      "label": "writes",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "role-dist",
+      "from": "role",
+      "to": "dist",
+      "label": "in-place: invalidate",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "bottom"
+    },
+    {
+      "id": "role-kvs",
+      "from": "role",
+      "to": "kvs",
+      "label": "versioned: keys",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "bottom"
+    }
+  ]
+}

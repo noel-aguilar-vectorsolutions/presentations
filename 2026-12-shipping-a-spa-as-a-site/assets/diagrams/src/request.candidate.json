@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "How a request is served: in-place and versioned",
+    "locale": "en",
+    "output": "tmp/archify/request.html",
+    "quality_profile": "showcase",
+    "legend": { "mode": "hidden" }
+  },
+  "components": [
+    { "id": "req", "type": "external", "label": "GET /reports/42", "sublabel": "Host: app.develop…", "pos": [40, 125], "size": [150, 58] },
+    { "id": "ip_fn", "type": "cloud", "label": "Function", "sublabel": "a route → /index.html", "pos": [290, 50], "size": [170, 58] },
+    { "id": "ip_s3", "type": "database", "label": "Bucket root", "sublabel": "/index.html", "pos": [540, 50], "size": [160, 58], "tag": "empty: 404" },
+    { "id": "v_fn", "type": "cloud", "label": "Function", "sublabel": "looks up the Host", "pos": [290, 210], "size": [170, 58] },
+    { "id": "v_kvs", "type": "database", "label": "KeyValueStore", "sublabel": "app.develop… → 1.9.0", "pos": [540, 210], "size": [160, 58], "tag": "no key: 503" },
+    { "id": "v_s3", "type": "database", "label": "Bucket", "sublabel": "/releases/app/1.9.0/index.html", "pos": [780, 210], "size": [210, 58] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "In-place", "wraps": ["ip_fn", "ip_s3"] },
+    { "kind": "security-group", "label": "Versioned", "wraps": ["v_fn", "v_kvs", "v_s3"] }
+  ],
+  "connections": [
+    { "id": "req-ip", "from": "req", "to": "ip_fn", "variant": "emphasis", "fromSide": "top", "toSide": "left" },
+    { "id": "req-v", "from": "req", "to": "v_fn", "variant": "emphasis", "fromSide": "bottom", "toSide": "left" },
+    { "id": "ip-serve", "from": "ip_fn", "to": "ip_s3", "label": "serves", "variant": "emphasis" },
+    { "id": "v-lookup", "from": "v_fn", "to": "v_kvs", "label": "Host", "variant": "emphasis" },
+    { "id": "v-serve", "from": "v_kvs", "to": "v_s3", "label": "rewrite", "variant": "emphasis" }
+  ]
+}

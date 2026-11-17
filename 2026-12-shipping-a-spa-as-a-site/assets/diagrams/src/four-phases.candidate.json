@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Four phases to deliver a SPA as a site",
+    "locale": "en",
+    "output": "tmp/archify/four-phases.html",
+    "quality_profile": "showcase",
+    "legend": { "mode": "hidden" }
+  },
+  "lanes": [
+    { "id": "product", "label": "Product team" },
+    { "id": "devops", "label": "DevOps" }
+  ],
+  "phases": [
+    { "id": "p1", "label": "1 · Infrastructure", "fromCol": 0, "toCol": 0 },
+    { "id": "p2", "label": "2 · App repository", "fromCol": 1, "toCol": 1 },
+    { "id": "p3", "label": "3 · CI", "fromCol": 2, "toCol": 2 },
+    { "id": "p4", "label": "4 · CD", "fromCol": 3, "toCol": 4, "variant": "emphasis" }
+  ],
+  "mainPath": ["unit", "chart", "ci", "promote", "job"],
+  "nodes": [
+    { "id": "unit", "lane": "product", "col": 0, "type": "cloud", "label": "Site unit", "sublabel": "creates the site", "tag": "DevOps approves" },
+    { "id": "ecr", "lane": "devops", "col": 0, "type": "database", "label": "ECR repository", "sublabel": "<product>/<app>-site" },
+    { "id": "chart", "lane": "product", "col": 1, "type": "frontend", "label": "Build + chart", "sublabel": "helm/<app>" },
+    { "id": "ci", "lane": "product", "col": 2, "type": "backend", "label": "CI", "sublabel": "one release image" },
+    { "id": "reg", "lane": "devops", "col": 3, "type": "messagebus", "label": "Register", "sublabel": "ArgoCD + promotion" },
+    { "id": "promote", "lane": "product", "col": 3, "type": "messagebus", "label": "Promote", "sublabel": "Promotion Manager" },
+    { "id": "job", "lane": "product", "col": 4, "type": "messagebus", "label": "Publisher Job", "sublabel": "publishes the site" }
+  ],
+  "edges": [
+    { "id": "unit-outputs", "from": "unit", "to": "chart", "label": "outputs", "variant": "emphasis" },
+    { "id": "chart-build", "from": "chart", "to": "ci", "variant": "emphasis" },
+    { "id": "ci-tag", "from": "ci", "to": "promote", "label": "image tag", "variant": "emphasis" },
+    { "id": "argo-sync", "from": "promote", "to": "job", "label": "sync", "variant": "emphasis" },
+    { "id": "ecr-ci", "from": "ecr", "to": "ci", "variant": "default", "role": "branch" },
+    { "id": "reg-promote", "from": "reg", "to": "promote", "variant": "dashed", "role": "branch" }
+  ]
+}

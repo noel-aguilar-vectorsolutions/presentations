@@ -1,0 +1,166 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "What a release does: in-place and versioned",
+    "locale": "en",
+    "output": "tmp/archify/release.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "inplace",
+      "label": "In-place"
+    },
+    {
+      "id": "versioned",
+      "label": "Versioned"
+    }
+  ],
+  "mainPath": [
+    "v_upload",
+    "v_config",
+    "v_key",
+    "v_check",
+    "v_live"
+  ],
+  "nodes": [
+    {
+      "id": "ip_copy",
+      "lane": "inplace",
+      "col": 0,
+      "type": "backend",
+      "label": "Copy the build",
+      "sublabel": "nothing deleted yet"
+    },
+    {
+      "id": "ip_entry",
+      "lane": "inplace",
+      "col": 1,
+      "type": "backend",
+      "label": "Entry files",
+      "sublabel": "index.html, files: · no-cache"
+    },
+    {
+      "id": "ip_inval",
+      "lane": "inplace",
+      "col": 2,
+      "type": "cloud",
+      "label": "Invalidate /*",
+      "sublabel": "and wait for it"
+    },
+    {
+      "id": "ip_sweep",
+      "lane": "inplace",
+      "col": 3,
+      "type": "backend",
+      "label": "Sweep",
+      "sublabel": "files the build dropped"
+    },
+    {
+      "id": "ip_live",
+      "lane": "inplace",
+      "col": 4,
+      "type": "external",
+      "label": "Live",
+      "sublabel": "every hostname",
+      "icon": "success"
+    },
+    {
+      "id": "v_upload",
+      "lane": "versioned",
+      "col": 0,
+      "type": "backend",
+      "label": "Upload the folder",
+      "sublabel": "skipped if there"
+    },
+    {
+      "id": "v_config",
+      "lane": "versioned",
+      "col": 1,
+      "type": "backend",
+      "label": "Per-host config",
+      "sublabel": "env/<host>/<name>"
+    },
+    {
+      "id": "v_key",
+      "lane": "versioned",
+      "col": 2,
+      "type": "database",
+      "label": "Write the key",
+      "sublabel": "<host> → <version>"
+    },
+    {
+      "id": "v_check",
+      "lane": "versioned",
+      "col": 3,
+      "type": "security",
+      "label": "Check the page",
+      "sublabel": "else revert the keys",
+      "icon": "decision",
+      "tag": "≤ 180 s"
+    },
+    {
+      "id": "v_live",
+      "lane": "versioned",
+      "col": 4,
+      "type": "external",
+      "label": "Live",
+      "sublabel": "per hostname",
+      "icon": "success"
+    }
+  ],
+  "edges": [
+    {
+      "id": "ip-1",
+      "from": "ip_copy",
+      "to": "ip_entry",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ip-2",
+      "from": "ip_entry",
+      "to": "ip_inval",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ip-3",
+      "from": "ip_inval",
+      "to": "ip_sweep",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ip-4",
+      "from": "ip_sweep",
+      "to": "ip_live",
+      "variant": "emphasis"
+    },
+    {
+      "id": "v-1",
+      "from": "v_upload",
+      "to": "v_config",
+      "variant": "emphasis"
+    },
+    {
+      "id": "v-2",
+      "from": "v_config",
+      "to": "v_key",
+      "variant": "emphasis"
+    },
+    {
+      "id": "v-3",
+      "from": "v_key",
+      "to": "v_check",
+      "variant": "emphasis"
+    },
+    {
+      "id": "v-4",
+      "from": "v_check",
+      "to": "v_live",
+      "variant": "emphasis"
+    }
+  ]
+}

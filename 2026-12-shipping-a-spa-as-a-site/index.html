@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipping a SPA as a site</title>
+<style>
+  :root {
+    /* Vector Solutions brand, sampled from the 2026-08 offsite deck's backgrounds and logo */
+    --b-deep: #1a439b;
+    --b-mid: #2c61ad;
+    --b-cyan: #2581c4;
+    --b-teal: #439ab8;
+    --b-green: #81c089;
+    --b-line-green: #9cc66b;
+    --b-line-blue: #5ba4e0;
+    --brand-gradient: linear-gradient(62deg, var(--b-green) 0%, var(--b-teal) 13%, var(--b-cyan) 30%, var(--b-mid) 58%, var(--b-deep) 100%);
+
+    --bg: #ffffff;
+    --fg: #26323a;
+    --heading: var(--b-deep);
+    --muted: #5b6670;
+    --accent: #0076b8;
+    --surface: #eef4fa;
+    --border: #d3e0ee;
+    --ok: #2f8a48;
+    --bad: #c0392b;
+    --warn: #c25a1c;
+    --tint-green: #ebf5ea;
+    --motif-opacity: .55;
+    /* Footer from vector-template.pptx's slide master: logo, then the green-blue-light blue strip */
+    --logo: url("assets/vector-logo.png");
+    --footer-strip: linear-gradient(90deg, #96d448 0%, #293d9a 65.8%, #5ab7e6 100%);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1a35;
+      --fg: #e6edf6;
+      --heading: #a9cdf5;
+      --muted: #9fb0c4;
+      --accent: #5cb6f2;
+      --surface: #142a52;
+      --border: #26406d;
+      --ok: #7ccb8a;
+      --bad: #f0716a;
+      --warn: #f29a5c;
+      --tint-green: #16354a;
+      --motif-opacity: .35;
+      --logo: url("assets/vector-logo-white.png");
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
+
+  .deck { height: 100vh; width: 100vw; overflow: hidden; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column; justify-content: center;
+    padding: 6vh 8vw;
+    font-size: max(14px, min(2.2vw, 3.9vh));
+    line-height: 1.45;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+  /* Footer on every slide: the logo bottom left, the strip to its right, the counter at the right */
+  .slide {
+    padding-bottom: 11vh;
+    background-image: var(--logo), var(--footer-strip);
+    background-repeat: no-repeat;
+    background-size: 14.6vw auto, 76vw 1.9vh;
+    background-position: 1.3vw calc(100% - 1.3vh), 16.8vw calc(100% - 2.9vh);
+  }
+
+  .slide h1 { font-size: 2.4em; line-height: 1.1; margin: 0 0 .4em; letter-spacing: -0.02em; color: var(--heading); }
+  .slide h2 { font-size: 1.6em; line-height: 1.15; margin: 0 0 .6em; letter-spacing: -0.01em; color: var(--heading); }
+  .slide h3 { font-size: 1.1em; margin: 0 0 .3em; color: var(--accent); }
+  .slide p, .slide li { max-width: 60ch; }
+  .slide ul, .slide ol { padding-left: 1.2em; margin: 0; }
+  .slide li + li { margin-top: .4em; }
+  .slide a { color: var(--accent); }
+  .slide img { max-width: 100%; max-height: 60vh; object-fit: contain; }
+  .slide code { font-family: var(--mono); font-size: .85em; background: var(--surface); padding: .1em .3em; border-radius: 4px; }
+  .slide pre { font-family: var(--mono); font-size: .7em; background: var(--surface); border: 1px solid var(--border); padding: 1em; border-radius: 8px; overflow: auto; }
+
+  .title-slide { justify-content: center; }
+  .title-slide h1 { font-size: 3em; }
+  .muted { color: var(--muted); }
+  .big { font-size: 1.6em; font-weight: 600; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: start; }
+  .kicker { font-size: .55em; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8em; }
+  .dense { font-size: .62em; }
+  .dense p, .dense li { max-width: none; }
+  .slide table { border-collapse: collapse; width: 100%; }
+  .slide th, .slide td { text-align: left; vertical-align: top; padding: .4em .7em; border-bottom: 1px solid var(--border); }
+  .slide th { color: var(--heading); font-weight: 600; }
+  .slide thead th { background: var(--surface); color: var(--muted); border-bottom: 2px solid var(--border); }
+  .slide thead th:first-child { border-radius: 8px 0 0 0; }
+  .slide thead th:last-child { border-radius: 0 8px 0 0; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6vw; }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1em 1.1em; box-shadow: 0 6px 18px -12px rgba(26, 67, 155, .45); }
+  .card p { margin: .3em 0 0; }
+  .card h3 { margin: 0; }
+  .callout { background: linear-gradient(90deg, var(--surface), var(--tint-green)); border: 1px solid var(--border); padding: .6em 1em; border-radius: 12px; margin-top: 1em; max-width: none; }
+  .num { display: inline-grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--brand-gradient); color: #fff; font-weight: 700; font-size: .8em; margin-bottom: .5em; }
+  .pill { display: inline-block; font-size: .55em; font-weight: 600; padding: .2em .7em; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); vertical-align: middle; }
+  .pill.warn { color: var(--warn); border-color: currentColor; }
+  .yes { color: var(--ok); font-weight: 700; }
+  .no { color: var(--bad); font-weight: 700; }
+
+  /* Inline SVG diagrams: <svg class="diagram" viewBox="..."> with these classes, so they follow dark mode */
+  .diagram { width: 100%; height: auto; max-height: 46vh; }
+  .dg-box { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .dg-box.accent { stroke: var(--accent); }
+  .dg-text { fill: var(--fg); font-family: var(--font); font-size: 18px; }
+  .dg-small { fill: var(--muted); font-family: var(--font); font-size: 15px; }
+  .dg-mono { fill: var(--fg); font-family: var(--mono); font-size: 15px; }
+  .dg-line { stroke: var(--muted); stroke-width: 2.5; fill: none; }
+  .dg-line.accent { stroke: var(--accent); }
+  .dg-line.dashed { stroke-dasharray: 7 6; }
+  .dg-zone { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 8 6; }
+  .dg-dot { fill: var(--bg); stroke: var(--muted); stroke-width: 3; }
+  .dg-dot.accent { fill: var(--accent); stroke: var(--accent); }
+  .dg-arrowhead { fill: var(--muted); }
+  .dg-arrowhead.accent { fill: var(--accent); }
+
+  /* Rounded-diamond outlines: the motif from the brand backgrounds */
+  .slide::before {
+    content: ""; position: absolute; top: -10vw; right: -7vw; width: 28vw; height: 28vw; pointer-events: none; opacity: var(--motif-opacity);
+    background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke-width='3'%3E%3Crect x='95' y='95' width='210' height='210' rx='44' transform='rotate(45 200 200)' stroke='%239cc66b'/%3E%3Crect x='115' y='125' width='210' height='210' rx='44' transform='rotate(45 220 230)' stroke='%235ba4e0'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* Brand slides: gradient background, white text. Add .photo for the title background image. */
+  .slide.brand { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, var(--brand-gradient); color: #fff; }
+  .slide.brand::before { --motif-opacity: .85; top: -19vw; right: -13vw; width: 42vw; height: 42vw; }
+  .slide.brand.photo { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, #1a439b url("assets/brand-title.jpg") center / cover no-repeat; }
+  .slide.brand.photo::before { display: none; }
+  .slide.brand.photo > :not(.notes) { max-width: 52%; }
+  .slide.brand h1, .slide.brand h2, .slide.brand h3 { color: #fff; }
+  .slide.brand .muted { color: rgba(255, 255, 255, .82); }
+  .slide.brand .kicker { color: #cfeab0; }
+  .slide.brand code { background: rgba(255, 255, 255, .16); color: #fff; }
+  .slide.brand .card { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .3); box-shadow: none; backdrop-filter: blur(8px); }
+  .slide.brand .card .muted { color: #cfeab0; font-weight: 600; }
+  .slide.brand .callout { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .3); backdrop-filter: blur(8px); }
+  .slide.brand .num { background: #fff; color: var(--b-deep); }
+
+  .notes { display: none; }
+  /* Press N: the current slide's speaker notes in a panel at the bottom, for rehearsing */
+  body.show-notes .slide.active .notes {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto;
+    background: var(--surface); border-top: 2px solid var(--accent);
+    padding: 12px 8vw 28px; font-size: max(15px, .9vw); line-height: 1.5; color: var(--fg);
+  }
+
+  .counter { position: fixed; right: 1.3vw; bottom: calc(3.85vh - .65em); font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
+  body.on-brand .counter { color: rgba(255, 255, 255, .8); }
+
+  /* Click a slide's image to see it full size; click again or Esc to close. */
+  .slide img { cursor: zoom-in; }
+  dialog.zoom { padding: 0; border: 0; background: transparent; max-width: 96vw; max-height: 96vh; overflow: visible; cursor: zoom-out; }
+  dialog.zoom:focus, dialog.zoom:focus-visible { outline: none; }
+  dialog.zoom::backdrop { background: rgba(10, 20, 45, .82); }
+  dialog.zoom img { display: block; max-width: 96vw; max-height: 96vh; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+
+  @media (max-width: 700px) {
+    .slide { padding: 6vh 16px 11vh; font-size: 18px; }
+    .two-col, .cards, .cards.two { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { height: auto; }
+    .deck { height: auto; overflow: visible; }
+    .slide { position: relative; display: flex !important; width: 1280px; height: 720px; font-size: 26px; page-break-after: always; break-after: page; }
+    .counter { display: none; }
+    .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.show-notes .slide.active .notes { display: none; }
+  }
+  /* Additions for this deck */
+  .kicker.demo { color: var(--warn); }
+  /* Archify diagrams, exported as SVG in a light and a dark variant; <picture> follows the colour scheme */
+  .fig { margin: 0; }
+  .fig picture, .fig img { display: block; }
+  .fig img { width: 100%; height: auto; max-height: 46vh; object-fit: contain; object-position: left center; }
+  .slide .caption { font-size: .62em; color: var(--muted); margin: .7em 0 0; max-width: none; }
+  .slide pre { margin: 0; line-height: 1.4; }
+  .snip h3 { font-size: .8em; margin-bottom: .4em; }
+  .snip pre { font-size: .6em; }
+  .tight li + li { margin-top: .15em; }
+  .pill.ok { color: var(--ok); border-color: currentColor; }
+  .dense .pill { font-size: .9em; }  /* .55em of the body text, not of .dense */
+  .shots { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.6vw; align-items: start; }
+  .shots p { margin: 0 0 .5em; font-size: .6em; }
+  .shots img { display: block; width: 100%; max-height: 50vh; object-fit: contain; object-position: top left; border: 1px solid var(--border); border-radius: 10px; }
+  .placeholder { border: 2px dashed var(--border); border-radius: 12px; min-height: 16vh; text-align: center; padding: 4vh 1em 1em; color: var(--muted); font-size: .6em; }
+  /* The zoom dialog shows an SVG at its intrinsic size; let it fill the screen instead */
+  dialog.zoom img[src$=".svg"] { width: 96vw; height: auto; }
+  @media (max-width: 700px) { .shots { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main class="deck">
+
+  <!-- ============ Opening ============ -->
+
+  <section class="slide title-slide brand photo">
+    <p class="kicker">Site platform · COREOPS-4535</p>
+    <h1>Shipping a SPA as a site</h1>
+    <p class="big muted" style="font-weight:400">Four phases, two release methods, and which one to choose</p>
+    <p class="muted">Noel Aguilar · DevOps<br><span style="font-size:.75em">December 2026</span></p>
+    <aside class="notes">⏱ 0.5 min. For product dev teams and leads who build SPAs and MFE host shells, and for DevOps. You know CI/CD, ArgoCD and AWS; what's new is modules/site, the site-release chart, KeyValueStore routing and a few names. About 38 minutes, a live demo in the middle, then questions.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Today</p>
+    <h2>What you'll leave with</h2>
+    <div class="cards two">
+      <div class="card"><span class="num">1</span><h3>The order of the work</h3><p>Four phases, what each one hands to the next.</p></div>
+      <div class="card"><span class="num">2</span><h3>Who owns each step</h3><p>Most of it is yours; DevOps does two steps and approves the unit.</p></div>
+      <div class="card"><span class="num">3</span><h3>Which method fits your app</h3><p>In-place or versioned, and why you choose once.</p></div>
+      <div class="card"><span class="num">4</span><h3>Where the details live</h3><p>The how-to has every step; this deck is the map.</p></div>
+    </div>
+    <aside class="notes">⏱ 1 min. Set expectations: this isn't the how-to read aloud. It's the order, the owners, the choice, and the few lines of config where the choice shows. Everything else is in the how-to, which we point to at the end. Two worked examples run through the deck: SDS for in-place and mfe-example for versioned. Both are live.</aside>
+  </section>
+
+  <!-- ============ What a site is ============ -->
+
+  <section class="slide">
+    <p class="kicker">What a site is</p>
+    <h2>A site is a hostname-rooted static origin</h2>
+    <div class="two-col">
+      <div>
+        <ul>
+          <li>A <strong>CloudFront distribution, an S3 bucket and a viewer-request function</strong>, plus DNS and the publisher's identity</li>
+          <li>Created by <code>modules/site</code> for <strong>one app in one environment</strong></li>
+          <li>It doesn't care what the files are</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Delivered as a site today</h3>
+        <ul class="tight">
+          <li><span class="yes">✓</span> An SPA</li>
+          <li><span class="yes">✓</span> An MFE host shell whose MFEs ship in the same release (mfe-example)</li>
+        </ul>
+        <h3 style="margin-top:.8em">Not a site</h3>
+        <ul class="tight">
+          <li><span class="no">✗</span> A frontend that runs as a pod: an EKS workload</li>
+          <li><span class="no">✗</span> Independently released MFEs: <span class="pill">coming</span></li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 2 min. Four words, one line each. A frontend is what a team builds: browser code, however it's hosted. An SPA is a standalone frontend: it owns a hostname and users go to it directly. An MFE is loaded into an existing site at runtime and never has a hostname of its own. A site is where an SPA is published: a hostname-rooted static origin on S3 and CloudFront. The site module doesn't know or care whether it holds an SPA, a Storybook or three HTML files. Today an SPA, or a shell whose MFEs ship in the same release, like mfe-example, is delivered as a site. A frontend that runs as a pod, like scheduling-frontend, is delivered like any EKS workload. Independently released MFEs on the shared CDN are a follow-on epic, not built yet; last content slide. Source: strategy §4.0–4.2.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What a site is</p>
+    <h2>One noun all the way through</h2>
+    <div class="dense">
+      <table>
+        <thead><tr><th>What</th><th>Pattern</th><th>mfe-example (versioned, develop)</th><th>SDS (in-place, test1)</th></tr></thead>
+        <tbody>
+          <tr><td>ECR repository</td><td><code>&lt;product&gt;/&lt;app&gt;-site</code></td><td><code>examples/mfe-example-site</code></td><td><code>sds/sds-site</code></td></tr>
+          <tr><td>Terraform unit</td><td><code>application/&lt;app&gt;-site</code></td><td><code>application/mfe-example-site</code></td><td><code>application/sds-site</code></td></tr>
+          <tr><td>Hostname</td><td><code>&lt;app&gt;.&lt;env&gt;.vsp-&lt;account&gt;.com</code></td><td><code>mfe-example.develop.vsp-nonprod.com</code></td><td><code>test1.vectorsds-nonprod.com</code></td></tr>
+          <tr><td>SSM prefix</td><td><code>/&lt;product&gt;/&lt;env&gt;/site/&lt;app&gt;</code></td><td><code>/terragrunt-demo/dev/site/mfe-example</code></td><td><code>/sds/test1/site</code></td></tr>
+          <tr><td>Publisher ServiceAccount</td><td><code>&lt;app&gt;-site-publisher</code></td><td><code>mfe-example-site-publisher</code></td><td><code>sds-site-publisher</code></td></tr>
+          <tr><td>Site chart</td><td><code>helm/&lt;app&gt;</code></td><td><code>helm/mfe-example</code></td><td><code>src/helm/sds-site</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout"><code>-site</code> means a data-only image: <strong>published, never run</strong>. A frontend that runs as a pod doesn't carry <code>-site</code>.</p>
+    <aside class="notes">⏱ 1.5 min. The point: one noun, site, all the way through, so the same name always means the same thing. Walk the mfe-example column; it follows the pattern exactly. SDS differs in three places, and that's expected, not the rule: it's the product's only site, so app and product are the same name and its SSM prefix has no app level; and its hostname is on SDS's own product domain rather than vsp-nonprod.com. The -site suffix on an ECR repository tells you the image holds files and is never run: no server, no port, no Deployment. Also: the ApplicationSet is &lt;app&gt;-appset and the Argo app &lt;env&gt;-&lt;app&gt;, e.g. develop-mfe-example. Sources: how-to "Names"; SDS's sds-infrastructure and src/helm/sds-site.</aside>
+  </section>
+
+  <!-- ============ The four phases ============ -->
+
+  <section class="slide">
+    <p class="kicker">The four phases</p>
+    <h2>Four phases, in this order</h2>
+    <figure class="fig">
+      <picture>
+        <source srcset="assets/diagrams/four-phases-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="assets/diagrams/four-phases-light.svg" alt="Four phases in two lanes, Product team and DevOps. Phase 1, infrastructure: the product team's site unit creates the site, DevOps approves it; DevOps creates the ECR repository. Phase 2, app repository: build and chart, helm/app, fed by the unit's outputs. Phase 3, CI: builds one release image into the ECR repository. Phase 4, CD: DevOps registers the site with ArgoCD and the Promotion Manager once; each promotion passes the image tag to the Promotion Manager, and ArgoCD's sync runs the publisher Job, which publishes the site.">
+      </picture>
+    </figure>
+    <p class="caption">The image is never run as a service: it holds the built files, and the Job copies them out.</p>
+    <aside class="notes">⏱ 2 min. Left to right. Phase 1 creates the site and the ECR repository; the unit's outputs (the SSM prefix, the ServiceAccount, the hostnames and, for versioned, release_name) fill in the chart in phase 2. Phase 3 turns the build into one release image. Phase 4 renders the chart with that image's tag and runs a Job in the cluster that publishes the files to the site. Two things that make a site different from an EKS workload: the image is never run as a service, and the same chart, ApplicationSet and Promotion Manager deliver both methods. The method is set twice and must match: routing in the Terraform, and the values block in the chart. Source: how-to "The four phases".</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">The four phases</p>
+    <h2>Who does what</h2>
+    <div class="dense">
+      <table>
+        <thead><tr><th>Phase</th><th>Produces</th><th>Who</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td>1. Infrastructure</td><td>The site (bucket, distribution, function, DNS; the KeyValueStore for versioned), its SSM parameters, the publisher's role and ServiceAccount; the ECR repository</td><td>Product team, DevOps approves (unit); DevOps (ECR)</td><td><code>&lt;product&gt;-infrastructure</code>; lvsf-infrastructure</td></tr>
+          <tr><td>2. App repository</td><td>A build that fits the method; <code>Dockerfile</code>; <code>helm/&lt;app&gt;/</code></td><td>Product team</td><td>The app's repository</td></tr>
+          <tr><td>3. CI</td><td>The release image in ECR, built once per version</td><td>Product team</td><td><code>.github/workflows/</code></td></tr>
+          <tr><td>4. CD</td><td>The ArgoCD registration, once; then each promotion publishes a release</td><td>DevOps (registration); product team (promotions)</td><td>argo-app-of-apps; Promotion Manager UI</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout">Teams do most of this themselves, starting with the site unit in their own infrastructure repo.</p>
+    <aside class="notes">⏱ 1.5 min. The two DevOps steps: the ECR repository (one line in lvsf-infrastructure's repo_list.tf, in core-resources, us-east-2) and the ArgoCD registration (one argo-app-of-apps PR: the ApplicationSet and the promotion config). DevOps also approves the unit, through code owners on application/. Everything else is the product team's. An in-place app that ships its bundle inside its API image, as vs-skills does, needs no separate ECR repository: the Job reads the bundle from that image. Source: how-to "Who does what".</aside>
+  </section>
+
+  <!-- ============ Two methods ============ -->
+
+  <section class="slide">
+    <p class="kicker">Two methods</p>
+    <h2>In-place replaces files; versioned moves a pointer</h2>
+    <figure class="fig">
+      <picture>
+        <source srcset="assets/diagrams/release-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="assets/diagrams/release-light.svg" alt="What a release does. In-place: copy the build with nothing deleted yet, write the entry files index.html and the files: entries no-cache, invalidate /* and wait for it, sweep the files the build dropped, then every hostname is live on the new build. Versioned: upload the release folder, skipped if it's already there; write the per-host config env/host/name; write the KeyValueStore key host to version; check the page names the new version, up to 180 seconds, else revert the keys; then live per hostname.">
+      </picture>
+    </figure>
+    <p class="caption">In-place: about a minute, one build for every hostname. Versioned: one key write per hostname, 30–40 s to reach the edge, no invalidation.</p>
+    <aside class="notes">⏱ 2.5 min. In-place: the publisher Job replaces the files at the root of the bucket, in an order that keeps pages already open working: copy first, nothing deleted; then index.html and the files: entries, no-cache; then invalidate /* and wait; and only then sweep what the new build doesn't have. About a minute end to end. Versioned never touches a published release: it adds releases/&lt;pkg&gt;/&lt;version&gt;/ (or finds it there already), writes each host's config, then moves each hostname's pointer in the KeyValueStore. Then it checks through CloudFront that the page names the new version, for up to 180 seconds; if a host doesn't, it puts the old keys back and the Job fails. The 30–40 seconds for a key to reach the edge is what we measured on develop. Source: how-to "What a release does".</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Two methods</p>
+    <h2>How a request is served</h2>
+    <figure class="fig">
+      <picture>
+        <source srcset="assets/diagrams/request-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="assets/diagrams/request-light.svg" alt="A request GET /reports/42 with Host app.develop. In-place: the viewer-request function sees a route and serves /index.html from the bucket root; an empty bucket gives 404. Versioned: the function looks up the Host in the KeyValueStore, app.develop maps to 1.9.0, and rewrites to /releases/app/1.9.0/index.html in the bucket; no key gives 503.">
+      </picture>
+    </figure>
+    <p class="caption">In both, a path whose last segment has no <code>.</code> is a client-side route and gets the page.</p>
+    <aside class="notes">⏱ 1.5 min. In-place serves the one page at the root of the bucket. Versioned rewrites every path into the hostname's live release, so two hostnames on one distribution can serve two different releases; that's what makes test environments as alias hosts possible, later. Before the first release, an in-place site answers 404 (the bucket is empty) and a versioned one 503 "site not released" (the hostname has no key yet). Both are expected: they're the check that phase 1 worked. Source: how-to "How a request is served"; modules/site viewer-request-in-place.js and viewer-request-versioned.js.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Two methods</p>
+    <h2>Side by side</h2>
+    <div class="dense">
+      <table>
+        <thead><tr><th></th><th>In-place</th><th>Versioned</th></tr></thead>
+        <tbody>
+          <tr><th>Going live</th><td>Copy, invalidate, sweep: about a minute</td><td>One KeyValueStore write per hostname, no invalidation</td></tr>
+          <tr><th>Rolling back</th><td>Promote the earlier image: a full release</td><td>Promote the earlier version: one key write</td></tr>
+          <tr><th>Release check</th><td>None yet</td><td>Checks each host, reverts the key if not</td></tr>
+          <tr><th>Hostnames</th><td>One build for every hostname</td><td>Each hostname on its own release</td></tr>
+          <tr><th>Runtime config</th><td><code>files:</code> next to the build, e.g. <code>/config.json</code></td><td><code>files:</code> per hostname, at <code>/config/&lt;name&gt;</code></td></tr>
+          <tr><th>Build and image tag</th><td>A plain build; any tag</td><td>Versioned URLs; <code>X.Y.Z</code> only</td></tr>
+          <tr><th>Old releases</th><td>Only the current build</td><td>Kept; retention keeps at least 10</td></tr>
+          <tr><th>Before the first release</th><td><code>404</code></td><td><code>503 site not released</code></td></tr>
+          <tr><th><code>modules/site</code> · chart block</th><td><code>routing = "in-place"</code> · <code>inPlace:</code></td><td><code>routing = "versioned"</code> · <code>site:</code></td></tr>
+          <tr><th>Example</th><td>SDS (and vs-skills)</td><td>mfe-example</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <aside class="notes">⏱ 1.5 min. Don't read the table; pick three rows. Rolling back: a full release for in-place, one key write for versioned. Build and tag: in-place takes any build and any tag, even a branch build to the lowest environment; versioned needs the build to put the version in its own URLs and to be tagged X.Y.Z. Old releases: in-place keeps only the current build, with replaced files kept 90 days as S3 object versions; versioned keeps old release folders, never deletes a live one, keeps at least the last 10, and deletion is off by default. modules/site: in-place is v1.0.0 and later; versioned is v1.1.0, being finalized. Source: how-to "Side by side"; proposed-standards 7.6.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Two methods</p>
+    <h2>Which to choose</h2>
+    <div class="cards two">
+      <div class="card">
+        <h3>In-place</h3>
+        <p>A plain build, and you don't need instant rollback. Or your build can't put the version in its URLs.</p>
+      </div>
+      <div class="card">
+        <h3>Versioned</h3>
+        <p>Instant rollback, a release per hostname, or test environments sharing develop's distribution.</p>
+      </div>
+    </div>
+    <p class="callout"><strong>Choose once.</strong> Switching an existing site's method isn't supported: you'd stand up a new distribution.</p>
+    <aside class="notes">⏱ 1.5 min. The method is chosen once per site, with routing on modules/site; it's required and has no default, so every unit states it. Why you can't switch: the bucket layout, the viewer-request function and the publisher's permissions all differ between the two. Switching means a new site with the other method, then moving the hostnames. If you're unsure: versioned costs a build change (versioned URLs from RELEASE_VERSION) and gives you one-write rollback and a release per hostname. Source: how-to "Which to choose"; modules/site variables.tf, routing.</aside>
+  </section>
+
+  <!-- ============ Phase by phase ============ -->
+
+  <section class="slide">
+    <p class="kicker">Phase 1 · Infrastructure</p>
+    <h2>The unit creates the site and hands off through SSM</h2>
+    <figure class="fig">
+      <picture>
+        <source srcset="assets/diagrams/site-unit-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="assets/diagrams/site-unit-light.svg" alt="What the site unit creates per environment. Both methods: DNS records, A and AAAA per hostname, pointing at CloudFront with its viewer-request function, which reads the site bucket; SSM parameters bucket and distribution_id; the publisher identity, an IRSA role and the app-site-publisher ServiceAccount, which writes the bucket and, in-place, invalidates the distribution. Versioned only: the KeyValueStore mapping host to version, which the function looks up and the publisher writes; the /config/* behavior for per-host files; SSM kvs_arn and retention.">
+      </picture>
+    </figure>
+    <pre style="margin-top:.8em">source  = "…//modules/site?ref=site-v1.1.0"
+routing = "versioned"   # or "in-place"; required, no default</pre>
+    <p class="caption">Check: every hostname answers <code>404</code> (in-place) or <code>503 site not released</code> (versioned).</p>
+    <aside class="notes">⏱ 2.5 min. Follow "Create a site unit" in infrastructure-standards; it's linked from the how-to. Start with the lowest environment. The unit calls modules/site with the method you chose. Everything in the left box exists for both methods; the right box only for versioned. The hand-off to the chart is SSM: the publisher Job reads the bucket and distribution id (and for versioned the KeyValueStore ARN and retention) at run time, so no resource id is ever copied into Helm values. The publisher's identity is an IRSA role and its ServiceAccount in your namespace. Note what phase 2 needs: the SSM prefix, the ServiceAccount name, the hostnames and, for versioned, release_name. The snippet shows site-v1.1.0 for versioned; that tag is being finalized, and in-place uses site-v1.0.0 today (SDS does). Source: how-to step 2; modules/site README.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Phase 2 · App repository</p>
+    <h2>The build fits the method; one values block says which</h2>
+    <ul class="dense tight">
+      <li><strong>The image holds no environment values.</strong> Browser config goes in <code>files:</code>, and it's public: never a secret.</li>
+      <li><strong>Versioned:</strong> the build writes <code>/releases/&lt;pkg&gt;/&lt;version&gt;/</code> into its URLs, from <code>RELEASE_VERSION</code>. <strong>In-place:</strong> a plain build, <code>index.html</code> at the top.</li>
+      <li><code>helm/&lt;app&gt;/</code> depends on <code>site-release</code>, <strong>pinned to an exact version</strong>, with <code>Chart.lock</code> committed.</li>
+    </ul>
+    <div class="two-col" style="margin-top:.8em;gap:2vw">
+      <div class="snip">
+        <h3>Versioned · mfe-example</h3>
+<pre>siteRelease:
+  serviceAccountName: mfe-example-site-publisher
+  files:
+    mfe-demo-config.js: { API_URL: /api }
+  site:
+    pkg: mfe-example
+    hosts: [mfe-example.develop.vsp-nonprod.com]
+    ssmPrefix: /terragrunt-demo/dev/site/mfe-example</pre>
+      </div>
+      <div class="snip">
+        <h3>In-place · SDS</h3>
+<pre>siteRelease:
+  serviceAccountName: sds-site-publisher
+  files:
+    config.json: { apiBase: "", … }
+  inPlace:
+    target: "."
+    sourcePath: /release/site
+    ssmPrefix: /sds/test1/site
+    noCache: [sw.js]</pre>
+      </div>
+    </div>
+    <aside class="notes">⏱ 3 min. The release image is the contract between the app and the publisher. One rule for both: no environment value in the image; anything the browser reads at run time, like an API URL, goes in the chart's files:, which the Job writes and serves. mfe-example's file is served at /config/mfe-demo-config.js; SDS's at /config.json, no-cache. Versioned asks more of the build: URLs to the site's own files are host-relative, /releases/&lt;pkg&gt;/&lt;version&gt;/…, written by the build from RELEASE_VERSION (webpack publicPath or the import map, Vite base); app code never derives URLs from its own version. In-place takes a plain build with index.html at the top of sourcePath; SDS's is /release/site, and noCache lists its service worker, which has a fixed name. The values have exactly one block, site: or inPlace:, matching routing; the render fails with neither, both, or a key the block doesn't know. Both are merged values.yaml plus envs/values-&lt;namespace&gt;.yaml, trimmed. mfe-example pins site-release 0.3.1; SDS pins 0.3.0. Source: how-to steps 3–4; mfe-example helm/mfe-example; sds src/helm/sds-site.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Phase 3 · CI</p>
+    <h2>Build the release image once, on main</h2>
+    <figure class="fig">
+      <picture>
+        <source srcset="assets/diagrams/ci-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="assets/diagrams/ci-light.svg" alt="CI on main: push to main, compute the version X.Y.Z, check whether the tag is already in ECR; if yes, skip and never push over a release; if no, build (versioned with RELEASE_VERSION), check the build's entry files name the release folder, and push the image to product/app-site.">
+      </picture>
+    </figure>
+    <ul class="dense tight" style="margin-top:.8em">
+      <li>Every environment releases the same image; nothing is rebuilt per environment.</li>
+      <li><strong>Versioned</strong> takes only <code>X.Y.Z</code>, so a branch image can never be released. <strong>In-place</strong> takes any tag: SDS releases a build tag such as <code>main-&lt;run&gt;</code>, or a release version.</li>
+    </ul>
+    <aside class="notes">⏱ 1.5 min. Build once, on main. Skip a version already in ECR: ECR tags are mutable, so CI must never push over a release tag. For versioned, RELEASE_VERSION is set for the release build only, so the build writes dist/&lt;version&gt;/ with versioned URLs; local builds and previews are unchanged. The base image needs sh, cp, find, sort, sha256sum and cut, because the Job runs it as an init container that copies the files out: mfe-example uses busybox 1.38.0, pinned by digest. References: mfe-example's ci.yml, job "Build and publish image", for versioned; SDS's ci.yml for in-place. Source: how-to step 5.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Phase 4 · CD</p>
+    <h2>Register once; every promotion publishes</h2>
+    <figure class="fig">
+      <picture>
+        <source srcset="assets/diagrams/cd-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="assets/diagrams/cd-light.svg" alt="Each promotion: promote, automatically on the lowest environment; the Promotion Manager renders helm/app with the tag and commits the environment's manifests, a ConfigMap and a Job, to the manifests repo; ArgoCD syncs env-app and runs the publisher Job as a Sync hook; the Job publishes the site, in-place or versioned. If the Job fails, ArgoCD retries twice, about 12 minutes at most.">
+      </picture>
+    </figure>
+    <ul class="dense tight" style="margin-top:.8em">
+      <li><strong>Register once</strong> (DevOps, one argo-app-of-apps PR): the ApplicationSet, with <code>retry.limit: 2</code>, and the promotion config. Auto-deploy only on the lowest environment.</li>
+      <li><strong>Promote the first release by hand</strong>: versions pushed before the config existed aren't deployed automatically.</li>
+    </ul>
+    <aside class="notes">⏱ 2 min. Same for both methods; only what the Job does differs. The Promotion Manager renders your chart with the image tag and commits the environment's manifests, a ConfigMap and a Job, to the rendered-manifests repo; ArgoCD syncs &lt;env&gt;-&lt;app&gt; and runs the &lt;env&gt;-&lt;app&gt;-site-release Job. Why retry.limit 2: a failed versioned attempt puts the failing release live for its check (up to 180 s) before reverting, and ArgoCD runs one operation per app at a time; two retries keep a failure to about 12 minutes, where ArgoCD's default of 5 took over 40. Higher environments are promoted by hand. The Promotion Manager's writer identity must be able to push to the manifests repo, or the first promotion fails at the push. Then check: the manifests commit, the Argo app, the Job log ending in "serves &lt;version&gt;" or "released &lt;version&gt;", and the site. Source: how-to steps 6–7.</aside>
+  </section>
+
+  <!-- ============ Demo ============ -->
+
+  <section class="slide">
+    <p class="kicker demo">Demo · live</p>
+    <h2>Roll back, then forward, on develop</h2>
+    <ol>
+      <li>The footer shows the current version</li>
+      <li>Promotion Manager: promote <strong>1.9.0</strong> to develop</li>
+      <li>ArgoCD runs <code>develop-mfe-example-site-release</code></li>
+      <li>The Job finds the folder, moves the key, and checks: <code>serves 1.9.0</code></li>
+      <li>Reload: the footer shows 1.9.0. Then promote the newer version again.</li>
+    </ol>
+    <p class="caption"><a href="https://mfe-example.develop.vsp-nonprod.com/">mfe-example.develop.vsp-nonprod.com</a></p>
+    <aside class="notes">⏱ 5 min. Before the session: a release newer than 1.9.0 must be live on develop (any merge to mfe-example main auto-deploys one), because 1.9.0 is the first release with the version in the footer. Tabs open: the site, the Promotion Manager, ArgoCD on develop-mfe-example, and a terminal with: kubectl --namespace develop logs job/develop-mfe-example-site-release -c release -f. Click path: (1) show the footer on the newer version. (2) Promotion Manager, mfe-example-appset, develop: promote 1.9.0. (3) ArgoCD: develop-mfe-example syncs and runs the Job. (4) Job log: the upload is skipped because the folder is already there, the key changes, "still waiting" every 15 seconds while the edge catches up, then "serves 1.9.0"; the key takes 30–40 s to reach the edge. (5) Reload the site: footer 1.9.0. That was the rollback: one key write. (6) Promote the newer version again and show the footer move forward. If anything stalls: go to the next slide. If a sync hangs, terminate the operation on develop-mfe-example in ArgoCD.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker demo">Demo · backup</p>
+    <h2>What the demo shows</h2>
+    <div class="shots">
+      <div>
+        <p class="muted">The site's footer names its release</p>
+        <img src="assets/demo-mfe-example-1.9.0.png" alt="The bottom of the mfe-example home page on develop: the end of the Getting started card, with Version 1.9.0 under it">
+        <p class="muted" style="margin-top:1em">The Job's log, a versioned release</p>
+<pre style="font-size:.55em">[site-release] publishing …/examples/mfe-example-site:1.5.0 …
+[site-release] mfe-example.develop.vsp-nonprod.com: still waiting,
+               HTTP 200, the page loads 1.4.1 (15s)
+[site-release] mfe-example.develop.vsp-nonprod.com serves 1.5.0
+               (30s after the key changed)
+[site-release] retention: candidates for deletion []</pre>
+      </div>
+      <div>
+        <p class="muted">The promotion</p>
+        <div class="placeholder">Promotion Manager: promote 1.9.0 to develop<br>(screenshot from rehearsal)</div>
+        <p class="muted" style="margin-top:1em">The sync</p>
+        <div class="placeholder">ArgoCD: develop-mfe-example, the site-release Job<br>(screenshot from rehearsal)</div>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0 min (only if the live demo fails; it replaces the previous slide). Click a screenshot to show it full size. The footer shot is develop on 1.9.0, taken 2026-11-17. The log lines are from the how-to's example, a release of 1.5.0 on 2026-11-11 (timestamps trimmed): "still waiting" while the edge still serves the old page, then "serves" 30 seconds after the key changed, then retention, which only logs while deletion is off. The two placeholders are for screenshots from the rehearsal: the promotion in the Promotion Manager, and the Argo app with its Job.</aside>
+  </section>
+
+  <!-- ============ After the first release ============ -->
+
+  <section class="slide">
+    <p class="kicker">After the first release</p>
+    <h2>Rollback and failed releases</h2>
+    <div class="two-col">
+      <div>
+        <h3>Rolling back</h3>
+        <ul class="tight">
+          <li>Promote the earlier version, or revert its manifests commit</li>
+          <li><strong>Versioned:</strong> the folder is still there, so only the key changes</li>
+          <li><strong>In-place:</strong> a full release of the earlier image: copy, invalidate, sweep</li>
+        </ul>
+      </div>
+      <div>
+        <h3>When a release fails</h3>
+        <ul class="tight">
+          <li><strong>Versioned:</strong> no host serves it within 180 s? The Job puts every key back and fails. Nothing to clean up.</li>
+          <li><strong>In-place:</strong> every step is safe to repeat; the next sync finishes the release</li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout">ArgoCD retries twice, about 12 minutes at most. A newer release waits; releases in between are skipped.</p>
+    <aside class="notes">⏱ 2 min. This is what the demo just showed: a versioned rollback takes as long as the key takes to reach the edge. In-place rollback is a whole release with the old image, about a minute. Failures: versioned is self-healing; users see the old version again. In-place: a failure before the copy changes nothing; if the invalidation doesn't complete in time, the Job fails before the sweep, so the new build is already serving, the old files are still there, and the next sync finishes it. For both, the sync fails and ArgoCD retries it twice. While retries run, a newer release waits; when the failed operation ends, ArgoCD syncs the newest commit, so releases in between are skipped. To stop the retries at once, terminate the operation on &lt;env&gt;-&lt;app&gt; in ArgoCD. The Job itself never retries (backoffLimit 0): a second pod would put the failing release live again. Source: how-to "Rolling back", "When a release fails"; proposed-standards 7.12.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">After the first release · versioned</p>
+    <h2>Test environments as alias hosts <span class="pill warn">being finalized</span></h2>
+    <figure class="fig">
+      <picture>
+        <source srcset="assets/diagrams/alias-hosts-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="assets/diagrams/alias-hosts-light.svg" alt="Illustrative: two hostnames, app.develop in namespace develop and app.test1 in namespace test1, both on develop's distribution with one bucket and one KeyValueStore; develop's key points at releases/app/1.9.0/ and test1's key at releases/app/1.8.0/.">
+      </picture>
+    </figure>
+    <p class="caption">test1–3 are extra hostnames on develop's distribution, each with its own key. Waiting on <code>*.test1-3</code> on the nonprod certificate.</p>
+    <aside class="notes">⏱ 1 min. Illustrative: no test environment is set up this way yet. With versioned, test1–3 don't need distributions of their own: the develop unit lists their hostnames in alias_hosts and creates a publisher ServiceAccount per namespace; each test namespace's values list only its own hostname, with develop's ssmPrefix, and has its own Argo app and promotion entry. So test1 can stay on an older release while develop moves on, and retention never deletes a version any hostname points at. What's missing: the nonprod us-east-1 platform certificate covers *.develop and *.staging, not *.test1-3 yet. Give a test environment its own distribution instead if it must test infrastructure changes, or needs its own WAF, headers, logs or IAM: every namespace's publisher can write every key in the shared store. Source: how-to "Optional: test environments"; strategy §4.4.3.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">After the first release · optional</p>
+    <h2>An API through the site</h2>
+    <p><code>/api/*</code> on the site's own hostname: same origin, no CORS. The same for both methods.</p>
+    <ol class="dense">
+      <li><strong>Infrastructure:</strong> the site unit's <code>api</code> input adds the <code>/api/*</code> behavior</li>
+      <li><strong>The API's chart:</strong> a site VirtualService on the external gateway, listing the site's hostnames</li>
+      <li><strong>The API</strong> checks requests came through CloudFront (architecture-standards §206)</li>
+      <li><strong>Promote the API</strong>, so its chart renders the new VirtualService</li>
+      <li><strong>The site's config</strong> sets <code>API_URL: /api</code></li>
+    </ol>
+    <p class="caption">mfe-example's <code>/api/hello</code> reaches its echo server this way; SDS sends <code>/api</code> and <code>/admin</code> to its API on test1.</p>
+    <aside class="notes">⏱ 1 min. Optional; some apps need it, not all. The VirtualService matches only /api/ and lists that environment's site hostnames; poc_echo_server_node's templates/virtualservice-site.yaml is the example. The origin-verify check means the API refuses requests that didn't come through the site's CloudFront. A chart-only change builds no image, so re-promote the current version. Check it: /api/anything returns 200 with Host set to the site hostname, and x-cache is never a Hit. If /api/… returns 404 with server: istio-envoy, the API's site VirtualService isn't deployed: promote the API. Source: how-to "Optional: route an API through the site"; SDS test1 values (apiBase "" sends /api and /admin to the API).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">After the first release</p>
+    <h2>Top gotchas</h2>
+    <div class="dense">
+      <table>
+        <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Render fails: <code>not authorized to perform: ecr:ListImages</code></td><td>The chart uses a version range</td><td>Pin <code>site-release</code> exactly, commit <code>Chart.lock</code>, use <code>oci://</code></td></tr>
+          <tr><td>Render fails naming <code>site:</code> or <code>inPlace:</code></td><td>Neither block, both, or an unknown key</td><td>Exactly one block, matching <code>routing</code></td></tr>
+          <tr><td>Job: <code>is not a release version</code></td><td>A branch image promoted to a versioned site</td><td>Promote an <code>X.Y.Z</code> image built with <code>RELEASE_VERSION</code></td></tr>
+          <tr><td>Every page: <code>503 site not released</code></td><td>No release yet</td><td>Promote one by hand</td></tr>
+          <tr><td>The first promotion fails at the push</td><td>The manifests repo's ruleset blocks the Promotion Manager</td><td>Give its writer identity bypass</td></tr>
+          <tr><td><code>waiting for completion of hook</code> for minutes</td><td>Retries of a failed release</td><td>Wait (about 12 min at most) or terminate the operation</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <aside class="notes">⏱ 1.5 min. From the how-to's troubleshooting table. The first one is the most likely to bite: a range like ~0.3.0 makes helm dependency build list the registry's tags, and the Promotion Manager's role can only pull; mfe-example 1.4.0 failed to render exactly that way. Use the oci:// repository, never file://: the Promotion Manager downloads only the chart's own folder. The rest of the troubleshooting table is in the how-to. Source: how-to "Troubleshooting"; proposed-standards 7.13.</aside>
+  </section>
+
+  <!-- ============ Where things stand ============ -->
+
+  <section class="slide">
+    <p class="kicker">Where things stand · December 2026</p>
+    <h2>What's ready, and where to look</h2>
+    <div class="two-col">
+      <div class="dense">
+        <table>
+          <tbody>
+            <tr><td><code>modules/site</code> in-place, <code>site-v1.0.0</code></td><td><span class="pill ok">available</span></td></tr>
+            <tr><td><code>modules/site</code> versioned, <code>v1.1.0</code></td><td><span class="pill warn">being finalized</span></td></tr>
+            <tr><td><code>site-release</code> chart 0.3.1</td><td><span class="pill ok">available</span></td></tr>
+            <tr><td>SDS, in-place on test1</td><td><span class="pill ok">live</span></td></tr>
+            <tr><td>mfe-example, versioned on develop</td><td><span class="pill ok">live</span></td></tr>
+            <tr><td>The how-to; the site-unit how-to</td><td><span class="pill warn">being finalized</span></td></tr>
+            <tr><td>Test environments as alias hosts</td><td><span class="pill warn">being finalized</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Where to look</h3>
+        <ul class="dense tight">
+          <li><strong>The how-to</strong>, <em>Deliver a SPA as a site</em>: every step and a checklist. Moving to architecture-standards <code>docs/how-to</code>.</li>
+          <li><strong>Create a site unit</strong>, in infrastructure-standards</li>
+          <li><strong>The <code>site-release</code> README</strong>, in vector-shared-helm-charts: every value</li>
+          <li>Jira: COREOPS-4535, COREOPS-4536</li>
+        </ul>
+        <h3 style="margin-top:.8em">How to start</h3>
+        <p class="dense">Pick the method, then write the site unit in your own infrastructure repo. Ask DevOps for the ECR repository and, once you have a chart, the ArgoCD registration.</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 2 min. Re-check every line before presenting; written as of 2026-11-17. Then: modules/site v1.1.0 was on branch feat/COREOPS-4536-site-versioned-routing with no PR or tag (mfe-example's unit pins it by commit, through terragrunt-demo-infrastructure#19, still open). The how-to was a draft in site-platform-strategy, moving to architecture-standards docs/how-to after approval; the site-unit how-to was infrastructure-standards#39, open. The certificate SANs for *.test1-3 weren't there. If any of these has merged, change "being finalized" to "available". Until the proposed site standards are published, the rules behind the how-to are in site-platform-strategy's proposed-standards.md; the infrastructure rules are infrastructure-standards §15. Teams do this themselves: the unit lives in your own infra repo, with DevOps approving through code owners.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Coming next</p>
+    <h2>MFEs on the shared CDN <span class="pill">coming, not built</span></h2>
+    <ul>
+      <li>An independently released MFE is published once, as <code>mfes/&lt;org&gt;/&lt;pkg&gt;/vX.Y.Z/</code> on the shared asset CDN</li>
+      <li>The host pins each MFE's version in its own import map; promoting an MFE is a change to the host's config</li>
+      <li>A follow-on epic. <strong>Until then</strong>, a shell whose MFEs ship together is delivered as a site, like mfe-example.</li>
+    </ul>
+    <aside class="notes">⏱ 1 min. Be clear this is not how it works today. The rule decided in the strategy (§4.2): an MFE is loaded into an existing site and never has a hostname, so it's a versioned shared asset on the CDN, even when only one app uses it. A site holds only its SPA; its import map is the join. Who publishes to the shared CDN, the host pinning rules and the first migrations are the follow-on epic's work; the epic hasn't been created yet, so there's no date. Source: strategy §4.1–4.2; proposed-standards §8 (all proposed).</aside>
+  </section>
+
+  <section class="slide title-slide brand photo">
+    <h2 style="font-size:2.6em">Questions?</h2>
+    <p class="muted">The how-to: <em>Deliver a SPA as a site</em><br>Sources are listed in this presentation's README.md</p>
+    <aside class="notes">⏱ 7 min. Likely questions. "Can we switch methods later?" No: a new site with the other method. "Do we need our own distribution for test1?" Not with versioned, once the certificate covers *.test1-3. "Where does runtime config go?" files: in the chart's values; public, never secrets. "Who approves the unit?" DevOps, through code owners on application/. "When can we use versioned?" When modules/site v1.1.0 is tagged; check the status slide.</aside>
+  </section>
+
+</main>
+<div class="counter"></div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const counter = document.querySelector('.counter');
+    let current = 0;
+
+    function show(i) {
+      current = Math.max(0, Math.min(slides.length - 1, i));
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+      counter.textContent = (current + 1) + ' / ' + slides.length;
+      document.body.classList.toggle('on-brand', slides[current].classList.contains('brand'));
+      history.replaceState(null, '', '#' + (current + 1));
+    }
+
+    // Click a slide's image to see it full size in a dialog; click or Esc closes it.
+    const zoom = document.createElement('dialog');
+    zoom.className = 'zoom';
+    zoom.appendChild(document.createElement('img'));
+    document.body.appendChild(zoom);
+    zoom.addEventListener('click', () => zoom.close());
+    document.querySelectorAll('.slide img').forEach((img) => {
+      img.addEventListener('click', () => {
+        zoom.firstChild.src = img.src;
+        zoom.firstChild.alt = img.alt;
+        zoom.showModal();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (zoom.open) return; // Esc closes the dialog; other keys don't move the deck under it
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key) {
+        case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+          e.preventDefault(); show(current + 1); break;
+        case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+          e.preventDefault(); show(current - 1); break;
+        case 'Home': show(0); break;
+        case 'End': show(slides.length - 1); break;
+        case 'f': case 'F':
+          if (document.fullscreenElement) document.exitFullscreen();
+          else document.documentElement.requestFullscreen();
+          break;
+        // Speaker notes overlay, for rehearsing with the time estimates.
+        case 'n': case 'N':
+          document.body.classList.toggle('show-notes'); break;
+      }
+    });
+
+    // Click right two-thirds of the screen to advance, left third to go back.
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('a, button, input, select, textarea, pre, .notes, .slide img, dialog')) return;
+      show(e.clientX > window.innerWidth / 3 ? current + 1 : current - 1);
+    });
+
+    const fromHash = parseInt(location.hash.slice(1), 10);
+    show(Number.isFinite(fromHash) ? fromHash - 1 : 0);
+  })();
+</script>
+</body>
+</html>
