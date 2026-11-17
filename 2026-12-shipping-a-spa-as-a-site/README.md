@@ -90,7 +90,11 @@ Every source of information used in this presentation goes here.
   1.5.0, 2026-11-11). Its seven Mermaid diagrams are the specs for the archify diagrams
 - `~/workspaces/cowork/site-platform-strategy/site-hosting-strategy.md`: §4.0 vocabulary and naming (slides 3–4),
   §4.1–4.2 the two tiers and the MFE rule (slides 3 and 22), §4.4.3 test environments as alias hosts (slide 18),
-  §4.5 ownership, §4.9 what is Terraform, GitOps and runtime (slides 6 and 11)
+  §4.4.2 the account quotas: 100 CloudFront Functions per account, one per distribution, 20 used in CORE
+  nonprod on 2026-11-06, 5 per app in nonprod with a distribution per environment versus 2 with test1–3 as
+  alias hosts (slide 10), §4.5 ownership, §4.9 what is Terraform, GitOps and runtime (slides 6 and 11)
+- [Amazon CloudFront quotas](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html),
+  "Quotas on CloudFront Functions" (read 2026-11-17): functions per AWS account, 100 (slide 10)
 - `~/workspaces/cowork/site-platform-strategy/proposed-standards.md`: 7.6 retention (at least 10 non-live
   versions, never a live one, deletion off by default), 7.12 the Job never retries itself (`backoffLimit: 0`),
   7.13 pin `site-release` exactly (mfe-example 1.4.0 failed to render with a range), §8 MFEs on the shared CDN
@@ -133,7 +137,9 @@ Every source of information used in this presentation goes here.
 - Noel Aguilar, DevOps (presenter), 2026-11-17: audience, 45 minutes, December 2026; one "coming next" slide
   for MFEs on the shared CDN; a live roll back and forward demo on mfe-example develop; a few short snippets
   only; rollback and failures, test environments, the API and gotchas included; teams start themselves in their
-  own infrastructure repo; SDS for in-place and mfe-example for versioned; keystone-cx-tools left out
+  own infrastructure repo; SDS for in-place and mfe-example for versioned; keystone-cx-tools left out; independently released MFEs are supported, on the shared CDN rather than as sites (slide 3); versioned
+  is the preferred method, because test environments as alias hosts keep the number of CloudFront Functions
+  down, and in-place sites need a distribution per test environment (slides 10 and 18)
 
 ### Data & assets
 - `assets/brand-title.jpg`: the title and Questions background, taken unchanged from `ppt/media/image1.jpeg` in `2026-08-nj-rubric-update.pptx`
