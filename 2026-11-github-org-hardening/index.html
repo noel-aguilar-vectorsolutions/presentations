@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitHub Org Hardening: Q4 and Q1</title>
+<style>
+  :root {
+    /* Vector Solutions brand, sampled from the 2026-08 offsite deck's backgrounds and logo */
+    --b-deep: #1a439b;
+    --b-mid: #2c61ad;
+    --b-cyan: #2581c4;
+    --b-teal: #439ab8;
+    --b-green: #81c089;
+    --b-line-green: #9cc66b;
+    --b-line-blue: #5ba4e0;
+    --brand-gradient: linear-gradient(62deg, var(--b-green) 0%, var(--b-teal) 13%, var(--b-cyan) 30%, var(--b-mid) 58%, var(--b-deep) 100%);
+
+    --bg: #ffffff;
+    --fg: #26323a;
+    --heading: var(--b-deep);
+    --muted: #5b6670;
+    --accent: #0076b8;
+    --surface: #eef4fa;
+    --border: #d3e0ee;
+    --ok: #2f8a48;
+    --bad: #c0392b;
+    --warn: #c25a1c;
+    --tint-green: #ebf5ea;
+    --motif-opacity: .55;
+    /* Footer from vector-template.pptx's slide master: logo, then the green-blue-light blue strip */
+    --logo: url("assets/vector-logo.png");
+    --footer-strip: linear-gradient(90deg, #96d448 0%, #293d9a 65.8%, #5ab7e6 100%);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1a35;
+      --fg: #e6edf6;
+      --heading: #a9cdf5;
+      --muted: #9fb0c4;
+      --accent: #5cb6f2;
+      --surface: #142a52;
+      --border: #26406d;
+      --ok: #7ccb8a;
+      --bad: #f0716a;
+      --warn: #f29a5c;
+      --tint-green: #16354a;
+      --motif-opacity: .35;
+      --logo: url("assets/vector-logo-white.png");
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
+
+  .deck { height: 100vh; width: 100vw; overflow: hidden; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column; justify-content: center;
+    padding: 6vh 8vw;
+    font-size: max(14px, min(2.2vw, 3.9vh));
+    line-height: 1.45;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+  /* Footer on every slide: the logo bottom left, the strip to its right, the counter at the right */
+  .slide {
+    padding-bottom: 11vh;
+    background-image: var(--logo), var(--footer-strip);
+    background-repeat: no-repeat;
+    background-size: 14.6vw auto, 76vw 1.9vh;
+    background-position: 1.3vw calc(100% - 1.3vh), 16.8vw calc(100% - 2.9vh);
+  }
+
+  .slide h1 { font-size: 2.4em; line-height: 1.1; margin: 0 0 .4em; letter-spacing: -0.02em; color: var(--heading); }
+  .slide h2 { font-size: 1.6em; line-height: 1.15; margin: 0 0 .6em; letter-spacing: -0.01em; color: var(--heading); }
+  .slide h3 { font-size: 1.1em; margin: 0 0 .3em; color: var(--accent); }
+  .slide p, .slide li { max-width: 60ch; }
+  .slide ul, .slide ol { padding-left: 1.2em; margin: 0; }
+  .slide li + li { margin-top: .4em; }
+  .slide a { color: var(--accent); }
+  .slide img { max-width: 100%; max-height: 60vh; object-fit: contain; }
+  .slide code { font-family: var(--mono); font-size: .85em; background: var(--surface); padding: .1em .3em; border-radius: 4px; }
+  .slide pre { font-family: var(--mono); font-size: .7em; background: var(--surface); border: 1px solid var(--border); padding: 1em; border-radius: 8px; overflow: auto; }
+
+  .title-slide { justify-content: center; }
+  .title-slide h1 { font-size: 3em; }
+  .muted { color: var(--muted); }
+  .big { font-size: 1.6em; font-weight: 600; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: start; }
+  .kicker { font-size: .55em; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8em; }
+  .dense { font-size: .62em; }
+  .dense p, .dense li { max-width: none; }
+  .slide table { border-collapse: collapse; width: 100%; }
+  .slide th, .slide td { text-align: left; vertical-align: top; padding: .4em .7em; border-bottom: 1px solid var(--border); }
+  .slide th { color: var(--heading); font-weight: 600; }
+  .slide thead th { background: var(--surface); color: var(--muted); border-bottom: 2px solid var(--border); }
+  .slide thead th:first-child { border-radius: 8px 0 0 0; }
+  .slide thead th:last-child { border-radius: 0 8px 0 0; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6vw; }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1em 1.1em; box-shadow: 0 6px 18px -12px rgba(26, 67, 155, .45); }
+  .card p { margin: .3em 0 0; }
+  .card h3 { margin: 0; }
+  .callout { background: linear-gradient(90deg, var(--surface), var(--tint-green)); border: 1px solid var(--border); padding: .6em 1em; border-radius: 12px; margin-top: 1em; max-width: none; }
+  .num { display: inline-grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--brand-gradient); color: #fff; font-weight: 700; font-size: .8em; margin-bottom: .5em; }
+  .pill { display: inline-block; font-size: .55em; font-weight: 600; padding: .2em .7em; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); vertical-align: middle; }
+  .pill.warn { color: var(--warn); border-color: currentColor; }
+  .yes { color: var(--ok); font-weight: 700; }
+  .no { color: var(--bad); font-weight: 700; }
+
+  /* Inline SVG diagrams: <svg class="diagram" viewBox="..."> with these classes, so they follow dark mode */
+  .diagram { width: 100%; height: auto; max-height: 46vh; }
+  .dg-box { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .dg-box.accent { stroke: var(--accent); }
+  .dg-text { fill: var(--fg); font-family: var(--font); font-size: 18px; }
+  .dg-small { fill: var(--muted); font-family: var(--font); font-size: 15px; }
+  .dg-mono { fill: var(--fg); font-family: var(--mono); font-size: 15px; }
+  .dg-line { stroke: var(--muted); stroke-width: 2.5; fill: none; }
+  .dg-line.accent { stroke: var(--accent); }
+  .dg-line.dashed { stroke-dasharray: 7 6; }
+  .dg-zone { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 8 6; }
+  .dg-dot { fill: var(--bg); stroke: var(--muted); stroke-width: 3; }
+  .dg-dot.accent { fill: var(--accent); stroke: var(--accent); }
+  .dg-arrowhead { fill: var(--muted); }
+  .dg-arrowhead.accent { fill: var(--accent); }
+
+  /* Rounded-diamond outlines: the motif from the brand backgrounds */
+  .slide::before {
+    content: ""; position: absolute; top: -10vw; right: -7vw; width: 28vw; height: 28vw; pointer-events: none; opacity: var(--motif-opacity);
+    background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke-width='3'%3E%3Crect x='95' y='95' width='210' height='210' rx='44' transform='rotate(45 200 200)' stroke='%239cc66b'/%3E%3Crect x='115' y='125' width='210' height='210' rx='44' transform='rotate(45 220 230)' stroke='%235ba4e0'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* Brand slides: gradient background, white text. Add .photo for the title background image. */
+  .slide.brand { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, var(--brand-gradient); color: #fff; }
+  .slide.brand::before { --motif-opacity: .85; top: -19vw; right: -13vw; width: 42vw; height: 42vw; }
+  .slide.brand.photo { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, #1a439b url("assets/brand-title.jpg") center / cover no-repeat; }
+  .slide.brand.photo::before { display: none; }
+  .slide.brand.photo > :not(.notes) { max-width: 52%; }
+  .slide.brand h1, .slide.brand h2, .slide.brand h3 { color: #fff; }
+  .slide.brand .muted { color: rgba(255, 255, 255, .82); }
+  .slide.brand .kicker { color: #cfeab0; }
+  .slide.brand code { background: rgba(255, 255, 255, .16); color: #fff; }
+  .slide.brand .card { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .3); box-shadow: none; backdrop-filter: blur(8px); }
+  .slide.brand .card .muted { color: #cfeab0; font-weight: 600; }
+  .slide.brand .callout { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .3); backdrop-filter: blur(8px); }
+  .slide.brand .num { background: #fff; color: var(--b-deep); }
+
+  .notes { display: none; }
+  /* Press N: the current slide's speaker notes in a panel at the bottom, for rehearsing */
+  body.show-notes .slide.active .notes {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto;
+    background: var(--surface); border-top: 2px solid var(--accent);
+    padding: 12px 8vw 28px; font-size: max(15px, .9vw); line-height: 1.5; color: var(--fg);
+  }
+
+  .counter { position: fixed; right: 1.3vw; bottom: calc(3.85vh - .65em); font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
+  body.on-brand .counter { color: rgba(255, 255, 255, .8); }
+
+  /* Click a slide's image to see it full size; click again or Esc to close. */
+  .slide img { cursor: zoom-in; }
+  dialog.zoom { padding: 0; border: 0; background: transparent; max-width: 96vw; max-height: 96vh; overflow: visible; cursor: zoom-out; }
+  dialog.zoom:focus, dialog.zoom:focus-visible { outline: none; }
+  dialog.zoom::backdrop { background: rgba(10, 20, 45, .82); }
+  dialog.zoom img { display: block; max-width: 96vw; max-height: 96vh; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+
+  @media (max-width: 700px) {
+    .slide { padding: 6vh 16px 11vh; font-size: 18px; }
+    .two-col, .cards, .cards.two { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { height: auto; }
+    .deck { height: auto; overflow: visible; }
+    .slide { position: relative; display: flex !important; width: 1280px; height: 720px; font-size: 26px; page-break-after: always; break-after: page; }
+    .counter { display: none; }
+    .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.show-notes .slide.active .notes { display: none; }
+  }
+
+  /* Additions for this deck */
+  .stat { font-size: 2em; font-weight: 700; line-height: 1; margin: 0 0 .15em; color: var(--heading); letter-spacing: -0.02em; }
+  .stat .of { font-size: .4em; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+  .cards.stats { grid-template-rows: auto auto; row-gap: 1.6vw; }
+  .cards.stats .card p:not(.stat) { font-size: .62em; margin: 0; }
+  .cards.six { row-gap: 1.6vw; }
+  .card .when { margin-top: .6em; font-size: .85em; font-weight: 600; color: var(--accent); }
+  .cards.dense .card .when { font-size: 1em; }
+  .card.highlight { border-color: var(--warn); }
+  .card.highlight .stat { color: var(--warn); }
+  .card.highlight ul { margin-top: .6em; }
+  .asks li + li { margin-top: .7em; }
+
+  /* The Q4 / Q1 plan: a quarter band over each column */
+  .timeline { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9em 1.4vw; }
+  .timeline .quarter { padding: .35em .9em; border-radius: 999px; font-weight: 700; color: #fff; }
+  .timeline .quarter.q4 { background: var(--brand-gradient); }
+  .timeline .quarter.q1 { background: var(--surface); color: var(--muted); border: 2px dashed var(--border); }
+  .timeline .month { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: .8em 1em; }
+  .timeline .month.planned { background: transparent; border-style: dashed; }
+  .timeline .month li + li { margin-top: .3em; }
+  .timeline .milestone { color: var(--warn); font-weight: 700; }
+  .slide.brand a { color: #fff; }
+</style>
+</head>
+<body>
+<main class="deck">
+
+  <section class="slide title-slide brand photo">
+    <p class="kicker">Q4 2026 and Q1 2027</p>
+    <h1>GitHub Org Hardening</h1>
+    <p class="big muted" style="font-weight:400">What changes, when, and what it asks of teams</p>
+    <p class="muted">Noel Aguilar · DevOps<br><span style="font-size:.75em">November 2026</span></p>
+    <aside class="notes">⏱ 0.5 min. Introduce yourself. About twenty-two minutes: the hardening plan, a short separate section on people, teams and access, then questions. This covers the organization-level security settings DevOps is changing in GitHub. The CI/CD changes themselves (paved road, versioning, release-please) are in the Moving to GitHub Actions session.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Why now</p>
+    <h2>GitHub's settings now protect every pipeline</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>The Actions migration</h3>
+        <p>Every pipeline becomes a GitHub workflow, with our code, secrets and AWS roles.</p>
+      </div>
+      <div class="card">
+        <h3>Open defaults</h3>
+        <p>GitHub favours convenience. Ours were never tightened, across ~800 active repos.</p>
+      </div>
+      <div class="card">
+        <h3>A real attack</h3>
+        <p>March 2025: a moved <code>tj-actions</code> tag ran attacker code in thousands of pipelines.</p>
+      </div>
+    </div>
+    <p class="callout"><strong>No new licences.</strong> Everything in this plan runs on the GitHub Team plan we already pay for.</p>
+    <aside class="notes">⏱ 1.5 min. The point: once CI lives in GitHub Actions, a workflow can reach our source, our secrets and our AWS roles, so the organization's Actions settings are now part of our security perimeter. GitHub ships with permissive defaults, and nobody had tightened ours; with about 800 active repositories, configuring them one at a time has left uneven coverage. The tj-actions/changed-files compromise in March 2025 is the example to remember: an attacker moved a version tag to point at malicious code, and every pipeline that referenced the tag ran it. We don't use that action, but nothing in our current settings would stop the same thing happening with one we do use. Every control in this plan is available on the Team plan, so there's no licence cost; the cost is configuration time, plus small edits in some repos.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Where we are today · scan of 2026-11-09</p>
+    <h2>Six gaps, one number each</h2>
+    <div class="cards stats">
+      <div class="card"><p class="stat">190</p><p>action references on movable tags, in 46 repos. Any Marketplace action may run.</p></div>
+      <div class="card"><p class="stat">write</p><p>is every workflow's default token, and workflows can approve their own PRs.</p></div>
+      <div class="card"><p class="stat">425 <span class="of">of 754</span></p><p>repos have no protection on their default branch, including 29 of the 101 that run Actions.</p></div>
+      <div class="card"><p class="stat">34 <span class="of">of 771</span></p><p>active repos have Dependabot alerts on.</p></div>
+      <div class="card"><p class="stat">184 <span class="of">of 370</span></p><p>members have no 2FA, plus 9 of 12 outside collaborators.</p></div>
+      <div class="card"><p class="stat">9</p><p>AWS and Kubernetes credentials in org secrets, unchanged since 2022–23 and used by no workflow.</p></div>
+    </div>
+    <aside class="notes">⏱ 2 min. All numbers are from the scan of 9 November 2026, the same scan the two team reports were built from. Walk the six quickly. Movable tags: 190 "uses:" lines point at tags like @v4 rather than a fixed commit, and the org allows any action from any author. Write token: unless a workflow says otherwise, its GITHUB_TOKEN can push code and edit releases, and Actions is allowed to approve pull requests, which defeats a "requires approval" rule. Branch protection: of the 754 active repos that have a default branch (17 more are empty), 425 have no protection on it, and 429 don't require a pull request; among the 101 that run Actions it's 29. Counted live on 9 November with the same rules the scan uses. Dependabot: 34 of 771 active repos have alerts on, so most vulnerable dependencies go unreported. 2FA: 184 of 370 members and 9 of 12 outside collaborators. AWS: three sets of credentials for the VIDP clusters, one each for production, staging and develop, each an AWS access key pair plus a Kubernetes config. Their values in GitHub haven't changed since 2022–23 (production 2022-08-23, staging 2023-02-28, develop 2023-03-16). GitHub can't show a secret's value, so whether the keys were rotated or disabled in AWS itself is the first thing the cleanup checks. Every private repo's workflows can read them, and no workflow uses them. None of this is anyone's mistake; these are GitHub's defaults.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">The plan</p>
+    <h2>Q4 secures CI; Q1 secures who has access</h2>
+    <div class="timeline dense">
+      <div class="quarter q4"><span>Q4 2026 · epic COREOPS-4617</span></div>
+      <div class="quarter q1"><span>Q1 2027 · planned</span></div>
+      <div class="month">
+        <h3>Secure CI, add a baseline, clean up</h3>
+        <ul>
+          <li>Team reports first: token and pinning</li>
+          <li>Every action pinned to an exact commit</li>
+          <li>Approved actions only</li>
+          <li>Token read-only by default</li>
+          <li>PR required on every default branch</li>
+          <li>Dependabot on in every repo</li>
+          <li>Old AWS credentials removed</li>
+          <li>Unused wikis, issues, projects off</li>
+          <li>Only org owners can create public repos</li>
+          <li>Third-party app access narrowed</li>
+          <li>Announce the 2FA deadline <span class="pill">not yet ticketed</span></li>
+        </ul>
+      </div>
+      <div class="month planned">
+        <h3>Identity and access</h3>
+        <ul>
+          <li>Move CI bot accounts to GitHub Apps, so 2FA doesn't lock them out</li>
+          <li class="milestone">2FA enforced, end of January</li>
+          <li>Fewer org owners</li>
+          <li>Claude review workflow hardened</li>
+          <li>Dormant repos archived</li>
+          <li>Runner groups locked down</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. One view of everything. Q4 is the epic COREOPS-4617, eleven stories, all in the backlog today. Within the quarter the order matters more than dates: affected teams get their report and the exact fix first, and the enforcing switches flip after that. The 2FA announcement sits in Q4 so people have the rest of the year to set it up; it isn't one of the epic's stories yet. Q1 is planned, not yet ticketed, and is about people and access, led by 2FA: enforcement at the end of January is the one date on this slide, because it removes people from the org. Q4 is on the left in blue; Q1 on the right is marked planned.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Q4 2026 · secure the CI supply chain</p>
+    <h2>Control what runs in CI, and what it can touch</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Pin every action</h3>
+        <p>An exact commit can't be moved. Teams get <a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29595041793/GitHub+Actions+action+references+to+pin+to+a+commit+SHA">a report</a> with the fix first.</p>
+        <p class="when">Announce: November<br>Enable: December</p>
+      </div>
+      <div class="card">
+        <h3>Approved actions only</h3>
+        <p>Ours, GitHub's, and the 22 third-party actions in use today. New ones by request.</p>
+        <p class="when">November</p>
+      </div>
+      <div class="card">
+        <h3>Read-only token</h3>
+        <p>Read access unless a workflow asks for more; no PR approvals. <a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29594746887/GitHub+Actions+workflows+that+need+a+permissions+block">3 workflows</a> need one line.</p>
+        <p class="when">Announce: November<br>Enable: December</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 2 min. These three close the tj-actions class of attack. Pinning: a tag like @v4 can be moved by whoever controls the action; a 40-character commit SHA can't. A report goes to the 46 affected repos with the exact replacement for every line, and Dependabot keeps pins current; DevOps adds its configuration when each repo moves to GitHub Actions, so teams don't add it themselves. Pinning is announced in November, with the report, and required org-wide in December, which gives the 46 repos a month to pin. Repos that are already fully pinned (55 of them) can get the requirement first, so they can't slip back. The approved-actions list lands in November. GitHub's rule covers its own actions too; reusable workflows are exempt. Approved actions: VectorLearning's own and GitHub-authored actions are allowed, plus a named list of 22 third-party actions, split between vendors (AWS, Docker, Microsoft, HashiCorp, Anthropic, Google, Astral, Veracode) and four individual maintainers. Four retiring actions stay allowed until 31 January 2027. No wildcards; we can loosen later. New actions are requested through a COREOPS ticket. Read-only token: announced in November with its report, switched on in December. 43 workflow files in 25 repos rely on the write default today, but only three actually write (release workflows in gateway-cli, document-auditor and survey-library); they add one permissions line. No workflow approves PRs today, so that part breaks nothing.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Q4 2026 · guardrails and cleanup</p>
+    <h2>A baseline every repo gets automatically, and less surface to attack</h2>
+    <div class="cards dense six">
+      <div class="card">
+        <h3>PR required on <code>main</code></h3>
+        <p>One org rule for every repo's default branch: changes go through a pull request, no force-push. Repos can add stricter rules.</p>
+        <p class="when">November</p>
+      </div>
+      <div class="card">
+        <h3>Dependabot everywhere</h3>
+        <p>Vulnerability alerts and fix PRs in all 771 active repos, with a named triage owner.</p>
+        <p class="when">November</p>
+      </div>
+      <div class="card">
+        <h3>Old cluster credentials gone</h3>
+        <p>Nine unused AWS and Kubernetes secrets removed: keys deactivated first, deleted after two quiet weeks.</p>
+        <p class="when">November</p>
+      </div>
+      <div class="card">
+        <h3>Unused features off</h3>
+        <p>Wikis, issues and projects off where nobody uses them: 568 wikis, 607 issue trackers. In-use ones untouched.</p>
+        <p class="when">November</p>
+      </div>
+      <div class="card">
+        <h3>Only owners create public repos</h3>
+        <p>Members still create private repos; a public one needs an org owner.</p>
+        <p class="when">November</p>
+      </div>
+      <div class="card">
+        <h3>App access narrowed</h3>
+        <p>Five third-party apps can reach every repo. Each is narrowed, or justified, with its owner.</p>
+        <p class="when">December</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. Move quickly; leads can read the detail in the Jira stories. Org rule: today there are no org-level rules, so protection depends on each team remembering. One rule covers every repo's default branch, including new repos: pull request required, no force-push, no deletion. It's switched on directly in November, with no trial period, so teams with automation that pushes straight to main need to tell us before then. The existing break-glass path on the github-actions repo is kept. Dependabot is free on our plan; expect a burst of alerts at first, which is why a triage owner is named before it goes on. AWS keys: nothing uses them, but they're deactivated first because deleting can't be undone. Unused features: turning a feature off hides it but deletes nothing, and any repo with even one wiki page or issue is left alone. Apps: aws-connector-for-github, atlassian, microsoft-teams-for-github, claude-design-import and aws-devops-agent-read-only can reach every repository; this one is reviewed with each app's owner and goes last.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Q1 2027 · identity and access <span class="pill">planned</span></p>
+    <h2>2FA becomes mandatory at the end of January</h2>
+    <div class="two-col">
+      <div class="card highlight">
+        <h3>2FA enforcement</h3>
+        <p class="stat">184 <span class="of">members</span></p>
+        <p>plus 9 outside collaborators have no 2FA today. Enforcement <strong>removes them from the org</strong>.</p>
+        <ul class="dense">
+          <li>Starting in Q4: everyone is told the deadline and how to set up 2FA; whoever still isn't set up is followed up weekly</li>
+          <li>First, 4 bot accounts used by CI (Jenkins, CircleCI, the CI bot, Convergence) move to GitHub Apps; otherwise enforcement removes them and their pipelines break</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Also in Q1</h3>
+        <ul>
+          <li>Org owners: 16 → about 10</li>
+          <li>Claude review workflow hardened in 16 repos</li>
+          <li>78 repos untouched for 2+ years archived, with owners consulted</li>
+          <li>Runner groups locked down before the first self-hosted runner</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. Q1 is planned: these come from the security review's backlog and don't have an epic yet. 2FA is the one item that removes people, so it gets the most notice. GitHub's enforcement removes any member or outside collaborator without 2FA; they can be reinstated within three months, but it's disruptive. So starting in Q4, well ahead of the deadline, everyone, including outside collaborators (who aren't on our internal channels), is told the deadline with instructions for setting up 2FA, and a weekly list of who still hasn't is followed up until it's near zero. Four of the accounts without 2FA are machines (targetsolutions-jenkins, vectorcibot, vectorehs-circlecimachine and ConvergenceServiceAccount); they move to GitHub Apps or other non-password auth before enforcement, otherwise their pipelines fail the moment it's switched on. The rest: 16 people are org owners, who can bypass almost every control, so that comes down to about 10. The Claude review workflow in 16 repos reads instructions from the PR's own branch while holding write access; it'll read them from the base branch instead. 78 repos haven't been pushed to in two years. There are no self-hosted runners today, but the default runner group would expose the first one to every repo, so it gets locked down before anyone adds one.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What it asks of teams</p>
+    <h2>Most teams do nothing; a few make small changes</h2>
+    <div class="two-col">
+      <div>
+        <h3>Who needs to act</h3>
+        <ul class="dense asks">
+          <li><strong>Everyone:</strong> turn on 2FA before the end of January</li>
+          <li><strong>46 repos:</strong> pin actions before December, using <a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29595041793/GitHub+Actions+action+references+to+pin+to+a+commit+SHA">the report's</a> exact SHAs</li>
+          <li><strong>3 repos:</strong> add one <code>permissions:</code> line to a release workflow (<a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29594746887/GitHub+Actions+workflows+that+need+a+permissions+block">report</a>)</li>
+          <li><strong>3 repos:</strong> replace 4 retiring actions by 31 January</li>
+          <li><strong>Automation that pushes to <code>main</code>:</strong> tell us before the rule is switched on</li>
+        </ul>
+      </div>
+      <div>
+        <h3>How we'll know it worked</h3>
+        <table class="dense">
+          <thead><tr><th>Measure</th><th>Today</th><th>Target</th></tr></thead>
+          <tbody>
+            <tr><td>Unpinned action references</td><td>190</td><td>0</td></tr>
+            <tr><td>Repos without branch protection</td><td>425</td><td>0</td></tr>
+            <tr><td>Repos with Dependabot</td><td>34</td><td>771</td></tr>
+            <tr><td>Unused AWS and Kubernetes secrets</td><td>9</td><td>0</td></tr>
+            <tr><td>Members without 2FA</td><td>184</td><td>0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. For leads: the only thing every person must do is set up 2FA. The rest is a short list of named repos, and each gets a report with the exact change. The 46 pinning repos and the 3 permissions repos are listed in the two team reports on Confluence, linked on this slide and on slide 5. The retiring actions are in survey-library, devsec and document-auditor. If a bot or job in your repo pushes straight to main (version bumps, generated files), tell us before the rule is switched on in November so we can move it to a PR or let its GitHub App through. A written announcement with the details goes out to teams. For leadership: these five numbers are what we'll report against; they come from the same scan we'll re-run after each change, so progress is measured, not assumed.</aside>
+  </section>
+
+  <section class="slide title-slide brand">
+    <p class="kicker">A separate stream · proposed</p>
+    <h2 style="font-size:2.6em">People, teams and access</h2>
+    <p class="big muted" style="font-weight:400">Who can reach our code, and how they got that access</p>
+    <aside class="notes">⏱ 0.25 min. That's the hardening plan. This last part is a separate stream: who has access and how it's granted. It isn't part of the Q4 or Q1 plan, and nothing here has a ticket or a date yet. It's the direction DevOps proposes.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Where we are today · collected 2026-11-11</p>
+    <h2>Access grew one person at a time</h2>
+    <div class="cards stats">
+      <div class="card"><p class="stat">102 <span class="of">of 362</span></p><p>people's GitHub accounts don't follow our username standard. 20 look like personal accounts.</p></div>
+      <div class="card"><p class="stat">303 <span class="of">of 370</span></p><p>members get their access through one team, with read on about 290 repos and write on 64.</p></div>
+      <div class="card"><p class="stat">38%</p><p>of repo access is granted to individuals, not teams. Two-thirds of those grants are admin.</p></div>
+      <div class="card"><p class="stat">117</p><p>active repos have no team or person granted. Only org owners can reach them.</p></div>
+      <div class="card"><p class="stat">21 <span class="of">of 175</span></p><p>teams are unused: no members, or no access to anything active.</p></div>
+      <div class="card"><p class="stat">12</p><p>outside collaborators. Half look like our own staff, added to one repo instead of the org.</p></div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. These come from a read-only collection on 11 November, made as a GitHub App rather than with anyone's personal token. Usernames: the standard is firstname-lastname-vectorsolutions, with -ctr- for contractors. 102 of the 362 people don't match. Most are small slips (capital letters, -ctr at the end because that's where it goes in the email address, a typo), and those can be renamed in place. 20 have no company marker at all and read as personal accounts, including one org owner. The second number is the vector-engineering team: 303 people, including 55 contractors, get read on about 290 active repos and write on 64 through it. So the org's base permission is "none", but in practice almost everyone can read almost everything. Third: of about 2,700 grants on active repos, 38% go straight to a person rather than a team, and two-thirds of those are admin. That's mostly because whoever creates a repo becomes its admin. 117 active repos have no grant at all, so only the 16 owners can reach them. 21 teams are unused. And the 12 outside collaborators: six look like staff or contractors who were added to one repo instead of joining the org. None of this is anyone's fault: it's what GitHub's defaults produce over several years.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose <span class="pill">proposed · not yet planned</span></p>
+    <h2>Access through teams, on standard accounts</h2>
+    <div class="cards dense six">
+      <div class="card"><h3>Standard accounts</h3><p>About 80 people rename in place and keep their history. 20 accounts that look personal are replaced. Contractors are marked <code style="white-space:nowrap">-ctr</code>.</p></div>
+      <div class="card"><h3>One team pattern</h3><p>Per product: a dev team with write, and a maintainers team under it. Every team has a named owner, and every repo a CODEOWNERS file naming its team.</p></div>
+      <div class="card"><h3>Access through teams</h3><p>194 times, someone was added to a repo individually with access their team already gives them. Those go first, changing nothing. The rest move into product teams.</p></div>
+      <div class="card"><h3>Repos start with an owner</h3><p>You request a repo through a self-service front door, and an App creates it with its teams, CODEOWNERS and the baseline.</p></div>
+      <div class="card"><h3>Clean up</h3><p>Unused teams removed. Repos with no owner get an owning team, or are archived.</p></div>
+      <div class="card"><h3>Outside collaborators sponsored</h3><p>Staff become members. The rest get a named sponsor and an end date. A monthly check flags new ones.</p></div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. This is the direction, not a commitment: no epic, no dates. Standard accounts: a GitHub username can be changed in place, so most people keep everything, including their commit history; the 20 accounts that look personal need a new company account instead. We call them personal from the username alone, since GitHub doesn't show us the email behind an account; a few may turn out to be company accounts with the wrong name, and those just rename. One team pattern: each product gets a dev team with write, and a maintainers team under it with maintain; no team gets admin, which is the next slide. Read for everyone else comes from the org-wide engineering team, kept read-only. Every team has a named owner managing its members, which 30 teams lack today. CODEOWNERS: only 175 of 776 active repos have one today, so most repos have no named owner for review; every repo gets one, naming its team. Access through teams: 194 times, someone was added to a repo individually with access their team already gives them; for instance, added with write to a repo their team already has write on. Removing those changes nothing, so they go first. The other personal grants move into the product teams. Repos start with an owner: today any member can create a repo and becomes its admin, which is where most of the personal admin grants come from. Instead, the person who needs a repo requests it through a self-service front door, and an App creates it with its teams, a CODEOWNERS file and the baseline already in place. Nobody creates repos by hand, DevOps included. It's proposed, not built, and it's what the next two slides depend on. Clean-up: the unused teams, and the 117 repos nobody owns. Outside collaborators: on our GitHub plan we can't stop repo admins inviting them, so the control is sponsorship plus a monthly read-only check. What it will ask of people: rename an account if asked, and leads naming a maintainer for each team. Questions about this part are welcome now, but it'll come back as its own plan.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose · the access model <span class="pill">proposed · not yet planned</span></p>
+    <h2>Nobody gets repo admin, by default</h2>
+    <div class="two-col">
+      <div>
+        <h3>Who gets what</h3>
+        <table class="dense">
+          <thead><tr><th>Who</th><th>On repos</th></tr></thead>
+          <tbody>
+            <tr><td>Org owners (about 10)</td><td><strong>Admin</strong> on every repo, through their org role</td></tr>
+            <tr><td>All engineers</td><td>Read, through the org-wide engineering team</td></tr>
+            <tr><td>A product's dev team</td><td>Write on its repos</td></tr>
+            <tr><td>Its maintainers team</td><td>Maintain</td></tr>
+            <tr><td>A product's admins team</td><td>Admin, only on repos that deploy from GitHub, and only if needed</td></tr>
+            <tr><td>GitOps and infrastructure repos</td><td>Every merge approved by the owning team and DevOps</td></tr>
+            <tr><td>Individuals</td><td>Nothing directly; access comes through a team</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Admin-only, done on request</h3>
+        <ul class="dense">
+          <li>Granting access: people, teams, outside collaborators</li>
+          <li>Branch protection and rulesets</li>
+          <li>Deployment environments and their secrets</li>
+          <li>Webhooks and deploy keys</li>
+          <li>Visibility, archiving, deleting, transferring</li>
+        </ul>
+        <p class="callout dense">Maintainers keep the day-to-day: merging, releases, most settings, Actions secrets and deploys.</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.5 min. The default is that no team and no person gets admin on a repo. Org owners already have admin everywhere through their role, and Q1 brings them down to about ten. We're not proposing an org-admin team: it would be a second, less visible owner group. Maintain is the highest role a team normally gets. It covers what leads do every day: merging, releases, repo settings like merge options and topics, and Actions secrets and deploys, which only need write. What it can't do is exactly what went wrong in the findings: it can't grant access, so a maintainer can't add an outside collaborator; it can't weaken branch protection or rulesets; and it can't delete, archive, transfer or change visibility. Those, plus webhooks and deploy keys, become a request. The exception is deployment environments, which need admin. Most of our deploys go through GitOps, not Actions; only the Windows, GovCloud and Azure deploys run from Actions. Where one of those needs a team to manage its environment, the product gets a small admins team: one to three named people, admin only on the repos that deploy, and reviewed each quarter. DevOps sets the environments up as part of migrating those repos. GitOps and infrastructure repos are different: a merge there is a deploy or an infrastructure change. Today the main GitOps repos already require a code-owner review, but about 312 people can write to them, so the CODEOWNERS file is the real gate, and every merge needs the owning team and DevOps. On our plan there's no in-between role: custom repository roles need Enterprise Cloud, so it's maintain or admin.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose · getting there <span class="pill">proposed · not yet planned</span></p>
+    <h2>Three steps, so nobody is blocked</h2>
+    <div class="cards">
+      <div class="card"><h3>1. Admin moves into teams</h3><p>Personal grants fold into each product's teams. Maintainers keep admin for now, so nothing breaks.</p></div>
+      <div class="card"><h3>2. Build the request paths</h3><p>One front door, signed in with Okta, for new repos and access changes. Every repo gets a CODEOWNERS file.</p></div>
+      <div class="card"><h3>3. Drop to maintain</h3><p>Members can no longer create repos; only the App does. Maintainers drop to maintain; an admins team only where a deploy needs one.</p></div>
+    </div>
+    <p class="callout">The repo-creation App is the dependency. Step 3 waits until it works.</p>
+    <aside class="notes">⏱ 1.25 min. We don't take admin away first. Step one moves the roughly thousand admin grants on active repos, today spread across people and teams, into one maintainers team per product. Maintainers keep admin for now, so nobody loses the ability to do their job; the gain is that admin becomes a short, named list per product instead of a thousand scattered grants. Step two builds the request paths: one front door, an internal app behind AVA so people sign in with Okta, where you ask for a new repo or an access change. It doesn't change GitHub itself; it opens a pull request to the github-org-config repo, where our GitHub Apps are already managed, and after review a repo-creation App makes the change. That's also when every repo gets a CODEOWNERS file: the App adds one to every new repo, and existing repos get one through a pull request. Step three only happens once the App works: we turn off repo creation for members, which today makes every creator an admin, and maintainers drop to maintain. Products that deploy from Actions and need an environment get their small admins team then. While admin is still in place, a monthly read-only check flags new outside collaborators and new personal admin grants, so nothing grows back unseen. And the Q4 org rule already stops repo admins from removing the pull-request requirement on main.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">What we propose · joining and leaving <span class="pill">proposed · not yet planned</span></p>
+    <h2>Every GitHub account tied to an Okta identity</h2>
+    <div class="two-col">
+      <div>
+        <h3>One way in, one way out</h3>
+        <ul class="dense">
+          <li><strong>Joining:</strong> through the front door, signed in with Okta. It checks the username against the standard and records which Okta person owns which GitHub account.</li>
+          <li><strong>Leaving:</strong> when an Okta account is deactivated, the matching GitHub account is removed from the org.</li>
+          <li><strong>A daily check:</strong> flags anyone in GitHub with no Okta owner, and anyone whose Okta account is no longer active.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Not SSO, but most of the benefit</h3>
+        <table class="dense">
+          <thead><tr><th></th><th>SSO + SCIM<br><span class="muted">Enterprise Cloud</span></th><th>Front door<br><span class="muted">our Team plan</span></th></tr></thead>
+          <tbody>
+            <tr><td>Each account tied to a person in Okta</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Removed when someone leaves</td><td>Immediately</td><td>Within a day</td></tr>
+            <tr><td>Okta needed to sign in to GitHub</td><td class="yes">✓</td><td class="no">✗ GitHub login and 2FA</td></tr>
+            <tr><td>Extra licence cost</td><td>Yes</td><td>None</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="callout">Leaving Okta means leaving GitHub: within a day, not the moment the account is deactivated.</p>
+    <aside class="notes">⏱ 1.25 min. Today nothing removes a leaver from GitHub unless someone remembers; the security review rates that High. The usual fix is SSO plus SCIM. SSO makes you sign in to GitHub through Okta. SCIM is the standard way Okta creates and removes accounts in another system automatically: deactivate someone in Okta, and their account goes. On GitHub both need Enterprise Cloud, which isn't part of this plan. The front door gives us most of the SCIM half on the Team plan. Everyone joins through it, signed in with Okta, so we record which Okta person owns each GitHub account. When Okta deactivates someone, we know which GitHub account to remove. What it doesn't give us is the sign-in half: people still sign in to GitHub with their GitHub login and 2FA, so between deactivation and removal a leaver's account, tokens and SSH keys still work. A daily check keeps that to a day at first; an Okta hook can bring it down to minutes later. Two conditions make it hold. Everyone already in the org gets matched to their Okta identity once, which fits with the account renames. And the front door has to be the only way in: the daily check also flags anyone added another way, such as an owner inviting someone by hand or an admin adding an outside collaborator, and removing repo admin closes most of those paths.</aside>
+  </section>
+
+  <section class="slide title-slide brand photo">
+    <h2 style="font-size:2.6em">Questions?</h2>
+    <p class="muted">Epic COREOPS-4617 · Team reports: <a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29594746887/GitHub+Actions+workflows+that+need+a+permissions+block">permissions</a> · <a href="https://lmsportal.atlassian.net/wiki/spaces/~712020beddc23505a94612b7dad1d37db24a00/pages/29595041793/GitHub+Actions+action+references+to+pin+to+a+commit+SHA">pinning</a><br>Sources are listed in this presentation's README.md</p>
+    <aside class="notes">⏱ 3 min. Likely questions: Will my pipeline break? Only if it's on one of the named lists, and you'll get the fix first. What about SSO or secret scanning? They need GitHub Enterprise Cloud, which isn't part of this plan; everything here runs on the Team plan we have. For leavers, the front door on the previous slide covers most of what SSO and SCIM would. Does the org ruleset need an approval? Required approvals (0 or 1) is still being decided; the rule requires a PR either way. What if I need an action that isn't approved? Raise a COREOPS ticket.</aside>
+  </section>
+
+</main>
+<div class="counter"></div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const counter = document.querySelector('.counter');
+    let current = 0;
+
+    function show(i) {
+      current = Math.max(0, Math.min(slides.length - 1, i));
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+      counter.textContent = (current + 1) + ' / ' + slides.length;
+      document.body.classList.toggle('on-brand', slides[current].classList.contains('brand'));
+      history.replaceState(null, '', '#' + (current + 1));
+    }
+
+    // Click a slide's image to see it full size in a dialog; click or Esc closes it.
+    const zoom = document.createElement('dialog');
+    zoom.className = 'zoom';
+    zoom.appendChild(document.createElement('img'));
+    document.body.appendChild(zoom);
+    zoom.addEventListener('click', () => zoom.close());
+    document.querySelectorAll('.slide img').forEach((img) => {
+      img.addEventListener('click', () => {
+        zoom.firstChild.src = img.src;
+        zoom.firstChild.alt = img.alt;
+        zoom.showModal();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (zoom.open) return; // Esc closes the dialog; other keys don't move the deck under it
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key) {
+        case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+          e.preventDefault(); show(current + 1); break;
+        case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+          e.preventDefault(); show(current - 1); break;
+        case 'Home': show(0); break;
+        case 'End': show(slides.length - 1); break;
+        case 'f': case 'F':
+          if (document.fullscreenElement) document.exitFullscreen();
+          else document.documentElement.requestFullscreen();
+          break;
+        // Speaker notes overlay, for rehearsing with the time estimates.
+        case 'n': case 'N':
+          document.body.classList.toggle('show-notes'); break;
+      }
+    });
+
+    // Click right two-thirds of the screen to advance, left third to go back.
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('a, button, input, select, textarea, pre, .notes, .slide img, dialog')) return;
+      show(e.clientX > window.innerWidth / 3 ? current + 1 : current - 1);
+    });
+
+    const fromHash = parseInt(location.hash.slice(1), 10);
+    show(Number.isFinite(fromHash) ? fromHash - 1 : 0);
+  })();
+</script>
+</body>
+</html>
