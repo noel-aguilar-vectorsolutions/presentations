@@ -252,22 +252,26 @@
   <section class="slide">
     <p class="kicker">Why the choice matters</p>
     <h2>One strategy per repository, and it rarely changes</h2>
-    <ul class="tight">
-      <li>A repository uses exactly one strategy, for all its modules</li>
-      <li>None is the default: it depends on how your team works</li>
-    </ul>
-    <p class="muted" style="margin:1em 0 .5em">Two questions decide most of it:</p>
-    <div class="cards two">
+    <p style="font-size:.8em; max-width:none; margin:0 0 .8em">A <strong>module</strong> is a folder versioned and released as one unit: one version, one line of tags. By default it's the whole repository; a monorepo has several. A repository uses <strong>one strategy for all its modules</strong>, and none is the default.</p>
+    <div class="cards dense" style="font-size:.72em">
       <div class="card">
         <span class="num">1</span>
-        <h3>Do you keep merging to <code>main</code> while a version is in regression?</h3>
+        <h3>Is every merge a release candidate, or do you collect features and plan a release?</h3>
+        <p>Every merge: <strong>Continuous versioning</strong>. Collect and plan: <strong>release-please</strong>.</p>
       </div>
       <div class="card">
         <span class="num">2</span>
-        <h3>Must you hotfix production without shipping unreleased work?</h3>
+        <h3>release-please: do you keep merging to <code>main</code> while a version is in regression?</h3>
+        <p>Yes: <strong>release branches</strong>.</p>
+      </div>
+      <div class="card">
+        <span class="num">3</span>
+        <h3>release-please: must you hotfix production without shipping unreleased work?</h3>
+        <p>Often: <strong>release branches</strong>. Rarely: <strong>plain</strong>.</p>
       </div>
     </div>
-    <aside class="notes">⏱ 1.25 min. Source: cicd-standards docs/ci/versioning.md, "Which versioning strategy should a repository use?". A repository MUST use exactly one strategy, for all its modules. Between plain release-please and release branches, switching is one PR (the caller workflow and config files), once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please, the tags are compatible by design, but no repository has made that move yet. So in practice teams rarely switch once they've started. That's why it's worth deciding deliberately now. Keep the two questions in mind: every strategy slide comes back to them, and the decision flow at the end starts from them. Ask the room to think about how their team handles regression today.</aside>
+    <p class="callout" style="font-size:.8em">Cut release branches today? That's release-please with release branches. Continuous versioning has none.</p>
+    <aside class="notes">⏱ 1.25 min. Source: cicd-standards docs/ci/versioning.md, "Which versioning strategy should a repository use?" and "What is a module?". A module is a folder of the repository versioned and released as one unit: one version, one line of tags (v1.2.0, or echo@v1.2.0 in a monorepo). It may produce several images; it is not an image, a .NET project or a Helm chart. With no configuration, the module is the whole repository. The first question splits the two models: Continuous versioning makes every build on main a release candidate as it lands; release-please collects features or epics in a release PR and someone decides when to cut. Questions 2 and 3 only apply under release-please, and choose between its two strategies. A team that cuts release branches by hand today lands on release-please with release branches; Continuous versioning never has release branches. A repository MUST use exactly one strategy, for all its modules. Between plain release-please and release branches, switching is one PR (the caller workflow and config files), once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please, the tags are compatible by design, but no repository has made that move yet. So in practice teams rarely switch once they've started. That's why it's worth deciding deliberately now. Keep the two questions in mind: every strategy slide comes back to them, and the decision flow at the end starts from them. Ask the room to think about how their team handles regression today.</aside>
   </section>
 
   <!-- ============ 2. Recap ============ -->
@@ -332,15 +336,15 @@
 
   <section class="slide">
     <p class="kicker">Recap</p>
-    <h2>Cut is not released</h2>
+    <h2>A version tag marks a release candidate, not a release</h2>
     <div class="cards two">
       <div class="card">
-        <h3>Cut</h3>
-        <p>The git tag is created, <code>v1.4.0</code>. A release candidate, on its way to <code>staging</code>.</p>
+        <h3>Cut: a candidate</h3>
+        <p>The git tag <code>v1.4.0</code> is created. That build is now a release candidate, on its way to <code>staging</code>. Nothing is in production yet.</p>
       </div>
       <div class="card">
-        <h3>Released</h3>
-        <p>The ArgoCD Promotion Manager promotes that version to <code>production</code>.</p>
+        <h3>Released: in production</h3>
+        <p>The ArgoCD Promotion Manager promotes that same candidate to <code>production</code>.</p>
       </div>
     </div>
     <p class="callout"><code>1.4.0</code> fails regression, <code>1.4.1</code> passes, and production goes straight to <code>1.4.1</code>. Normal, in every strategy.</p>
@@ -349,18 +353,18 @@
 
   <section class="slide">
     <p class="kicker">Recap</p>
-    <h2>One tag names one build, and never moves</h2>
+    <h2>Every image gets a build tag; only a version gets a git tag</h2>
     <div class="mid">
       <table>
-        <thead><tr><th>What</th><th>Tag</th></tr></thead>
+        <thead><tr><th>What was built</th><th>Image tag</th><th>Git tag</th></tr></thead>
         <tbody>
-          <tr><td>A build of <code>feat/DAR-102-search</code>, run 107</td><td><code>feat-DAR-102-search-107</code>: <code>&lt;branch&gt;-&lt;run&gt;</code></td></tr>
-          <tr><td>A version</td><td>git tag <code>v1.4.0</code>, image <code>1.4.0</code></td></tr>
-          <tr><td>Moving tags</td><td><span class="no">None</span>: no <code>latest</code>, no <code>main</code></td></tr>
+          <tr><td>Branch <code>feat/DAR-102-search</code>, run 107</td><td><code>feat-DAR-102-search-107</code></td><td><span class="no">none</span></td></tr>
+          <tr><td>A version, <code>1.4.0</code></td><td><code>1.4.0</code></td><td><code>v1.4.0</code></td></tr>
+          <tr><td>Moving tags</td><td><span class="no">never</span>: no <code>latest</code>, no <code>main</code></td><td><span class="no">never</span> moved or deleted</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted">Which build gets the version tag differs by strategy: coming up.</p>
+    <p class="muted">A branch build's tag, <code>&lt;branch&gt;-&lt;run&gt;</code>, is on the image in the registry only. Which build gets the version differs by strategy: coming up.</p>
     <aside class="notes">⏱ 0.75 min. Source: versioning.md, "How are builds tagged?" and "What do versions and version tags look like?". The branch name with each / replaced by -, then the workflow run number. Version tags are vX.Y.Z in git (the git convention, and release-please's default) and bare X.Y.Z on images and packages. A monorepo module's git tag carries its component: echo@v1.4.0. The difference by strategy, for later: under Continuous versioning, the build on main is tagged with the version it cuts. Under release-please, every build is branch-run, main included (main-412), and the version is added to that image at release.</aside>
   </section>
 
@@ -396,7 +400,7 @@
       </div>
     </div>
     <p class="callout">A monorepo has one version line per module, tagged <code>&lt;component&gt;@v1.4.0</code>.</p>
-    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 33). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 36). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
   </section>
 
   <section class="slide">
@@ -413,7 +417,7 @@
       </table>
     </div>
     <p class="callout">Release branches change the rules on purpose: <code>main</code> cuts minors, each release branch cuts patches.</p>
-    <aside class="notes">⏱ 1.75 min. The core slide. Sources: versioning.md's comparison table; versioning-release-please.md, "Why does main never release a patch version?", "What if a feature lands on a release branch?" and "How is a breaking change released?". Release branches come on slide 22: each minor version gets a branch, release/X.Y.x, that cuts its patches; this slide previews their rules. Walk it column by column. Continuous versioning and plain release-please bump by type, the textbook way. With release branches, main uses always-bump-minor, a release-please setting: even a release holding only fixes is the next minor (why: slide 23). Each release branch uses always-bump-patch, so anything merged there, even a feat:, ships as the next patch; a job comments on the PR to warn, but doesn't block it. The cost of always-bump-minor is that a breaking change no longer becomes a major by itself: it needs Release-As: X.0.0, a footer line in a PR description that sets the next version, on a PR to main. The release PR version check, a required check on every release PR (release-please / release-pr-version-check), fails main's release PR until it's there. That check applies from 1.0.0 on; below 1.0 a minor is the right bump for a breaking change. A plain release-please team may choose always-bump-minor too, and then gets the same rule.</aside>
+    <aside class="notes">⏱ 1.75 min. The core slide. Sources: versioning.md's comparison table; versioning-release-please.md, "Why does main never release a patch version?", "What if a feature lands on a release branch?" and "How is a breaking change released?". Release branches come on slide 25: each minor version gets a branch, release/X.Y.x, that cuts its patches; this slide previews their rules. Walk it column by column. Continuous versioning and plain release-please bump by type, the textbook way. With release branches, main uses always-bump-minor, a release-please setting: even a release holding only fixes is the next minor (why: slide 26). Each release branch uses always-bump-patch, so anything merged there, even a feat:, ships as the next patch; a job comments on the PR to warn, but doesn't block it. The cost of always-bump-minor is that a breaking change no longer becomes a major by itself: it needs Release-As: X.0.0, a footer line in a PR description that sets the next version, on a PR to main. The release PR version check, a required check on every release PR (release-please / release-pr-version-check), fails main's release PR until it's there. That check applies from 1.0.0 on; below 1.0 a minor is the right bump for a breaking change. A plain release-please team may choose always-bump-minor too, and then gets the same rule.</aside>
   </section>
 
   <section class="slide">
@@ -441,6 +445,14 @@
   </section>
 
   <!-- ============ 4. Continuous versioning ============ -->
+
+  <section class="slide brand">
+    <p class="kicker">Strategy 1 of 3</p>
+    <h2 style="font-size:2.4em">Continuous versioning</h2>
+    <p class="big">Every merge to <code>main</code> that builds is a release candidate, tagged as it lands.</p>
+    <p class="muted">No release PR and no release branches: <code>main</code> is the only long-lived branch.</p>
+    <aside class="notes">⏱ 0.25 min. Section opener. Say the one line, then move on: the next slides show how it works, then the live demo.</aside>
+  </section>
 
   <section class="slide">
     <p class="kicker">Continuous versioning</p>
@@ -485,7 +497,7 @@
       <li>On <code>main</code>: compute the version, push image <code>1.4.0</code>, then tag <code>v1.4.0</code></li>
       <li>Only changed modules build; a docs-only change builds nothing</li>
     </ul>
-    <aside class="notes">⏱ 1.5 min. Source: versioning-continuous.md, "How does Continuous versioning work, end to end?". One workflow, ci.yml, calling app-ci. Its first job, Plan builds, runs compute-versions: which modules did this push change, and, on main, what's each one's next version, from the PR titles merged since that module's last tag. Each changed module is built once, tested and scanned as built, and only then pushed; on main, the git tag is created last, so a tag never points at a version whose images are missing or untested. A change that touches no module (docs, workflows, a chart outside the module folder) builds nothing. Main builds run one at a time, so versions are cut in order.</aside>
+    <aside class="notes">⏱ 1.25 min. Source: versioning-continuous.md, "How does Continuous versioning work, end to end?". One workflow, ci.yml, calling app-ci. Its first job, Plan builds, runs compute-versions: which modules did this push change, and, on main, what's each one's next version, from the PR titles merged since that module's last tag. Each changed module is built once, tested and scanned as built, and only then pushed; on main, the git tag is created last, so a tag never points at a version whose images are missing or untested. A change that touches no module (docs, workflows, a chart outside the module folder) builds nothing. Main builds run one at a time, so versions are cut in order.</aside>
   </section>
 
   <section class="slide">
@@ -545,7 +557,7 @@
       <li>The staged <code>feat:</code> PR: checks green, branch image <code>feat-…-&lt;run&gt;</code>, no version</li>
       <li>Squash-merge it first, then talk over the run</li>
       <li>The <code>main</code> build's Plan builds job picks the next minor</li>
-      <li>The image is pushed with that version, then the commit is tagged, about 5 minutes after the merge</li>
+      <li>The image is pushed with that version, then the merge commit is tagged</li>
     </ol>
     <aside class="notes">⏱ 5.5 min including the run. Live: PR #59, feat(echo): stamp the demo build 20261118-001425, staged and CLEAN on 2026-11-17, branch image noel/echo.api:feat-demo-20261118-001425-145. Expected: tag v1.5.0 and image noel/echo.api:1.5.0 (the rehearsal's #58 cut v1.4.0). Don't merge anything else into the repository before the session; leave PR #16 alone. The run takes the whole slot, so merge first and talk over it. Tabs open: PR #59, the Actions tab, Code → Tags, and the ECR repository for the echo image. Click by click: (1) Within the first minute, on PR #59: point at the title, feat(echo): …, the two required checks, CI / CI result and PR / Lint PR title, and the branch image feat-demo-20261118-001425-145: no version anywhere. (2) Click "Squash and merge"; point out the commit title box is the PR title; confirm. (3) Actions → build-test-publish on main: the run starts about 6 seconds after the merge. Open Plan builds (done at about +15 s): the module src/Services/Echo changed, "version": "1.5.0", "tag": "v1.5.0", "create-tag": true (compute-versions reads the titles merged since v1.4.0). (4) While it runs, say: only the changed module builds; the image is built once and tested as built; nothing is pushed until the tests and scans pass; the git tag comes last, so a tag never points at a missing image; there's no release PR, no changelog, no GitHub Release here; a docs-only change would build nothing at all. Rehearsal timings to pace by: Build done at about 1.8 minutes, Unit and Integration Test at about 4.3, Publish images at about 4.9, and Tag release commit about 5 minutes after the merge, its log saying Created tag 'v1.5.0' on &lt;sha&gt;; the run ends at about 5.2 minutes. (5) When it's green: Code → Tags shows v1.5.0 on the merge commit; ECR (or the run summary's digests) shows noel/echo.api:1.5.0. Harmless warnings: "Retention days cannot be greater than the maximum…" and ASP0014. If it fails, or isn't done when the slot is, go to the next slide (backup).</aside>
   </section>
@@ -592,6 +604,14 @@
   </section>
 
   <!-- ============ 5. Plain release-please ============ -->
+
+  <section class="slide brand">
+    <p class="kicker">Strategy 2 of 3</p>
+    <h2 style="font-size:2.4em">Plain release-please</h2>
+    <p class="big">Merges collect in a release PR; merging it cuts the version.</p>
+    <p class="muted"><code>main</code> is the only long-lived branch; a <code>hotfix/X.Y.x</code> appears only when production needs one.</p>
+    <aside class="notes">⏱ 0.25 min. Section opener. Say the one line, then move on: the next slides show how it works, then the live demo.</aside>
+  </section>
 
   <section class="slide">
     <p class="kicker">Plain release-please</p>
@@ -643,7 +663,7 @@
       <li>Merging the release PR tags <code>vX.Y.Z</code> and writes a GitHub Release</li>
       <li>The hotfix button cuts <code>hotfix/X.Y.x</code> from the production tag, <strong>only</strong> when <code>main</code> has moved on</li>
     </ul>
-    <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "How does plain release-please work?" and "Hotfix branches". After every releasable merge (feat:, fix:, a breaking change), release-please updates one standing release PR with the next version and its changelog. Nothing is cut until a person merges it: anyone with merge rights merges main's release PR, since it goes to staging first. A hotfix branch is rare: if nothing has merged to main since the production version was cut, the hotfix goes on main like any fix. Only when main has unreleased work does the Technical Owner (the project lead, or whoever decides for the repository) press the hotfix button, Actions → release-please → Run workflow, with the production tag; the workflow creates hotfix/X.Y.x from it, and the fix goes in by PR. Seconds after the fix merges, the forward-port job opens its port back to main: a forward-port is a PR that carries the same change to main. Only the Technical Owner merges the branch's release PR, which cuts the next patch, because it goes to production. While the hotfix branch exists, main can't release on its line: the version check blocks it, so main's next release is a minor (with only fixes on main, the check asks for a Release-As).</aside>
+    <aside class="notes">⏱ 1.25 min. Source: versioning-release-please.md, "How does plain release-please work?" and "Hotfix branches". After every releasable merge (feat:, fix:, a breaking change), release-please updates one standing release PR with the next version and its changelog. Nothing is cut until a person merges it: anyone with merge rights merges main's release PR, since it goes to staging first. A hotfix branch is rare: if nothing has merged to main since the production version was cut, the hotfix goes on main like any fix. Only when main has unreleased work does the Technical Owner (the project lead, or whoever decides for the repository) press the hotfix button, Actions → release-please → Run workflow, with the production tag; the workflow creates hotfix/X.Y.x from it, and the fix goes in by PR. Seconds after the fix merges, the forward-port job opens its port back to main: a forward-port is a PR that carries the same change to main. Only the Technical Owner merges the branch's release PR, which cuts the next patch, because it goes to production. While the hotfix branch exists, main can't release on its line: the version check blocks it, so main's next release is a minor (with only fixes on main, the check asks for a Release-As).</aside>
   </section>
 
   <section class="slide">
@@ -746,6 +766,14 @@ tagged noel/echo.api:4.6.0 on sha256:164e1e48…</pre>
 
   <!-- ============ 6. release-please with release branches ============ -->
 
+  <section class="slide brand">
+    <p class="kicker">Strategy 3 of 3</p>
+    <h2 style="font-size:2.4em">release-please with release branches</h2>
+    <p class="big">Plain release-please, plus a <code>release/X.Y.x</code> branch for every minor version.</p>
+    <p class="muted">Regression fixes and hotfixes go there while <code>main</code> keeps moving.</p>
+    <aside class="notes">⏱ 0.25 min. Section opener. Say the one line, then move on: the next slides show how it works, then the live demo.</aside>
+  </section>
+
   <section class="slide">
     <p class="kicker">release-please with release branches</p>
     <h2>Every minor version gets its own <code>release/X.Y.x</code></h2>
@@ -796,7 +824,7 @@ tagged noel/echo.api:4.6.0 on sha256:164e1e48…</pre>
       <li>Fixes go on the release branch as patches; it's never merged back</li>
       <li>Several can be live: production on <code>1.0.2</code>, <code>1.1.0</code> in regression</li>
     </ul>
-    <aside class="notes">⏱ 1.25 min. Source: versioning-release-please.md, "How do release branches work?". The x is literal: one branch per minor version, release/1.0.x holds 1.0.1, 1.0.2 and so on. The workflow (app-release-please-release-branches.yml) creates it, as the release App, right after main's release PR cuts X.Y.0: the release commit plus one commit with the branch's own config. Nobody creates one by hand. The release branch first stabilizes the version while it's in regression, then maintains it with hotfixes once it's in production, so there's no separate hotfix branch under this strategy. It's never merged into main: each fix reaches main by its own forward-port PR. Anyone with merge rights merges main's release PR; only the Technical Owner merges a release branch's release PR, because a patch can be a production hotfix. The Technical Owner deletes the branch once production runs a later minor. In industry terms: trunk-based development with branch-for-release. Teams that cut release/1.0.0 branches by hand today land here.</aside>
+    <aside class="notes">⏱ 1 min. Source: versioning-release-please.md, "How do release branches work?". The x is literal: one branch per minor version, release/1.0.x holds 1.0.1, 1.0.2 and so on. The workflow (app-release-please-release-branches.yml) creates it, as the release App, right after main's release PR cuts X.Y.0: the release commit plus one commit with the branch's own config. Nobody creates one by hand. The release branch first stabilizes the version while it's in regression, then maintains it with hotfixes once it's in production, so there's no separate hotfix branch under this strategy. It's never merged into main: each fix reaches main by its own forward-port PR. Anyone with merge rights merges main's release PR; only the Technical Owner merges a release branch's release PR, because a patch can be a production hotfix. The Technical Owner deletes the branch once production runs a later minor. In industry terms: trunk-based development with branch-for-release. Teams that cut release/1.0.0 branches by hand today land here.</aside>
   </section>
 
   <section class="slide">
@@ -1146,7 +1174,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <li>Continuous versioning (SemVer format): a merge commit in a module's range fails the build</li>
       <li>release-please requires it, or <code>wip</code> and <code>fix typo</code> land in the changelog and can change the bump</li>
     </ul>
-    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 38). The templates also turn on "Automatically delete head branches".</aside>
+    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 41). The templates also turn on "Automatically delete head branches".</aside>
   </section>
 
   <section class="slide">
@@ -1263,7 +1291,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <li>Under release-please the running image doesn't know its version: inject it at deploy time</li>
       <li>release-please monorepos: modules can't share code <em>directly</em>, except inside one <code>linked-versions</code> group</li>
     </ul>
-    <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "Known limitations". (1) A push to release/1.0.x runs release-please.yml as it is on that branch, so when the library pin moves on main, open a chore: PR into each live branch too. (2) The release App has no Workflows permission, on purpose, so it can't push anything under .github/workflows/: the forward-port job labels such a change forward-port-needed (slide 24), and GitHub refuses the hotfix job a branch at a commit whose workflow files differ from today's, which is usual for an older release; a Technical Owner then pushes the branch with the same config commit (the how-to has the steps). (3) The Releases API marks every new release Latest, and release-please can't turn it off. (4) The image was built as main-412 and re-tagged, never rebuilt, so a version file inside it (package.json, version.txt) holds the previous version: an app that reports its version gets it from the deployment; how is not standardized yet (the CI → GitOps Handoff standard, Planned, will say). (5) release-please releases a module only for commits in its own folder, so a change only to shared code releases nothing; the build's shared-code guard fails such a reference. That shape fits Continuous versioning.</aside>
+    <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "Known limitations". (1) A push to release/1.0.x runs release-please.yml as it is on that branch, so when the library pin moves on main, open a chore: PR into each live branch too. (2) The release App has no Workflows permission, on purpose, so it can't push anything under .github/workflows/: the forward-port job labels such a change forward-port-needed (slide 27), and GitHub refuses the hotfix job a branch at a commit whose workflow files differ from today's, which is usual for an older release; a Technical Owner then pushes the branch with the same config commit (the how-to has the steps). (3) The Releases API marks every new release Latest, and release-please can't turn it off. (4) The image was built as main-412 and re-tagged, never rebuilt, so a version file inside it (package.json, version.txt) holds the previous version: an app that reports its version gets it from the deployment; how is not standardized yet (the CI → GitOps Handoff standard, Planned, will say). (5) release-please releases a module only for commits in its own folder, so a change only to shared code releases nothing; the build's shared-code guard fails such a reference. That shape fits Continuous versioning.</aside>
   </section>
 
   <!-- ============ 10. The legacy four-part format ============ -->
@@ -1299,14 +1327,14 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
   <section class="slide">
     <p class="kicker">Choosing</p>
     <h2>Three questions pick the strategy</h2>
-    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Ship each change as it lands? Yes: Continuous versioning. No: is it a monorepo whose independently released modules share code? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
+    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose independently released modules share code? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
       <defs>
         <marker id="decision-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
       </defs>
       <!-- questions -->
       <rect class="dg-box" x="10" y="20" width="210" height="110" rx="12"/>
-      <text class="dg-text" x="115" y="70" text-anchor="middle">Ship each change</text>
-      <text class="dg-text" x="115" y="94" text-anchor="middle">as it lands?</text>
+      <text class="dg-text" x="115" y="70" text-anchor="middle">Every merge a</text>
+      <text class="dg-text" x="115" y="94" text-anchor="middle">release candidate?</text>
       <rect class="dg-box" x="270" y="20" width="250" height="110" rx="12"/>
       <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo whose</text>
       <text class="dg-text" x="395" y="81" text-anchor="middle">independently released</text>
@@ -1340,7 +1368,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <text class="dg-text" x="900" y="279" text-anchor="middle">release-please</text>
     </svg>
     <p class="callout">None is the default. It's your team's call, and it's hard to change later.</p>
-    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Do you ship each change as it lands? Continuous versioning. If not, you batch changes and test them before release, so it is release-please, unless (2) it is a monorepo whose independently released modules share code: then Continuous versioning, because release-please cannot release a change to code a module does not own; a team routed there gives up the hotfix path, so keep main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression.</aside>
+    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose independently released modules share code: then Continuous versioning, because release-please cannot release a change to code a module does not own; a team routed there gives up the hotfix path, so keep main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression.</aside>
   </section>
 
   <section class="slide cheat">

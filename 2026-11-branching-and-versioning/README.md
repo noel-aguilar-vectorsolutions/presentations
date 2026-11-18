@@ -23,18 +23,18 @@ in a live demo, with a backup slide.
 | 1 | Title, agenda, and why the choice matters | 1–3 | 2 |
 | 2 | Recap from *Moving to GitHub Actions* | 4–8 | 5 |
 | 3 | SemVer, and how each strategy applies it | 9–11 | 3.75 |
-| 4 | Continuous versioning, then demo 1 (+ backup) | 12–16 | 4 + 5.5 |
-| 5 | Plain release-please, then demo 2 (+ backup) | 17–21 | 4 + 5.5 |
-| 6 | release-please with release branches, then demo 3 (+ backup) | 22–27 | 4 + 5.5 |
-| 7 | Side by side, and three scenarios | 28–31 | 5 |
-| 8 | Rulesets and squash merge | 32–34 | 2.75 |
-| 9 | Gotchas | 35–37 | 3.5 |
-| 10 | The legacy four-part format | 38 | 1.5 |
-| 11 | Decision flow, cheat sheet, where to read more | 39–41 | 3 |
-| — | Questions | 42 | 5 |
-| | **Total** | **42** | **60** |
+| 4 | Continuous versioning (opener), then demo 1 (+ backup) | 12–17 | 4 + 5.5 |
+| 5 | Plain release-please (opener), then demo 2 (+ backup) | 18–23 | 4 + 5.5 |
+| 6 | release-please with release branches (opener), then demo 3 (+ backup) | 24–30 | 4 + 5.5 |
+| 7 | Side by side, and three scenarios | 31–34 | 5 |
+| 8 | Rulesets and squash merge | 35–37 | 2.75 |
+| 9 | Gotchas | 38–40 | 3.5 |
+| 10 | The legacy four-part format | 41 | 1.5 |
+| 11 | Decision flow, cheat sheet, where to read more | 42–44 | 3 |
+| — | Questions | 45 | 5 |
+| | **Total** | **45** | **60** |
 
-The backup slides (16, 21, 27) carry 0 minutes: they are shown only if a live demo fails, in its
+The backup slides (17, 23, 30) carry 0 minutes: they are shown only if a live demo fails, in its
 5.5 minutes. The review (below) freed 2 minutes, given to the three demos (+0.5 each) and
 Q&A (+0.5).
 
