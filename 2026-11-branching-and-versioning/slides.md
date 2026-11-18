@@ -468,23 +468,34 @@ Plain release-please, plus a `release/X.Y.x` branch for every minor version.
 
 *release-please with release branches*
 
-- `main` uses `always-bump-minor`: even a release of only fixes is the next minor
-- Each release branch uses `always-bump-patch`: every release from it is the next patch
+- `always-bump-minor` on `main`: every release is the next minor, whatever the titles say
+- `always-bump-patch` on each release branch: every release is the next patch
 
-**Speaker notes:** ⏱ 1 min. Source: versioning-release-please.md, "Why does main never release a patch version?". release-please computes main's version from main alone and can't see release branches. Without always-bump-minor, main would propose 1.1.1 after 1.1.0, the very version release/1.1.x releases next; whichever merged second would find its tag taken, and that branch's changelog goes wrong. The workflow fails if main's config lacks always-bump-minor. The price, majors by Release-As (slide 10), is small: a major is a deliberate, rare event anyway.
+| After `v1.1.0`, merged | Branch | release-please's default | With the setting |
+|---|---|---|---|
+| only `fix:` PRs (forward-ports) | `main` | `1.1.1`: clashes with `release/1.1.x` | `1.2.0` |
+| a `fix:` | `release/1.1.x` | `1.1.1` | `1.1.1` |
+| a `feat:` (by mistake) | `release/1.1.x` | `1.2.0`: clashes with `main` | `1.1.1`, with a warning |
+| a `feat!:` | `main` | `2.0.0` | `1.2.0`: add `Release-As: 2.0.0` |
+
+> Each version line owns its numbers: `main` the minors, `release/1.1.x` the `1.1.*` patches.
+
+**Speaker notes:** ⏱ 1 min. Source: versioning-release-please.md, "Why does main never release a patch version?" and "What if a feature lands on a release branch?". Walk the table top to bottom. Row 1: after 1.1.0 is cut, release/1.1.x exists and owns 1.1.1, 1.1.2 and so on. If main has only merged fixes, typically the forward-ports of fixes from the release branch, release-please's default would propose 1.1.1 for main too. always-bump-minor makes it 1.2.0. Row 2: the release branch's own fixes release as 1.1.1, as expected. Row 3: a feat: merged into a release branch by mistake would by default become 1.2.0, the version main will cut; always-bump-patch keeps it a patch, and the workflow warns on the PR so the Technical Owner can revert it. Row 4: the price, a breaking change on main still proposes a minor, so a major needs Release-As; the version check fails the release PR until it's there. release-please computes main's version from main alone and can't see release branches. Without always-bump-minor, main would propose 1.1.1 after 1.1.0, the very version release/1.1.x releases next; whichever merged second would find its tag taken, and that branch's changelog goes wrong. The workflow fails if main's config lacks always-bump-minor. The price, majors by Release-As (slide 10), is small: a major is a deliberate, rare event anyway.
 
 ---
 
-## 27. Forward-ports open themselves [new since October]
+## 27. Forward-ports open themselves
 
 *release-please with release branches*
+
+A **forward-port** is an ordinary PR that carries **one** change from a release branch to `main`, reviewed and squash-merged like any other. Not a cherry-pick pushed straight to `main`, and never a merge of the release branch back.
 
 - Any PR merged into a release or hotfix branch: the release App opens a PR with the same title to `main`, and to each newer release branch
 - The developer merges each, or closes it saying why
 - A release PR is blocked while a port into its branch is missing
 - A change to a workflow file is labelled `forward-port-needed` and ported by hand
 
-**Speaker notes:** ⏱ 0.75 min. Correction to the October deck, which said forward-ports were opened by hand until an action existed (COREOPS-4416). Now both release-please workflows run a forward-port job on every push to a release/** or hotfix/** branch (github-actions app-release-please-release-branches.yml and app-release-please.yml, release/forward-port). It cherry-picks the change onto a branch named forward-port/\<source>/\<pr>/\<target> cut from the target, opens the PR as the release App with the original's title, labels it forward-port and asks the original author for a review. One change per PR, never bundled. Where it can't (a conflict, or a file under .github/workflows/, which the App has no permission to push), it labels the original forward-port-needed and its comment names the branch to use for the hand-made port. The release PR version check holds the target's release PR until every port is merged or closed. Demo 3 shows one, already open: it opened seconds after the fix merged into release/1.0.x, not when the release PR merged.
+**Speaker notes:** ⏱ 0.75 min. Source: versioning-release-please.md, "What is a forward-port?". It copies the change, not the branch: nothing else on the release branch comes with it. Because it's a normal PR, it gets the same checks, review and squash merge as any other, and its title lands in main's changelog. Under the hood the action builds the port's branch with git cherry-pick, so if someone asks: yes, but the result is a PR that a developer reviews and merges, not a commit pushed onto main. Correction to the October deck, which said forward-ports were opened by hand until an action existed (COREOPS-4416). Now both release-please workflows run a forward-port job on every push to a release/** or hotfix/** branch (github-actions app-release-please-release-branches.yml and app-release-please.yml, release/forward-port). It cherry-picks the change onto a branch named forward-port/\<source>/\<pr>/\<target> cut from the target, opens the PR as the release App with the original's title, labels it forward-port and asks the original author for a review. One change per PR, never bundled. Where it can't (a conflict, or a file under .github/workflows/, which the App has no permission to push), it labels the original forward-port-needed and its comment names the branch to use for the hand-made port. The release PR version check holds the target's release PR until every port is merged or closed. Demo 3 shows one, already open: it opened seconds after the fix merged into release/1.0.x, not when the release PR merged.
 
 ---
 
@@ -504,7 +515,7 @@ Plain release-please, plus a `release/X.Y.x` branch for every minor version.
 - `always-bump-minor` in `release-please-config.json`
 - Each release branch gets its own config, written by the workflow
 
-> The cost: a forward-port PR for every fix, and a release PR per branch for the Technical Owner.
+> The cost is people's time, not setup: every fix's forward-port PR needs a review and merge, and each live release branch has its own release PR for the Technical Owner to approve and merge. The App opens them all.
 
 **Speaker notes:** ⏱ 1 min. Sources: versioning.md, "Which versioning strategy should a repository use?"; versioning-release-please.md, "What must a repository have?". The branch config is release-please-config.release-branch.json, with always-bump-patch; it must never be on main. A repository with release branches never has hotfix/** branches: the release branch of the version in production takes the hotfix. Multi-module release branches (release/\<component>-X.Y.x) are in the standard but haven't been run on a live repository yet: the first monorepo to use them checks them on its first release.
 
