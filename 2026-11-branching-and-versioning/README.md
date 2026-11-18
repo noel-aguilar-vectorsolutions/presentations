@@ -21,20 +21,20 @@ in a live demo, with a backup slide.
 | # | Section | Slides | Minutes |
 |---|---|---|---|
 | 1 | Title, agenda, and why the choice matters | 1–3 | 2 |
-| 2 | Recap from *Moving to GitHub Actions*, and Conventional Commits | 4–9 | 5.25 |
-| 3 | SemVer, and how each strategy applies it | 10–12 | 3.75 |
-| 4 | Continuous versioning (opener), then demo 1 (+ backup) | 13–18 | 4 + 5.5 |
-| 5 | Plain release-please (opener), then demo 2 (+ backup) | 19–24 | 4 + 5.5 |
-| 6 | release-please with release branches (opener), then demo 3 (+ backup) | 25–31 | 4 + 5.5 |
-| 7 | Side by side, monorepos, three scenarios, and the decision flow | 32–37 | 7 |
-| 8 | Rulesets and squash merge | 38–40 | 2.75 |
-| 9 | Gotchas | 41–43 | 3.5 |
-| 10 | The legacy four-part format | 44 | 1.5 |
-| 11 | Cheat sheet, where to read more | 45–46 | 1.75 |
-| — | Questions | 47 | 4 |
-| | **Total** | **47** | **60** |
+| 2 | Recap from *Moving to GitHub Actions*, and Conventional Commits | 4–8 | 5.25 |
+| 3 | SemVer, and how each strategy applies it | 9–11 | 3.75 |
+| 4 | Continuous versioning (opener), then demo 1 (+ backup) | 12–17 | 4 + 5.5 |
+| 5 | Plain release-please (opener), then demo 2 (+ backup) | 18–23 | 4 + 5.5 |
+| 6 | release-please with release branches (opener), then demo 3 (+ backup) | 24–30 | 4 + 5.5 |
+| 7 | Side by side, monorepos, three scenarios, and the decision flow | 31–36 | 7 |
+| 8 | Rulesets and squash merge | 37–39 | 2.75 |
+| 9 | Gotchas | 40–42 | 3.5 |
+| 10 | The legacy four-part format | 43 | 1.5 |
+| 11 | Cheat sheet, where to read more | 44–45 | 1.75 |
+| — | Questions | 46 | 4 |
+| | **Total** | **46** | **60** |
 
-The backup slides (18, 24, 31) carry 0 minutes: they are shown only if a live demo fails, in its
+The backup slides (17, 23, 30) carry 0 minutes: they are shown only if a live demo fails, in its
 5.5 minutes. The review (below) freed 2 minutes, given to the three demos (+0.5 each) and
 Q&A (+0.5).
 
