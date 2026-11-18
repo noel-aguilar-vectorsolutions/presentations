@@ -534,7 +534,7 @@
         <ul class="tight">
           <li>Each merged change goes to <code>staging</code> on its own</li>
           <li><code>main</code> is kept releasable: small PRs, feature flags</li>
-          <li>A service monorepo whose modules share files or code (<code>extra-paths</code>)</li>
+          <li>A service monorepo whose modules share files or code directly (<code>extra-paths</code>)</li>
         </ul>
       </div>
       <div class="card">
@@ -949,7 +949,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
         <tbody>
           <tr><th>Batching</th><td>None: one merge, one version</td><td>The release PR collects everything since the last version</td><td>As plain</td></tr>
           <tr><th>Changelog</th><td class="na">None: git tags are the record</td><td><code>CHANGELOG.md</code> and a GitHub Release</td><td>As plain</td></tr>
-          <tr><th>Monorepo fit</th><td>Modules that share files or code</td><td>Self-contained modules, or one <code>linked-versions</code> group</td><td>As plain; per-module release branches not yet proven live</td></tr>
+          <tr><th>Monorepo fit</th><td>Modules that share files or code directly</td><td>Self-contained modules, shared code as a published package, or one <code>linked-versions</code> group</td><td>As plain; per-module release branches not yet proven live</td></tr>
           <tr><th>Merge method</th><td>Squash (four-part legacy: merge commits allowed)</td><td>Squash only</td><td>Squash only</td></tr>
         </tbody>
       </table>
@@ -1340,7 +1340,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
   <section class="slide">
     <p class="kicker">Choosing</p>
     <h2>Three questions pick the strategy</h2>
-    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose independently released modules share code? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
+    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules use shared code directly, not as a published package? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
       <defs>
         <marker id="decision-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
       </defs>
@@ -1349,9 +1349,9 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <text class="dg-text" x="115" y="70" text-anchor="middle">Every merge a</text>
       <text class="dg-text" x="115" y="94" text-anchor="middle">release candidate?</text>
       <rect class="dg-box" x="270" y="20" width="250" height="110" rx="12"/>
-      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo whose</text>
-      <text class="dg-text" x="395" y="81" text-anchor="middle">independently released</text>
-      <text class="dg-text" x="395" y="104" text-anchor="middle">modules share code?</text>
+      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo whose modules</text>
+      <text class="dg-text" x="395" y="81" text-anchor="middle">use shared code directly,</text>
+      <text class="dg-text" x="395" y="104" text-anchor="middle">not as a package?</text>
       <rect class="dg-box" x="570" y="20" width="420" height="110" rx="12"/>
       <text class="dg-text" x="780" y="58" text-anchor="middle">Keep merging to main during</text>
       <text class="dg-text" x="780" y="81" text-anchor="middle">regression, or hotfix production</text>
@@ -1380,8 +1380,8 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <text class="dg-text" x="900" y="255" text-anchor="middle">plain</text>
       <text class="dg-text" x="900" y="279" text-anchor="middle">release-please</text>
     </svg>
-    <p class="callout">None is the default. It's your team's call, and it's hard to change later.</p>
-    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose independently released modules share code: then Continuous versioning, because release-please cannot release a change to code a module does not own; a team routed there gives up the hotfix path, so keep main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression.</aside>
+    <p class="callout">None is the default. It's your team's call: switching later is doable, but it's work, so choose on purpose.</p>
+    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules use shared code directly, from a folder in the repository rather than as a published package: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
   </section>
 
   <section class="slide cheat">

@@ -232,7 +232,7 @@ Every merge to `main` that builds is a release candidate, tagged as it lands.
 
 - Each merged change goes to `staging` on its own
 - `main` is kept releasable: small PRs, feature flags
-- A service monorepo whose modules share files or code (`extra-paths`)
+- A service monorepo whose modules share files or code directly (`extra-paths`)
 
 **The files**
 
@@ -581,7 +581,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…
 |---|---|---|---|
 | Batching | None: one merge, one version | The release PR collects everything since the last version | As plain |
 | Changelog | None: git tags are the record | `CHANGELOG.md` and a GitHub Release | As plain |
-| Monorepo fit | Modules that share files or code | Self-contained modules, or one `linked-versions` group | As plain; per-module release branches not yet proven live |
+| Monorepo fit | Modules that share files or code directly | Self-contained modules, shared code as a published package, or one `linked-versions` group | As plain; per-module release branches not yet proven live |
 | Merge method | Squash (four-part legacy: merge commits allowed) | Squash only | Squash only |
 
 **Speaker notes:** ⏱ 1 min. Source: versioning.md, the comparison table under "Which versioning strategy should a repository use?" and the monorepo section. Four rows the scenarios that follow don't show; the rest of the comparison is in the scenarios and on the cheat sheet. Batching and the changelog are what a team gets from a release PR. Monorepo: release-please releases a module only for commits in its own folder, so modules that share code directly fit Continuous versioning; release-please fits self-contained modules, or one linked-versions group (modules that always share one version). Both give a module the same tags, component@vX.Y.Z. Not proven yet: release branches per module, and a linked-versions group with release PRs of its own (the workflows refuse that combination).
@@ -747,13 +747,13 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…
 
 *Choosing*
 
-*Diagram:* Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose independently released modules share code? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.
+*Diagram:* Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules use shared code directly, not as a published package? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.
 
-*Diagram labels:* Every merge a · release candidate? · Monorepo whose · independently released · modules share code? · Keep merging to main during · regression, or hotfix production · without shipping unreleased work, often? · no · no · yes · yes · yes · no · Continuous versioning · release-please with · release branches · plain · release-please
+*Diagram labels:* Every merge a · release candidate? · Monorepo whose modules · use shared code directly, · not as a package? · Keep merging to main during · regression, or hotfix production · without shipping unreleased work, often? · no · no · yes · yes · yes · no · Continuous versioning · release-please with · release branches · plain · release-please
 
-> None is the default. It's your team's call, and it's hard to change later.
+> None is the default. It's your team's call: switching later is doable, but it's work, so choose on purpose.
 
-**Speaker notes:** ⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose independently released modules share code: then Continuous versioning, because release-please cannot release a change to code a module does not own; a team routed there gives up the hotfix path, so keep main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression.
+**Speaker notes:** ⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules use shared code directly, from a folder in the repository rather than as a published package: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.
 
 ---
 
