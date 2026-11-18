@@ -243,8 +243,8 @@
     <ol>
       <li><strong>Refresher:</strong> squash merge, PR titles, SemVer</li>
       <li><strong>The three strategies</strong>, each with a live demo: Continuous versioning, plain release-please, release-please with release branches</li>
-      <li><strong>Side by side:</strong> three scenarios, rulesets, gotchas, the legacy format</li>
-      <li><strong>Choosing:</strong> a decision flow and a one-page cheat sheet</li>
+      <li><strong>Side by side:</strong> monorepos, three scenarios, and a decision flow; then rulesets, gotchas, the legacy format</li>
+      <li><strong>Wrap-up:</strong> a one-page cheat sheet and where to read more</li>
     </ol>
     <aside class="notes">⏱ 0.5 min. The thread: by the end, each tech lead should be able to say which strategy fits their product, and why. None of the three is the default, so this is about informing the choice, not selling one.</aside>
   </section>
@@ -271,7 +271,7 @@
       </div>
     </div>
     <p class="callout" style="font-size:.8em">Cut release branches today? That's release-please with release branches. Continuous versioning has none.</p>
-    <aside class="notes">⏱ 1.25 min. Source: cicd-standards docs/ci/versioning.md, "Which versioning strategy should a repository use?" and "What is a module?". A module is a folder of the repository versioned and released as one unit: one version, one line of tags (v1.2.0, or echo@v1.2.0 in a monorepo). It may produce several images; it is not an image, a .NET project or a Helm chart. With no configuration, the module is the whole repository. The first question splits the two models: Continuous versioning makes every build on main a release candidate as it lands; release-please collects features or epics in a release PR and someone decides when to cut. Questions 2 and 3 only apply under release-please, and choose between its two strategies. A team that cuts release branches by hand today lands on release-please with release branches; Continuous versioning never has release branches. A repository MUST use exactly one strategy, for all its modules. Between plain release-please and release branches, switching is one PR (the caller workflow and config files), once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please, the tags are compatible by design, but no repository has made that move yet. So in practice teams rarely switch once they've started. That's why it's worth deciding deliberately now. Keep the two questions in mind: every strategy slide comes back to them, and the decision flow at the end starts from them. Ask the room to think about how their team handles regression today.</aside>
+    <aside class="notes">⏱ 1.25 min. Source: cicd-standards docs/ci/versioning.md, "Which versioning strategy should a repository use?" and "What is a module?". A module is a folder of the repository versioned and released as one unit: one version, one line of tags (v1.2.0, or echo@v1.2.0 in a monorepo). It may produce several images; it is not an image, a .NET project or a Helm chart. With no configuration, the module is the whole repository. The first question splits the two models: Continuous versioning makes every build on main a release candidate as it lands; release-please collects features or epics in a release PR and someone decides when to cut. Questions 2 and 3 only apply under release-please, and choose between its two strategies. A team that cuts release branches by hand today lands on release-please with release branches; Continuous versioning never has release branches. A repository MUST use exactly one strategy, for all its modules. Between plain release-please and release branches, switching is one PR (the caller workflow and config files), once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please, the tags are compatible by design, but no repository has made that move yet. So in practice teams rarely switch once they've started. That's why it's worth deciding deliberately now. Keep these questions in mind: every strategy slide comes back to them, and the decision flow after the scenarios turns them into a choice. Ask the room to think about how their team handles regression today.</aside>
   </section>
 
   <!-- ============ 2. Recap ============ -->
@@ -400,7 +400,7 @@
       </div>
     </div>
     <p class="callout">A monorepo has one version line per module, tagged <code>&lt;component&gt;@v1.4.0</code>.</p>
-    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 37). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 38). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
   </section>
 
   <section class="slide">
@@ -938,7 +938,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
     <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: release PR #7 cut v1.0.1 (live, #10 cuts v1.0.2; live port #11, main's release PR #4). Walk it in order. (1) Left column, what was open before the merge. #7, the release branch's release PR, base release/1.0.x, with fix #5 in its changelog. #6, the forward-port of fix #5 to main: same title, opened by the release App 17 seconds after #5 merged into release/1.0.x, long before anyone touched the release PR. Ports open when a change merges into a release branch, never when the release PR merges. The App also commented on #5, listing every target. #4, main's release PR, proposing 1.1.0 from feat #3. (2) Right column, after merging #7: the run started at +11 s; tag v1.0.1 and its GitHub Release at +19 s; the forward-port job ran and skipped the release PR itself; retag was done at +42 s, adding 1.0.1 to the images the release-1.0.x-11 build had tested; release-branch skipped, since only an X.Y.0 creates a branch. (3) main's release PR still proposed 1.1.0: main and the release line move separately, and port #6, once merged, joins 1.1.0. Captures: demo/captures/demo3-rehearsal-*.</aside>
   </section>
 
-  <!-- ============ 7. Side by side, and three scenarios ============ -->
+  <!-- ============ 7. Side by side, monorepos, three scenarios, and the decision flow ============ -->
 
   <section class="slide">
     <p class="kicker">Side by side</p>
@@ -1196,6 +1196,53 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
     <aside class="notes">⏱ 1.25 min. Source: versioning-release-please.md, "How is a breaking change released?". In every strategy, the breaking change merges with an honest title, feat!: or a BREAKING CHANGE: footer, so the changelog lists it under Breaking Changes. Continuous versioning: the merge itself cuts 2.0.0. Plain: release-please proposes 2.0.0 by itself, unless the team chose always-bump-minor. Release branches: release-please proposes only 1.5.0, and the release PR version check fails it, naming the footer to use; put "Release-As: 2.0.0" in the description of that PR or the next one to main; merging the release PR cuts 2.0.0 and creates release/2.0.x. A feat!: that wasn't really breaking is confirmed as a minor with Release-As: 1.5.0, which also passes the check.</aside>
   </section>
 
+  <section class="slide">
+    <p class="kicker">Choosing</p>
+    <h2>Three questions pick the strategy</h2>
+    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules share code directly but release on their own schedules? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
+      <defs>
+        <marker id="decision-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- questions -->
+      <rect class="dg-box" x="10" y="20" width="210" height="110" rx="12"/>
+      <text class="dg-text" x="115" y="70" text-anchor="middle">Every merge a</text>
+      <text class="dg-text" x="115" y="94" text-anchor="middle">release candidate?</text>
+      <rect class="dg-box" x="270" y="20" width="250" height="110" rx="12"/>
+      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo: modules share</text>
+      <text class="dg-text" x="395" y="81" text-anchor="middle">code directly, but release</text>
+      <text class="dg-text" x="395" y="104" text-anchor="middle">on their own schedules?</text>
+      <rect class="dg-box" x="570" y="20" width="420" height="110" rx="12"/>
+      <text class="dg-text" x="780" y="58" text-anchor="middle">Keep merging to main during</text>
+      <text class="dg-text" x="780" y="81" text-anchor="middle">regression, or hotfix production</text>
+      <text class="dg-text" x="780" y="104" text-anchor="middle">without shipping unreleased work, often?</text>
+      <!-- no: next question -->
+      <line class="dg-line" x1="220" y1="75" x2="268" y2="75" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="244" y="66" text-anchor="middle">no</text>
+      <line class="dg-line" x1="520" y1="75" x2="568" y2="75" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="544" y="66" text-anchor="middle">no</text>
+      <!-- answers -->
+      <line class="dg-line" x1="115" y1="130" x2="115" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="125" y="180">yes</text>
+      <line class="dg-line" x1="395" y1="130" x2="395" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="405" y="180">yes</text>
+      <line class="dg-line" x1="680" y1="130" x2="680" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="690" y="180">yes</text>
+      <line class="dg-line" x1="900" y1="130" x2="900" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="910" y="180">no</text>
+      <!-- outcomes -->
+      <rect class="dg-box accent" x="10" y="220" width="510" height="80" rx="12"/>
+      <text class="dg-text" x="265" y="266" text-anchor="middle">Continuous versioning</text>
+      <rect class="dg-box accent" x="570" y="220" width="220" height="80" rx="12"/>
+      <text class="dg-text" x="680" y="255" text-anchor="middle">release-please with</text>
+      <text class="dg-text" x="680" y="279" text-anchor="middle">release branches</text>
+      <rect class="dg-box accent" x="810" y="220" width="180" height="80" rx="12"/>
+      <text class="dg-text" x="900" y="255" text-anchor="middle">plain</text>
+      <text class="dg-text" x="900" y="279" text-anchor="middle">release-please</text>
+    </svg>
+    <p class="callout">None is the default. It's your team's call: switching later is doable, but it's work, so choose on purpose.</p>
+    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules share code directly, from a folder in the repository rather than as a published package, and must release on their own schedules: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
+  </section>
+
   <!-- ============ 8. Rulesets and squash merge ============ -->
 
   <section class="slide">
@@ -1205,7 +1252,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <li>Continuous versioning (SemVer format): a merge commit in a module's range fails the build</li>
       <li>release-please requires it, or <code>wip</code> and <code>fix typo</code> land in the changelog and can change the bump</li>
     </ul>
-    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 42). The templates also turn on "Automatically delete head branches".</aside>
+    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 43). The templates also turn on "Automatically delete head branches".</aside>
   </section>
 
   <section class="slide">
@@ -1353,54 +1400,8 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
     <aside class="notes">⏱ 1.5 min. Say up front: this matters only if your repo came from dynamo-config; everyone else can relax for a minute. Source: versioning-continuous.md, "When may a repository use the four-part format?" and "How does a module move to SemVer?". It's Continuous versioning's build-metadata format, kept for repositories migrating from dynamo-config. The standard says it's legacy, not recommended, and will be deprecated in the future; no date is set, so don't promise one. A new repository should not use it; one that does states why in its README. X.Y.Z moves only for feat, fix, perf and breaking changes; anything else gets a new N. Why 1.4.3 and not 1.4.2: SemVer ranks 1.4.2 below 1.4.2.2087, so the first SemVer build fails without an initial-version above it. Remove initial-version once that first tag exists, and remove run-number-offset once no module uses the four-part format. If time allows, open poc_echo_server_dotnet_legacy's tags page.</aside>
   </section>
 
-  <!-- ============ 11. Decision flow, cheat sheet, where to read more ============ -->
+  <!-- ============ 11. Cheat sheet, where to read more ============ -->
 
-  <section class="slide">
-    <p class="kicker">Choosing</p>
-    <h2>Three questions pick the strategy</h2>
-    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules share code directly but release on their own schedules? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
-      <defs>
-        <marker id="decision-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
-      </defs>
-      <!-- questions -->
-      <rect class="dg-box" x="10" y="20" width="210" height="110" rx="12"/>
-      <text class="dg-text" x="115" y="70" text-anchor="middle">Every merge a</text>
-      <text class="dg-text" x="115" y="94" text-anchor="middle">release candidate?</text>
-      <rect class="dg-box" x="270" y="20" width="250" height="110" rx="12"/>
-      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo: modules share</text>
-      <text class="dg-text" x="395" y="81" text-anchor="middle">code directly, but release</text>
-      <text class="dg-text" x="395" y="104" text-anchor="middle">on their own schedules?</text>
-      <rect class="dg-box" x="570" y="20" width="420" height="110" rx="12"/>
-      <text class="dg-text" x="780" y="58" text-anchor="middle">Keep merging to main during</text>
-      <text class="dg-text" x="780" y="81" text-anchor="middle">regression, or hotfix production</text>
-      <text class="dg-text" x="780" y="104" text-anchor="middle">without shipping unreleased work, often?</text>
-      <!-- no: next question -->
-      <line class="dg-line" x1="220" y1="75" x2="268" y2="75" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="244" y="66" text-anchor="middle">no</text>
-      <line class="dg-line" x1="520" y1="75" x2="568" y2="75" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="544" y="66" text-anchor="middle">no</text>
-      <!-- answers -->
-      <line class="dg-line" x1="115" y1="130" x2="115" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="125" y="180">yes</text>
-      <line class="dg-line" x1="395" y1="130" x2="395" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="405" y="180">yes</text>
-      <line class="dg-line" x1="680" y1="130" x2="680" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="690" y="180">yes</text>
-      <line class="dg-line" x1="900" y1="130" x2="900" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="910" y="180">no</text>
-      <!-- outcomes -->
-      <rect class="dg-box accent" x="10" y="220" width="510" height="80" rx="12"/>
-      <text class="dg-text" x="265" y="266" text-anchor="middle">Continuous versioning</text>
-      <rect class="dg-box accent" x="570" y="220" width="220" height="80" rx="12"/>
-      <text class="dg-text" x="680" y="255" text-anchor="middle">release-please with</text>
-      <text class="dg-text" x="680" y="279" text-anchor="middle">release branches</text>
-      <rect class="dg-box accent" x="810" y="220" width="180" height="80" rx="12"/>
-      <text class="dg-text" x="900" y="255" text-anchor="middle">plain</text>
-      <text class="dg-text" x="900" y="279" text-anchor="middle">release-please</text>
-    </svg>
-    <p class="callout">None is the default. It's your team's call: switching later is doable, but it's work, so choose on purpose.</p>
-    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules share code directly, from a folder in the repository rather than as a published package, and must release on their own schedules: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
-  </section>
 
   <section class="slide cheat">
     <p class="kicker">Cheat sheet</p>

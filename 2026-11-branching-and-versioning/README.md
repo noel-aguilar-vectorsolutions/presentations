@@ -26,11 +26,11 @@ in a live demo, with a backup slide.
 | 4 | Continuous versioning (opener), then demo 1 (+ backup) | 12–17 | 4 + 5.5 |
 | 5 | Plain release-please (opener), then demo 2 (+ backup) | 18–23 | 4 + 5.5 |
 | 6 | release-please with release branches (opener), then demo 3 (+ backup) | 24–30 | 4 + 5.5 |
-| 7 | Side by side, monorepos, and three scenarios | 31–35 | 5.75 |
-| 8 | Rulesets and squash merge | 36–38 | 2.75 |
-| 9 | Gotchas | 39–41 | 3.5 |
-| 10 | The legacy four-part format | 42 | 1.5 |
-| 11 | Decision flow, cheat sheet, where to read more | 43–45 | 3 |
+| 7 | Side by side, monorepos, three scenarios, and the decision flow | 31–36 | 7 |
+| 8 | Rulesets and squash merge | 37–39 | 2.75 |
+| 9 | Gotchas | 40–42 | 3.5 |
+| 10 | The legacy four-part format | 43 | 1.5 |
+| 11 | Cheat sheet, where to read more | 44–45 | 1.75 |
 | — | Questions | 46 | 4.25 |
 | | **Total** | **46** | **60** |
 
