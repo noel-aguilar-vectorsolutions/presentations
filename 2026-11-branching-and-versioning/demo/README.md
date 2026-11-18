@@ -6,7 +6,8 @@ state: run the stage script again afterwards.
 
 ## Expected live versions (staged 2026-11-17)
 
-Checked `CLEAN` at 2026-11-17 19:50 (ET). Don't merge anything else into these repositories before
+Checked `CLEAN` at 2026-11-17 19:50 (ET), and again at 2026-11-18 12:09 (ET) after the builds were
+trimmed (#61, #254) and the staged PRs updated. Don't merge anything else into these repositories before
 the session.
 
 | Demo | Merge live | Last version | Expected live |
@@ -37,6 +38,7 @@ Note: the spec's numbers (`1.4.0`, `4.6.0`, `1.0.1`) were the rehearsal's; the l
 | `stage-demo2.sh` | `release-please-demo` | One `feat(echo)` and one `fix(echo)` PR **merged** to `main`, `main`'s builds finished, the release PR updated and `CLEAN`. | ~25 min |
 | `stage-demo3.sh` | `release-please-branches-demo` | Merges any open `forward-port/…` PR into `main`; one `feat(echo)` **merged** to `main` (unreleased); one `fix(echo)` **merged** into the newest `release/X.Y.x`; that branch's release PR `CLEAN`. | ~30 min |
 | `capture-live.sh N <PR> [label]` | any | After a merge: waits for the tag, Release, branch and run, prints the seconds after the merge each appeared, saves `captures/demoN-<label>-*`. | until the run ends |
+| `fast-build.sh trim\|restore <repo> [PR…]` | `poc_echo_server_dotnet`, `release-please-demo` | `trim`: a `chore(ci):` PR to `build-config.json` (only `Echo.Api`, no unit or integration tests), merged; then each staged PR given is updated with `main` and re-checked. `restore`: puts the previous `build-config.json` back the same way. Neither cuts a version or releases anything. | ~3–6 min |
 | `lib.sh` | | Shared helpers, sourced. | |
 
 Each stage script ends by printing the PR to merge live and the version it will produce, and fails
@@ -62,15 +64,19 @@ Times are from the rehearsal, counted from the click on **Squash and merge**.
 2. **Squash and merge.** Open **Actions → build-test-publish** on `main` (it starts within ~6 s).
 3. While it runs, open **CI / Plan builds**: the `versions` step's output shows the module changed
    and `"version": "<next minor>"`, `"tag": "v<next minor>"`, `"create-tag": true`.
-4. Build ~1.5 min, Unit and Integration Test ~2.5 min, Publish images at ~+4.5 min,
-   **Tag release commit** at **~+5 min**: the job log says `Created tag 'vX.Y.0' on <sha>`.
-   Then **Code → Tags** shows it. No release PR, no changelog, no GitHub Release.
+4. With the trimmed build (#61): Build ~1 min, Publish images ~+1.5 min, **Tag release commit** at
+   **~+2 min**: the job log says `Created tag 'vX.Y.0' on <sha>`. Then **Code → Tags** shows it.
+   No release PR, no changelog, no GitHub Release.
 
-**Takes ~5 min end to end**, the whole demo slot. Merge first, then talk over the run; or show the
-rehearsal's run (captures) if time is short.
+**Takes ~2 min end to end** while the build is trimmed (the PR build of #59 took 1:34); the
+rehearsal's full build took ~5 min. Merge first, then talk over the run.
 
 ### Demo 2, plain release-please (`release-please-demo`)
 
+0. Optional, at the start of the section: merge the staged fix
+   [#252](https://github.com/VectorLearning/release-please-demo/pull/252). release-please rewrites
+   #250 within a minute (still `4.7.0`, a new Bug Fixes line); `main`'s trimmed build of #252 takes
+   ~2 min. Merge #250 only once its checks are green again. Skipped, #250 is ready as it is.
 1. Open the release PR: title `chore(main): release echo X.Y.Z`, body = the changelog with the
    staged `feat` and `fix`. Point at `.release-please-manifest.json` and `CHANGELOG.md` in
    **Files changed**.
@@ -114,6 +120,9 @@ Ports open when a change merges to the release branch, not when the release PR m
 
 ## After the session (or a rehearsal)
 
+- **Restore the full builds** (trimmed on 2026-11-18 for the session):
+  `./fast-build.sh restore VectorLearning/poc_echo_server_dotnet` and
+  `./fast-build.sh restore VectorLearning/release-please-demo`.
 - Demo 3: merge the forward-port PR into `main` (or let `stage-demo3.sh` do it at its start).
 - Run the three stage scripts again to re-stage; they print the next expected versions. Update the
   speaker notes' numbers from that output.
