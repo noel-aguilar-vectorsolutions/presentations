@@ -26,13 +26,13 @@ in a live demo, with a backup slide.
 | 4 | Continuous versioning (opener), then demo 1 (+ backup) | 12–17 | 4 + 5.5 |
 | 5 | Plain release-please (opener), then demo 2 (+ backup) | 18–23 | 4 + 5.5 |
 | 6 | release-please with release branches (opener), then demo 3 (+ backup) | 24–30 | 4 + 5.5 |
-| 7 | Side by side, and three scenarios | 31–34 | 5 |
-| 8 | Rulesets and squash merge | 35–37 | 2.75 |
-| 9 | Gotchas | 38–40 | 3.5 |
-| 10 | The legacy four-part format | 41 | 1.5 |
-| 11 | Decision flow, cheat sheet, where to read more | 42–44 | 3 |
-| — | Questions | 45 | 5 |
-| | **Total** | **45** | **60** |
+| 7 | Side by side, monorepos, and three scenarios | 31–35 | 5.75 |
+| 8 | Rulesets and squash merge | 36–38 | 2.75 |
+| 9 | Gotchas | 39–41 | 3.5 |
+| 10 | The legacy four-part format | 42 | 1.5 |
+| 11 | Decision flow, cheat sheet, where to read more | 43–45 | 3 |
+| — | Questions | 46 | 4.25 |
+| | **Total** | **46** | **60** |
 
 The backup slides (17, 23, 30) carry 0 minutes: they are shown only if a live demo fails, in its
 5.5 minutes. The review (below) freed 2 minutes, given to the three demos (+0.5 each) and

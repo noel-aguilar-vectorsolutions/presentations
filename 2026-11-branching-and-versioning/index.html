@@ -400,7 +400,7 @@
       </div>
     </div>
     <p class="callout">A monorepo has one version line per module, tagged <code>&lt;component&gt;@v1.4.0</code>.</p>
-    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 36). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 37). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
   </section>
 
   <section class="slide">
@@ -949,12 +949,30 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
         <tbody>
           <tr><th>Batching</th><td>None: one merge, one version</td><td>The release PR collects everything since the last version</td><td>As plain</td></tr>
           <tr><th>Changelog</th><td class="na">None: git tags are the record</td><td><code>CHANGELOG.md</code> and a GitHub Release</td><td>As plain</td></tr>
-          <tr><th>Monorepo fit</th><td>Modules that share files or code directly</td><td>Self-contained modules, shared code as a published package, or one <code>linked-versions</code> group</td><td>As plain; per-module release branches not yet proven live</td></tr>
+          <tr><th>Monorepo fit</th><td>Modules that share files or code directly</td><td>Self-contained modules, shared code as a published package, or one <code>linked-versions</code> group that releases together</td><td>As plain; per-module release branches not yet proven live</td></tr>
           <tr><th>Merge method</th><td>Squash (four-part legacy: merge commits allowed)</td><td>Squash only</td><td>Squash only</td></tr>
         </tbody>
       </table>
     </div>
     <aside class="notes">⏱ 1 min. Source: versioning.md, the comparison table under "Which versioning strategy should a repository use?" and the monorepo section. Four rows the scenarios that follow don't show; the rest of the comparison is in the scenarios and on the cheat sheet. Batching and the changelog are what a team gets from a release PR. Monorepo: release-please releases a module only for commits in its own folder, so modules that share code directly fit Continuous versioning; release-please fits self-contained modules, or one linked-versions group (modules that always share one version). Both give a module the same tags, component@vX.Y.Z. Not proven yet: release branches per module, and a linked-versions group with release PRs of its own (the workflows refuse that combination).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Side by side</p>
+    <h2>Monorepos work in both: shared code decides</h2>
+    <div class="dense" style="font-size:.7em">
+      <table>
+        <thead><tr><th>Modules share code…</th><th class="cv">Continuous versioning</th><th class="rp">release-please (either strategy)</th></tr></thead>
+        <tbody>
+          <tr><th>Not at all</th><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+          <tr><th>As a published, versioned package</th><td><span class="yes">✓</span></td><td><span class="yes">✓</span> a consumer bumps the version in its own folder, which releases it</td></tr>
+          <tr><th>Directly, released together</th><td><span class="yes">✓</span> <code>extra-paths</code></td><td><span class="yes">✓</span> one <code>linked-versions</code> group: the modules and the shared folder share one version</td></tr>
+          <tr><th>Directly, released on their own schedules</th><td><span class="yes">✓</span> <code>extra-paths</code></td><td><span class="no">✗</span> a change only to the shared code releases nothing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout" style="font-size:.8em">Proven on <code>release-please-monorepo-demo</code>: a change in <code>src/Shared</code> released alpha, beta and shared as <code>1.1.0</code> together.</p>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "Which model for a repository with several modules (i.e. monorepo)?"; versioning-release-please.md, "How may modules share code?". Why the last row fails: release-please releases a module only for commits that touch files inside its own folder, and has no way to say another folder belongs to it (upstream additional-paths, googleapis/release-please#2534, is unmerged). So a fix only in src/Shared changes what alpha and beta do but releases neither. The linked-versions row works under three conditions: the shared folder is itself a package of the group (a folder no package owns doesn't work, even inside a group); every module that references it is in the group, so they all share one version and release and deploy together; and each referencing module lists the shared folder in extra-paths in version-config.json, so a change there rebuilds it and the re-tag finds an image with the change. The guard release/check-module-references fails the build if any of the three is missing. The trade-off is losing independent releases inside the group: every release bumps every member. Node and Maven workspaces are a narrow exception (node-workspace, maven-workspace plugins release the dependent when its dependency releases). Proof: COREOPS-4612 on release-please-monorepo-demo, release PR #8 proposed alpha, beta and shared 1.1.0, three tags, alpha and beta re-tagged.</aside>
   </section>
 
   <section class="slide">
@@ -1187,7 +1205,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <li>Continuous versioning (SemVer format): a merge commit in a module's range fails the build</li>
       <li>release-please requires it, or <code>wip</code> and <code>fix typo</code> land in the changelog and can change the bump</li>
     </ul>
-    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 41). The templates also turn on "Automatically delete head branches".</aside>
+    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 42). The templates also turn on "Automatically delete head branches".</aside>
   </section>
 
   <section class="slide">
@@ -1302,7 +1320,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <li>The release App can't touch <code>.github/workflows/</code>: those changes are ported by hand, and the hotfix button refuses an older tag whose workflow files differ</li>
       <li>GitHub's "Latest" release is the one created last, maybe a patch on an older line: use the environment's version</li>
       <li>Under release-please the running image doesn't know its version: inject it at deploy time</li>
-      <li>release-please monorepos: modules can't share code <em>directly</em>, except inside one <code>linked-versions</code> group</li>
+      <li>release-please monorepos: modules that share code <em>directly</em> must be one <code>linked-versions</code> group, and release together</li>
     </ul>
     <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "Known limitations". (1) A push to release/1.0.x runs release-please.yml as it is on that branch, so when the library pin moves on main, open a chore: PR into each live branch too. (2) The release App has no Workflows permission, on purpose, so it can't push anything under .github/workflows/: the forward-port job labels such a change forward-port-needed (slide 27), and GitHub refuses the hotfix job a branch at a commit whose workflow files differ from today's, which is usual for an older release; a Technical Owner then pushes the branch with the same config commit (the how-to has the steps). (3) The Releases API marks every new release Latest, and release-please can't turn it off. (4) The image was built as main-412 and re-tagged, never rebuilt, so a version file inside it (package.json, version.txt) holds the previous version: an app that reports its version gets it from the deployment; how is not standardized yet (the CI → GitOps Handoff standard, Planned, will say). (5) release-please releases a module only for commits in its own folder, so a change only to shared code releases nothing; the build's shared-code guard fails such a reference. That shape fits Continuous versioning.</aside>
   </section>
@@ -1340,7 +1358,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
   <section class="slide">
     <p class="kicker">Choosing</p>
     <h2>Three questions pick the strategy</h2>
-    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules use shared code directly, not as a published package? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
+    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules share code directly but release on their own schedules? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
       <defs>
         <marker id="decision-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
       </defs>
@@ -1349,9 +1367,9 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <text class="dg-text" x="115" y="70" text-anchor="middle">Every merge a</text>
       <text class="dg-text" x="115" y="94" text-anchor="middle">release candidate?</text>
       <rect class="dg-box" x="270" y="20" width="250" height="110" rx="12"/>
-      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo whose modules</text>
-      <text class="dg-text" x="395" y="81" text-anchor="middle">use shared code directly,</text>
-      <text class="dg-text" x="395" y="104" text-anchor="middle">not as a package?</text>
+      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo: modules share</text>
+      <text class="dg-text" x="395" y="81" text-anchor="middle">code directly, but release</text>
+      <text class="dg-text" x="395" y="104" text-anchor="middle">on their own schedules?</text>
       <rect class="dg-box" x="570" y="20" width="420" height="110" rx="12"/>
       <text class="dg-text" x="780" y="58" text-anchor="middle">Keep merging to main during</text>
       <text class="dg-text" x="780" y="81" text-anchor="middle">regression, or hotfix production</text>
@@ -1381,7 +1399,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <text class="dg-text" x="900" y="279" text-anchor="middle">release-please</text>
     </svg>
     <p class="callout">None is the default. It's your team's call: switching later is doable, but it's work, so choose on purpose.</p>
-    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules use shared code directly, from a folder in the repository rather than as a published package: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
+    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules share code directly, from a folder in the repository rather than as a published package, and must release on their own schedules: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
   </section>
 
   <section class="slide cheat">
@@ -1438,7 +1456,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
   <section class="slide title-slide brand photo">
     <h2 style="font-size:2.6em">Questions?</h2>
     <p class="muted">Sources are listed in this presentation's README.md</p>
-    <aside class="notes">⏱ 5 min. Likely questions: Can we switch strategy later? (Between plain and release branches: yes, one PR, once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please: the tags are compatible by design, but no repository has done it yet.) Can a monorepo mix strategies? (No: one strategy for all modules.) What about packages? (Built at release from the tag, not re-tagged; the publish job is COREOPS-4658.) Lambdas and SPAs? (Out of scope here; their own session.)</aside>
+    <aside class="notes">⏱ 4.25 min. Likely questions: Can we switch strategy later? (Between plain and release branches: yes, one PR, once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please: the tags are compatible by design, but no repository has done it yet.) Can a monorepo mix strategies? (No: one strategy for all modules.) What about packages? (Built at release from the tag, not re-tagged; the publish job is COREOPS-4658.) Lambdas and SPAs? (Out of scope here; their own session.)</aside>
   </section>
 
 </main>
