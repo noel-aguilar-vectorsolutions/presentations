@@ -107,3 +107,4 @@ one.
 |---|---|---|
 | [Moving to GitHub Actions](moving-to-github-actions/) | For dev teams and leads: what changes moving from CircleCI to GitHub Actions: paved road, versioning, release-please, hardening | 2026-10-27 |
 | [GitHub Org Hardening: Q4 and Q1](2026-11-github-org-hardening/) | For leads and leadership, 15 min: the GitHub org security changes in Q4 2026 (epic COREOPS-4617) and Q1 2027 (planned), and what they ask of teams | 2026-11-09 |
+| [Branching and Versioning: Choosing a Strategy](2026-11-branching-and-versioning/) | For project tech leads, 60 min: Continuous versioning vs plain release-please vs release branches, SemVer per strategy, rulesets, gotchas, live demos | 2026-11-18 |
