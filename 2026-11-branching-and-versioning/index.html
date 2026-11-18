@@ -1282,48 +1282,62 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
   <section class="slide">
     <p class="kicker">Epics that ship together</p>
     <h2>Integration branches: one commit per feature <span class="pill warn">direction</span></h2>
-    <svg class="diagram" viewBox="0 0 1000 290" role="img" aria-label="An integration branch, integration/PROJ-123, is cut from main. Feature PRs feat A, feat B and fix C are squash-merged into it, one commit each, and the branch is kept current by rebasing it on main, never merging main in. When the epic is ready, its PR into main is merged with Rebase and merge, so the three commits land on main one by one, and release-please's next release lists three changelog entries.">
+    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="An epic's integration branch, integration/PROJ-123, is cut from main. Each feature gets its own branch, feat/PROJ-201, feat/PROJ-202 and fix/PROJ-203, cut from the integration branch and squash-merged back into it, so each feature is one commit there: feat A, feat B, fix C. The integration branch is kept current by rebasing it on main, never merging main in. When the epic is ready, its PR into main is merged with Rebase and merge, so the three commits land on main one by one, and release-please's next release lists three changelog entries.">
       <defs>
         <marker id="integration-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
         <marker id="integration-flow-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
       </defs>
       <!-- main -->
-      <text class="dg-mono" x="10" y="75">main</text>
-      <line class="dg-line" x1="70" y1="70" x2="985" y2="70" marker-end="url(#integration-flow-ah)"/>
-      <circle class="dg-dot" cx="110" cy="70" r="9"/>
-      <circle class="dg-dot" cx="170" cy="70" r="9"/>
-      <circle class="dg-dot" cx="420" cy="70" r="9"/>
-      <text class="dg-small" x="420" y="45" text-anchor="middle">other PRs</text>
-      <circle class="dg-dot" cx="620" cy="70" r="9"/>
-      <circle class="dg-dot" cx="680" cy="70" r="9"/>
-      <circle class="dg-dot" cx="740" cy="70" r="9"/>
-      <text class="dg-mono" x="620" y="45" text-anchor="middle">feat A</text>
-      <text class="dg-mono" x="680" y="25" text-anchor="middle">feat B</text>
-      <text class="dg-mono" x="740" y="45" text-anchor="middle">fix C</text>
-      <circle class="dg-dot accent" cx="890" cy="70" r="11"/>
-      <text class="dg-mono" x="890" y="30" text-anchor="middle">release PR</text>
-      <text class="dg-small" x="890" y="50" text-anchor="middle">3 changelog entries</text>
-      <!-- integration branch -->
-      <path class="dg-line accent" d="M170,81 C170,150 200,200 240,200 L460,200"/>
-      <text class="dg-mono" x="190" y="245">integration/PROJ-123</text>
-      <circle class="dg-dot" cx="280" cy="200" r="9"/>
-      <circle class="dg-dot" cx="340" cy="200" r="9"/>
-      <circle class="dg-dot" cx="400" cy="200" r="9"/>
-      <text class="dg-mono" x="280" y="180" text-anchor="middle">feat A</text>
-      <text class="dg-mono" x="340" y="180" text-anchor="middle">feat B</text>
-      <text class="dg-mono" x="400" y="180" text-anchor="middle">fix C</text>
-      <text class="dg-small" x="400" y="245">feature PRs squash-merged, one commit each</text>
-      <text class="dg-small" x="400" y="268">kept current by rebasing on main, never merging main in</text>
+      <text class="dg-mono" x="10" y="65">main</text>
+      <line class="dg-line" x1="70" y1="60" x2="985" y2="60" marker-end="url(#integration-flow-ah)"/>
+      <circle class="dg-dot" cx="110" cy="60" r="9"/>
+      <circle class="dg-dot" cx="160" cy="60" r="9"/>
+      <circle class="dg-dot" cx="470" cy="60" r="9"/>
+      <text class="dg-small" x="470" y="35" text-anchor="middle">other PRs</text>
+      <circle class="dg-dot" cx="720" cy="60" r="9"/>
+      <circle class="dg-dot" cx="785" cy="60" r="9"/>
+      <circle class="dg-dot" cx="850" cy="60" r="9"/>
+      <text class="dg-mono" x="720" y="35" text-anchor="middle">feat A</text>
+      <text class="dg-mono" x="785" y="18" text-anchor="middle">feat B</text>
+      <text class="dg-mono" x="850" y="35" text-anchor="middle">fix C</text>
+      <circle class="dg-dot accent" cx="940" cy="60" r="11"/>
+      <text class="dg-mono" x="940" y="95" text-anchor="middle">release PR</text>
+      <text class="dg-small" x="995" y="117" text-anchor="end">3 changelog entries</text>
+      <!-- the epic's integration branch -->
+      <path class="dg-line accent" d="M160,71 C160,140 180,180 220,180 L640,180"/>
+      <text class="dg-mono" x="30" y="140">integration/</text>
+      <text class="dg-mono" x="30" y="160">PROJ-123</text>
+      <path class="dg-line" d="M240,180 C240,230 250,240 265,240 L305,240 C320,240 330,230 330,192" marker-end="url(#integration-flow-ah)"/>
+      <circle class="dg-dot" cx="270" cy="240" r="6"/>
+      <circle class="dg-dot" cx="300" cy="240" r="6"/>
+      <text class="dg-small" x="285" y="268" text-anchor="middle">feat/PROJ-201</text>
+      <circle class="dg-dot" cx="330" cy="180" r="9"/>
+      <text class="dg-mono" x="330" y="160" text-anchor="middle">feat A</text>
+      <path class="dg-line" d="M360,180 C360,230 370,240 385,240 L425,240 C440,240 450,230 450,192" marker-end="url(#integration-flow-ah)"/>
+      <circle class="dg-dot" cx="390" cy="240" r="6"/>
+      <circle class="dg-dot" cx="420" cy="240" r="6"/>
+      <text class="dg-small" x="405" y="268" text-anchor="middle">feat/PROJ-202</text>
+      <circle class="dg-dot" cx="450" cy="180" r="9"/>
+      <text class="dg-mono" x="450" y="160" text-anchor="middle">feat B</text>
+      <path class="dg-line" d="M480,180 C480,230 490,240 505,240 L545,240 C560,240 570,230 570,192" marker-end="url(#integration-flow-ah)"/>
+      <circle class="dg-dot" cx="510" cy="240" r="6"/>
+      <circle class="dg-dot" cx="540" cy="240" r="6"/>
+      <text class="dg-small" x="525" y="268" text-anchor="middle">fix/PROJ-203</text>
+      <circle class="dg-dot" cx="570" cy="180" r="9"/>
+      <text class="dg-mono" x="570" y="160" text-anchor="middle">fix C</text>
+      <text class="dg-small" x="400" y="300" text-anchor="middle">feature branches: cut from the epic, squash-merged back into it</text>
+      <text class="dg-small" x="610" y="215">rebased on main,</text>
+      <text class="dg-small" x="610" y="235">never merged with it</text>
       <!-- ship -->
-      <path class="dg-line accent dashed" d="M460,200 C540,200 600,150 616,84" marker-end="url(#integration-flow-aha)"/>
-      <text class="dg-small" x="612" y="150">Rebase and merge</text>
+      <path class="dg-line accent dashed" d="M640,180 C690,180 712,130 718,74" marker-end="url(#integration-flow-aha)"/>
+      <text class="dg-small" x="732" y="140">Rebase and merge</text>
     </svg>
     <ul class="tight" style="font-size:.85em">
-      <li>For an epic whose features are incomplete without each other: they wait on <code>integration/&lt;EPIC&gt;</code>, not <code>main</code></li>
+      <li>Each feature branch is cut from <code>integration/&lt;EPIC&gt;</code> and squash-merged back into it, not into <code>main</code></li>
       <li>Ships with <strong>Rebase and merge</strong>: each feature keeps its own Conventional Commit, version bump and changelog line</li>
       <li>The only PR into <code>main</code> that isn't squash-merged; needs ruleset changes first</li>
     </ul>
-    <aside class="notes">⏱ 0.75 min. Source: the presenter's draft, "Integration Branch Workflow" (not yet a standard). Say up front: this is the direction we're heading, not a rule yet. The problem: some teams work on several epics at once, and an epic's features are incomplete without each other, so they can't merge one by one to main (anything merged to main ships in the next version). Squashing the whole epic into main would collapse every feature into one commit: one changelog entry, one bump, lost history. The idea: integration/PROJ-123, cut from the latest main. Feature PRs target it and are squash-merged, each with a Conventional Commit title, so each feature is one commit. The branch is kept current by rebasing on main (Update branch → Update with rebase, or git rebase origin/main and git push --force-with-lease), never by merging main in, so its history stays linear. When the epic is ready: a final rebase, check the PR's commit list is one Conventional Commit per feature and no merge commits, then Rebase and merge, not squash; delete the branch. release-please then lists each feature separately and bumps by the highest. If someone squash-merges it by mistake, put a BEGIN_COMMIT_OVERRIDE … END_COMMIT_OVERRIDE block in the merged PR's description, one line per change, before the release PR merges: release-please uses those lines instead. Under Continuous versioning it works too, but gains less: the rebase-merge pushes the commits together, main builds once at the head and cuts one version, with the highest bump. What it needs before it's a standard: main allowing rebase merge (today every repository is squash-only, in the templates and the branch rulesets) and linear history; a ruleset for integration/** that is squash-only, linear, and allows force push for the rebase; and the PR-title check on PRs into integration/**. GitHub can't restrict a merge method to one PR, so once rebase is allowed on main, keeping it to integration PRs is discipline, or a required check that wants a rebase-merge label as a deliberate pause. Rebase and merge creates new commits, so rebuild from main; never promote an image built on the integration branch (build once, promote many still holds, from main). Not a release branch: a release branch stabilizes a version already cut; an integration branch holds work that hasn't reached main. Until this lands, the options are keeping the PRs unmerged or merging behind a feature flag that's off.</aside>
+    <aside class="notes">⏱ 0.75 min. Source: the presenter's draft, "Integration Branch Workflow" (not yet a standard). Say up front: this is the direction we're heading, not a rule yet. The problem: some teams work on several epics at once, and an epic's features are incomplete without each other, so they can't merge one by one to main (anything merged to main ships in the next version). Squashing the whole epic into main would collapse every feature into one commit: one changelog entry, one bump, lost history. The idea: integration/PROJ-123, cut from the latest main. Each feature branch (feat/PROJ-201 and so on) is cut from the integration branch, and its PR targets the integration branch and is squash-merged back into it, each with a Conventional Commit title, so each feature is one commit. The branch is kept current by rebasing on main (Update branch → Update with rebase, or git rebase origin/main and git push --force-with-lease), never by merging main in, so its history stays linear. When the epic is ready: a final rebase, check the PR's commit list is one Conventional Commit per feature and no merge commits, then Rebase and merge, not squash; delete the branch. release-please then lists each feature separately and bumps by the highest. If someone squash-merges it by mistake, put a BEGIN_COMMIT_OVERRIDE … END_COMMIT_OVERRIDE block in the merged PR's description, one line per change, before the release PR merges: release-please uses those lines instead. Under Continuous versioning it works too, but gains less: the rebase-merge pushes the commits together, main builds once at the head and cuts one version, with the highest bump. What it needs before it's a standard: main allowing rebase merge (today every repository is squash-only, in the templates and the branch rulesets) and linear history; a ruleset for integration/** that is squash-only, linear, and allows force push for the rebase; and the PR-title check on PRs into integration/**. GitHub can't restrict a merge method to one PR, so once rebase is allowed on main, keeping it to integration PRs is discipline, or a required check that wants a rebase-merge label as a deliberate pause. Rebase and merge creates new commits, so rebuild from main; never promote an image built on the integration branch (build once, promote many still holds, from main). Not a release branch: a release branch stabilizes a version already cut; an integration branch holds work that hasn't reached main. Until this lands, the options are keeping the PRs unmerged or merging behind a feature flag that's off.</aside>
   </section>
 
   <!-- ============ 8. Rulesets and squash merge ============ -->
