@@ -26,7 +26,7 @@ in a live demo, with a backup slide.
 | 4 | Continuous versioning (opener), then demo 1 (+ backup) | 13–18 | 4 + 5.5 |
 | 5 | Plain release-please (opener), then demo 2 (+ backup) | 19–24 | 4 + 5.5 |
 | 6 | release-please with release branches (opener), then demo 3 (+ backup) | 25–31 | 4 + 5.5 |
-| 7 | Side by side, monorepos, three scenarios, the decision flow, and integration branches (direction) | 32–38 | 7.75 |
+| 7 | Side by side, monorepos, three scenarios, the decision flow, and integration branches (coming) | 32–38 | 7.75 |
 | 8 | Rulesets and squash merge | 39–41 | 2.75 |
 | 9 | Gotchas | 42–44 | 3.25 |
 | 10 | The legacy four-part format | 45 | 1.5 |

@@ -708,7 +708,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…
 
 ---
 
-## 38. Integration branches: one commit per feature [direction]
+## 38. Integration branches: one commit per feature [coming]
 
 *Epics that ship together*
 
