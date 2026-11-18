@@ -1,0 +1,6 @@
+# demo 1, VectorLearning/poc_echo_server_dotnet#58 merged at 2026-11-18T00:08:18Z as 4ffffff
++6s  ci.yml run started: https://github.com/VectorLearning/poc_echo_server_dotnet/actions/runs/44205320537
++300s  tag v1.4.0 (from the run log: "Created tag 'v1.4.0' on 4ffffff" at 00:13:18Z; the capture script missed it in a poll race, since fixed)
++314s  ci.yml run finished: success
+
+captures: /Users/noelaguilar/workspaces/cowork/presentations/2026-11-branching-and-versioning/demo/captures/demo1-rehearsal-*

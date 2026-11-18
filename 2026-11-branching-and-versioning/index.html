@@ -201,8 +201,19 @@
   .captions .rp, .slide thead th.rp { border-top-color: var(--b-cyan); }
   .captions .rb, .slide thead th.rb { border-top-color: var(--b-mid); }
   .slide td.na { color: var(--muted); }
-  /* Backup slides: the rehearsal captures replace this box */
-  .placeholder { border: 2px dashed var(--border); border-radius: 12px; min-height: 40vh; display: grid; place-items: center; color: var(--muted); max-width: none; margin: 0; }
+  /* Backup slides: the rehearsal's captures, rebuilt as HTML (.dense is .62em; nothing here goes below .55em) */
+  .backup-label { margin: -.35em 0 .8em; }
+  .backup-label .pill { font-size: .7em; }
+  .backup h3 { margin: .7em 0 .25em; }
+  .backup > div > h3:first-child { margin-top: 0; }
+  .backup p { margin: .25em 0 .45em; }
+  .backup .pill { font-size: .9em; margin-left: .4em; }
+  .backup pre.log { font-size: .9em; margin: .5em 0; padding: .55em .8em; white-space: pre-wrap; }
+  .backup td:first-child { white-space: nowrap; }
+  .backup .changelog { padding: .5em .9em; margin: .4em 0 .6em; box-shadow: none; }
+  .backup .changelog p { margin: .15em 0; }
+  .backup .changelog .cl-head { margin-top: .4em; font-weight: 700; color: var(--heading); }
+  .backup .changelog ul { margin: 0; }
   /* Cheat sheet: one slide that also prints as one page */
   .cheat .kicker { margin-bottom: .4em; }
   .cheat h2 { margin-bottom: .35em; }
@@ -532,19 +543,52 @@
     <p class="muted"><code>poc_echo_server_dotnet</code>, the .NET pilot</p>
     <ol>
       <li>The staged <code>feat:</code> PR: checks green, branch image <code>feat-…-&lt;run&gt;</code>, no version</li>
-      <li>Squash-merge it</li>
+      <li>Squash-merge it first, then talk over the run</li>
       <li>The <code>main</code> build's Plan builds job picks the next minor</li>
-      <li>The image is pushed with that version, then the commit is tagged</li>
+      <li>The image is pushed with that version, then the commit is tagged, about 5 minutes after the merge</li>
     </ol>
-    <aside class="notes">⏱ 5.5 min including the run. Expected: v1.5.0 and image 1.5.0, if the rehearsal cut v1.4.0 from v1.3.0 (check demo/README.md before the session). Before the session: re-stage the feat: PR (it changes src/Services/Echo, with its branch build green); nothing else unreleased on main. Leave PR #16 alone. Tabs open: the PR, the Actions tab, Code → Tags, and the ECR repository for the echo image. Click by click: (1) On the PR, point at the title, feat(…): …, and the two required checks, CI / CI result and PR / Lint PR title. Open the CI result's run summary: the image tag is feat-…-&lt;run&gt;, and there's no version anywhere. (2) Click "Squash and merge"; point out the commit title box is the PR title; confirm. (3) Actions tab → the new build-test-publish run on main → open Plan builds: it shows the module src/Services/Echo changed and the version it computed, a minor bump from the feat: (compute-versions reads the titles merged since the module's last tag). (4) While it builds, tests, scans and pushes (a few minutes), say: only the changed module builds; the image is built once and tested as built; nothing is pushed until the tests and scans pass; the git tag comes last, so a tag never points at a missing image; there's no release PR, no changelog, no GitHub Release here. Then, if it's still running: a docs-only change would build nothing at all. (5) When it's green: Code → Tags shows the new v1.x.0 on the merge commit; ECR (or the run summary's digests) shows the image tagged 1.x.0. If anything stalls, move to the backup slide and walk the captures.</aside>
+    <aside class="notes">⏱ 5.5 min including the run. Live: PR #59, feat(echo): stamp the demo build 20261118-001425, staged and CLEAN on 2026-11-17, branch image noel/echo.api:feat-demo-20261118-001425-145. Expected: tag v1.5.0 and image noel/echo.api:1.5.0 (the rehearsal's #58 cut v1.4.0). Don't merge anything else into the repository before the session; leave PR #16 alone. The run takes the whole slot, so merge first and talk over it. Tabs open: PR #59, the Actions tab, Code → Tags, and the ECR repository for the echo image. Click by click: (1) Within the first minute, on PR #59: point at the title, feat(echo): …, the two required checks, CI / CI result and PR / Lint PR title, and the branch image feat-demo-20261118-001425-145: no version anywhere. (2) Click "Squash and merge"; point out the commit title box is the PR title; confirm. (3) Actions → build-test-publish on main: the run starts about 6 seconds after the merge. Open Plan builds (done at about +15 s): the module src/Services/Echo changed, "version": "1.5.0", "tag": "v1.5.0", "create-tag": true (compute-versions reads the titles merged since v1.4.0). (4) While it runs, say: only the changed module builds; the image is built once and tested as built; nothing is pushed until the tests and scans pass; the git tag comes last, so a tag never points at a missing image; there's no release PR, no changelog, no GitHub Release here; a docs-only change would build nothing at all. Rehearsal timings to pace by: Build done at about 1.8 minutes, Unit and Integration Test at about 4.3, Publish images at about 4.9, and Tag release commit about 5 minutes after the merge, its log saying Created tag 'v1.5.0' on &lt;sha&gt;; the run ends at about 5.2 minutes. (5) When it's green: Code → Tags shows v1.5.0 on the merge commit; ECR (or the run summary's digests) shows noel/echo.api:1.5.0. Harmless warnings: "Retention days cannot be greater than the maximum…" and ASP0014. If it fails, or isn't done when the slot is, go to the next slide (backup).</aside>
   </section>
 
   <section class="slide">
     <p class="kicker">Demo 1 · backup</p>
-    <h2>Continuous versioning, from the rehearsal</h2>
+    <h2>Merge PR #58, get <code>v1.4.0</code></h2>
+    <p class="backup-label"><span class="pill">From the rehearsal (one version earlier than live)</span></p>
     <!-- BACKUP:demo1 -->
-    <p class="muted placeholder">Rehearsal captures go here</p>
-    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). The captures come from the rehearsal, one version lower than the live run would have cut (v1.4.0 rather than v1.5.0). Walk them in order: the PR with its green checks and branch image tag; the squash merge; Plan builds choosing a minor bump; the git tag and the versioned image.</aside>
+    <div class="two-col dense backup">
+      <div>
+        <h3>The PR, squash-merged to <code>main</code></h3>
+        <p><strong>#58</strong> <code>feat(echo): stamp the demo build 20261118-000218</code></p>
+        <p class="muted">Its branch build: <code>noel/echo.api:feat-demo-20261118-000218-143</code>, no version</p>
+        <h3>Plan builds: the version</h3>
+        <pre class="log">"module": "src/Services/Echo", "changed": true,
+"version": "1.4.0", "tag": "v1.4.0",
+"create-tag": true, "image-tag": "1.4.0"</pre>
+        <p>Last tag <code>v1.3.0</code>, plus a <code>feat:</code>: the next minor</p>
+        <h3>About 5 minutes after the merge</h3>
+        <p>Tag <code>v1.4.0</code> on the merge commit, and image <code>noel/echo.api:1.4.0</code></p>
+        <p class="muted">No release PR, no changelog, no GitHub Release</p>
+      </div>
+      <div>
+        <h3><code>main</code>'s run <span class="pill">started +0:06 after the merge</span></h3>
+        <table class="compact">
+          <thead><tr><th>Job</th><th></th><th>Done</th></tr></thead>
+          <tbody>
+            <tr><td>Plan builds</td><td class="yes">✓</td><td>+0:15</td></tr>
+            <tr><td>Helm / Plan</td><td class="yes">✓</td><td>+0:22</td></tr>
+            <tr><td>echo / SCA Scan (×3)</td><td class="yes">✓</td><td>+1:19</td></tr>
+            <tr><td>echo / Build</td><td class="yes">✓</td><td>+1:49</td></tr>
+            <tr><td>echo / Unit Test</td><td class="yes">✓</td><td>+4:15</td></tr>
+            <tr><td>echo / Integration Test</td><td class="yes">✓</td><td>+4:24</td></tr>
+            <tr><td>echo / Publish images</td><td class="yes">✓</td><td>+4:53</td></tr>
+            <tr><td><strong>echo / Tag release commit</strong></td><td class="yes">✓</td><td><strong>+5:02</strong></td></tr>
+            <tr><td>CI result</td><td class="yes">✓</td><td>+5:08</td></tr>
+          </tbody>
+        </table>
+        <pre class="log">Created tag 'v1.4.0' on 4ffffff…</pre>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: PR #58 cut v1.4.0 (live, #59 cuts v1.5.0). Walk it in order. (1) The PR: a feat: title, and its branch build pushed noel/echo.api:feat-demo-…-143, with no version: a topic branch never gets one. (2) Squash-merged; main's run started 6 seconds later. (3) Plan builds, done at +15 s: the module src/Services/Echo changed, and compute-versions read the feat: since v1.3.0 and chose 1.4.0, with create-tag true. (4) The run, right column: SCA scans and the build in under 2 minutes, both test jobs at about 4.3 minutes, Publish images at 4:53 (Helm / Validate skipped, nothing changed in the chart). Only after the images are pushed does Tag release commit run: its log says Created tag 'v1.4.0' on 4ffffff, 300 seconds after the merge. So a tag never points at an image that doesn't exist. (5) The result: tag v1.4.0 and image noel/echo.api:1.4.0; no release PR, no changelog, no GitHub Release. Captures: demo/captures/demo1-rehearsal-*.</aside>
   </section>
 
   <!-- ============ 5. Plain release-please ============ -->
@@ -599,7 +643,7 @@
       <li>Merging the release PR tags <code>vX.Y.Z</code> and writes a GitHub Release</li>
       <li>The hotfix button cuts <code>hotfix/X.Y.x</code> from the production tag, <strong>only</strong> when <code>main</code> has moved on</li>
     </ul>
-    <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "How does plain release-please work?" and "Hotfix branches". After every releasable merge (feat:, fix:, a breaking change), release-please updates one standing release PR with the next version and its changelog. Nothing is cut until a person merges it: anyone with merge rights merges main's release PR, since it goes to staging first. A hotfix branch is rare: if nothing has merged to main since the production version was cut, the hotfix goes on main like any fix. Only when main has unreleased work does the Technical Owner (the project lead, or whoever decides for the repository) press the hotfix button, Actions → release-please → Run workflow, with the production tag; the workflow creates hotfix/X.Y.x from it, the fix goes in by PR, and only the Technical Owner merges the branch's release PR, which cuts the next patch, because it goes to production. Then the forward-port job opens the port of the fix back to main: a forward-port is a PR that carries the same change to main. While the hotfix branch exists, main can't release on its line: the version check blocks it, so main's next release is a minor (with only fixes on main, the check asks for a Release-As).</aside>
+    <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "How does plain release-please work?" and "Hotfix branches". After every releasable merge (feat:, fix:, a breaking change), release-please updates one standing release PR with the next version and its changelog. Nothing is cut until a person merges it: anyone with merge rights merges main's release PR, since it goes to staging first. A hotfix branch is rare: if nothing has merged to main since the production version was cut, the hotfix goes on main like any fix. Only when main has unreleased work does the Technical Owner (the project lead, or whoever decides for the repository) press the hotfix button, Actions → release-please → Run workflow, with the production tag; the workflow creates hotfix/X.Y.x from it, and the fix goes in by PR. Seconds after the fix merges, the forward-port job opens its port back to main: a forward-port is a PR that carries the same change to main. Only the Technical Owner merges the branch's release PR, which cuts the next patch, because it goes to production. While the hotfix branch exists, main can't release on its line: the version check blocks it, so main's next release is a minor (with only fixes on main, the check asks for a Release-As).</aside>
   </section>
 
   <section class="slide">
@@ -653,19 +697,51 @@
     <p class="muted"><code>release-please-demo</code>, a .NET echo service with component tags, <code>echo@v…</code></p>
     <ol>
       <li>Read the open release PR: the next minor, and its changelog from one <code>feat:</code> and one <code>fix:</code></li>
-      <li>Merge it: tag <code>echo@v…</code> and a GitHub Release</li>
+      <li>Merge it: tag <code>echo@v…</code> and a GitHub Release, about 25 seconds later</li>
       <li>The <code>retag</code> job adds the version to the image <code>main</code> already built</li>
       <li>Then <code>hotfix/4.4.x</code>: what a hotfix branch looks like</li>
     </ol>
-    <aside class="notes">⏱ 5.5 min including the run. Expected: echo@v4.7.0 and image 4.7.0, if the rehearsal cut echo@v4.6.0 from echo@v4.5.0 (check demo/README.md before the session). Before the session: a feat: and a fix: merged to main, their main-&lt;run&gt; builds green, and the release PR open and up to date. Tabs: the release PR, the Actions tab, Releases, the ECR repository. Click by click: (1) Open the release PR, chore(main): release echo 4.x.0, opened by the release App (vectorlearning-release, the organization's GitHub App that opens release PRs and creates tags and branches). Files changed: .release-please-manifest.json and CHANGELOG.md (and version.txt if the repo has one), with a Features and a Bug Fixes section, one line per PR title. Point at the checks: release-please / release-pr-version-check is required. Say: this PR has been rewritten after every merge; nothing is released until a person merges it. (2) Squash-merge it. (3) Actions → the release-please run on main: release-please creates the tag and the GitHub Release; then retag finds the build of the commit before the release commit, checks the revision label, and adds the version. While it runs, say: the release commit itself builds nothing (the build run on it shows the module skipped); the image getting 4.x.0 is the one main built and the team tested as main-&lt;run&gt;; no rebuild. (4) Releases page: the new echo v4.x.0 with the changelog. ECR: the main-&lt;run&gt; image now also carries 4.x.0, same digest. (5) Branches → hotfix/4.4.x: created by the hotfix button from echo@v4.4.1, the production tag, while main had moved on. It released one hotfix, echo@v4.4.2, and the forward-port action opened its port to main, #241. If anything stalls, move to the backup slide.</aside>
+    <aside class="notes">⏱ 5.5 min including the run. Live: release PR #250, chore(main): release echo 4.7.0, with feat #249 and fix #251, staged and CLEAN on 2026-11-17. Expected: tag echo@v4.7.0, the GitHub Release, and noel/echo.api:4.7.0 (with echo.backgroundtasks and echo.migrations) re-tagged from the main-&lt;run&gt; build of fix #251 (the rehearsal's #247 cut echo@v4.6.0 from main-600). Don't merge anything else into the repository before the session. Tabs: PR #250, the Actions tab, Releases, the ECR repository. Click by click: (1) Open PR #250, opened by the release App (vectorlearning-release, the organization's GitHub App that opens release PRs and creates tags and branches). Its body is the changelog: a Features line for #249 and a Bug Fixes line for #251, one per PR title. Files changed: .release-please-manifest.json and CHANGELOG.md. Point at the checks: release-please / release-pr-version-check is required. Say: this PR has been rewritten after every merge; nothing is released until a person merges it. (2) Squash-merge it. (3) Actions → release-please on main: it starts about 11 seconds after the merge. The tag echo@v4.7.0 and the GitHub Release appear at about +25 s (Code → Tags, Releases). (4) The retag job is done at about +46 s; its log: module '.' was built at &lt;sha&gt;, 1 commit(s) before the release commit; its images are tagged main-&lt;run&gt;; then tagged noel/echo.api:4.7.0 on sha256:…. Say: the release commit itself builds nothing; the image getting 4.7.0 is the one main built and the team tested as main-&lt;run&gt;; same digest, no rebuild. The run ends at about +52 s; the skipped jobs (release-pr-version-check, hotfix-branch, forward-port) are normal on a push. (5) Releases page: echo v4.7.0 with the changelog. (6) Branches → hotfix/4.4.x: created by the hotfix button from echo@v4.4.1, the production tag, while main had moved on. It released one hotfix, echo@v4.4.2, and the forward-port action opened the fix's port to main, #241. If it fails, go to the next slide (backup).</aside>
   </section>
 
   <section class="slide">
     <p class="kicker">Demo 2 · backup</p>
-    <h2>Plain release-please, from the rehearsal</h2>
+    <h2>Merge release PR #247, get <code>echo@v4.6.0</code></h2>
+    <p class="backup-label"><span class="pill">From the rehearsal (one version earlier than live)</span></p>
     <!-- BACKUP:demo2 -->
-    <p class="muted placeholder">Rehearsal captures go here</p>
-    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). The captures come from the rehearsal, one version lower than the live run would have cut (echo@v4.6.0 rather than echo@v4.7.0). Walk them in order: the release PR and its changelog; the merged tag and GitHub Release; the retag job adding the version to the main-&lt;run&gt; image; the hotfix/4.4.x branch.</aside>
+    <div class="two-col dense backup">
+      <div>
+        <h3>The release PR, opened by the release App</h3>
+        <p><strong>#247</strong> <code>chore(main): release echo 4.6.0</code>, base <code>main</code></p>
+        <div class="card changelog">
+          <p><strong>4.6.0</strong> (2026-11-18)</p>
+          <p class="cl-head">Features</p>
+          <ul><li><strong>echo:</strong> stamp the demo feature 20261118-000219 (#246)</li></ul>
+          <p class="cl-head">Bug Fixes</p>
+          <ul><li><strong>echo:</strong> stamp the demo fix 20261118-000219 (#248)</li></ul>
+        </div>
+        <p class="muted">Files changed: <code>.release-please-manifest.json</code>, <code>CHANGELOG.md</code></p>
+        <p class="muted">Skipped on the merge, as normal on a push: <code>release-pr-version-check</code>, <code>hotfix-branch</code>, <code>forward-port</code></p>
+      </div>
+      <div>
+        <h3>After the merge</h3>
+        <table class="compact">
+          <tbody>
+            <tr><td>+0:11</td><td><code>release-please</code> run starts</td></tr>
+            <tr><td><strong>+0:25</strong></td><td>Tag <code>echo@v4.6.0</code> and the GitHub Release <em>echo: v4.6.0</em>, with the same changelog</td></tr>
+            <tr><td><strong>+0:46</strong></td><td><code>retag</code> done <span class="yes">✓</span>: the tested image gets the version</td></tr>
+            <tr><td>+0:52</td><td>Run done <span class="yes">✓</span></td></tr>
+          </tbody>
+        </table>
+        <pre class="log">module '.' was built at 790c91d,
+  1 commit(s) before the release commit b36db71.
+build run … (run number 600) succeeded;
+  its images are tagged main-600.
+tagged noel/echo.api:4.6.0 on sha256:164e1e48…</pre>
+        <p class="muted">Also <code>echo.backgroundtasks</code> and <code>echo.migrations</code>: same digests as <code>main-600</code>, no rebuild</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: release PR #247 cut echo@v4.6.0 (live, #250 cuts echo@v4.7.0). Walk it in order. (1) The release PR, chore(main): release echo 4.6.0, opened by the release App: its body is the changelog, one Features line for feat #246 and one Bug Fixes line for fix #248, written from their PR titles; it changes only the manifest and CHANGELOG.md. (2) Squash-merged; the release-please run started 11 seconds later. (3) At +25 s the tag echo@v4.6.0 and the GitHub Release echo: v4.6.0, with the same changelog. (4) At +46 s the retag job was done; its log, right column: the module was built at the fix's commit, one commit before the release commit, by build run 600, whose images are tagged main-600; it added 4.6.0 to those same digests, for all three images. No rebuild: what was tested is what ships. (5) The whole run took 52 seconds; the skipped jobs are normal on a push. Then, if there's time, the hotfix/4.4.x branch in the repository, as on the demo slide. Captures: demo/captures/demo2-rehearsal-*.</aside>
   </section>
 
   <!-- ============ 6. release-please with release branches ============ -->
@@ -742,7 +818,7 @@
       <li>A release PR is blocked while a port into its branch is missing</li>
       <li>A change to a workflow file is labelled <code>forward-port-needed</code> and ported by hand</li>
     </ul>
-    <aside class="notes">⏱ 0.75 min. Correction to the October deck, which said forward-ports were opened by hand until an action existed (COREOPS-4416). Now both release-please workflows run a forward-port job on every push to a release/** or hotfix/** branch (github-actions app-release-please-release-branches.yml and app-release-please.yml, release/forward-port). It cherry-picks the change onto a branch named forward-port/&lt;source&gt;/&lt;pr&gt;/&lt;target&gt; cut from the target, opens the PR as the release App with the original's title, labels it forward-port and asks the original author for a review. One change per PR, never bundled. Where it can't (a conflict, or a file under .github/workflows/, which the App has no permission to push), it labels the original forward-port-needed and its comment names the branch to use for the hand-made port. The release PR version check holds the target's release PR until every port is merged or closed. Demo 3 shows one opening.</aside>
+    <aside class="notes">⏱ 0.75 min. Correction to the October deck, which said forward-ports were opened by hand until an action existed (COREOPS-4416). Now both release-please workflows run a forward-port job on every push to a release/** or hotfix/** branch (github-actions app-release-please-release-branches.yml and app-release-please.yml, release/forward-port). It cherry-picks the change onto a branch named forward-port/&lt;source&gt;/&lt;pr&gt;/&lt;target&gt; cut from the target, opens the PR as the release App with the original's title, labels it forward-port and asks the original author for a review. One change per PR, never bundled. Where it can't (a conflict, or a file under .github/workflows/, which the App has no permission to push), it labels the original forward-port-needed and its comment names the branch to use for the hand-made port. The release PR version check holds the target's release PR until every port is merged or closed. Demo 3 shows one, already open: it opened seconds after the fix merged into release/1.0.x, not when the release PR merged.</aside>
   </section>
 
   <section class="slide">
@@ -775,21 +851,50 @@
     <h2>Release branches: merge a patch release PR</h2>
     <p class="muted"><code>release-please-branches-demo</code>, plain <code>vX.Y.Z</code> tags</p>
     <ol>
-      <li>Staged: a <code>fix:</code> on <code>release/1.0.x</code> with its release PR open, and a <code>feat:</code> on <code>main</code>, unreleased</li>
+      <li>Staged: a <code>fix:</code> merged into <code>release/1.0.x</code> with its release PR open, and a <code>feat:</code> on <code>main</code>, unreleased</li>
+      <li>Already open: the fix's forward-port PR to <code>main</code>, opened by itself seconds after the fix merged</li>
       <li>Merge the release branch's release PR: the next patch, its tag, the re-tagged image</li>
-      <li>The forward-port PR to <code>main</code>, opened by itself when the fix merged</li>
       <li><code>main</code>'s release PR still proposes the next minor</li>
       <li>A quick look at the repository's rulesets</li>
     </ol>
-    <aside class="notes">⏱ 5.5 min including the run. Expected: v1.0.2 and image 1.0.2, if the rehearsal cut v1.0.1 (check demo/README.md before the session); main's release PR proposes 1.1.0 throughout. Before the session: v1.0.0 cut (which created release/1.0.x); a feat: merged to main and unreleased, with main's release PR open for 1.1.0; a new fix: merged into release/1.0.x, its release-1.0.x-&lt;run&gt; build green, and its release PR open. Tabs: the release branch's release PR, main's release PR, Pull requests, Actions, Settings → Rules → Rulesets. Click by click: (1) Open the release branch's release PR, chore(release/1.0.x): release 1.0.x, base release/1.0.x. Point at the base and the changelog. Only the Technical Owner merges these. (2) Squash-merge it. (3) Actions → the release-please run on release/1.0.x: tag v1.0.x and the GitHub Release, then retag adds the version to the release-1.0.x-&lt;run&gt; image. While it runs, say: the fix was made against the code that's actually in the release; main may have changed it since. (4) Pull requests: the forward-port PR to main, opened by the release App when the fix merged, same title as the fix, labelled forward-port, from forward-port/release-1.0.x/&lt;pr&gt;/main; a comment on the original fix lists every target. (5) Open main's release PR: still 1.1.0, because main is always-bump-minor; the forward-port, once merged, joins 1.1.0. (6) Settings → Rules → Rulesets: the branch ruleset on main and release/**, the release branch creation ruleset (release App only), the tag rulesets on v* and *@v*. Say: this demo repo has one approver, so approvals and code owner review are off here; the templates turn them on. If anything stalls, move to the backup slide.</aside>
+    <aside class="notes">⏱ 5.5 min including the run. Live: release PR #10, chore(release/1.0.x): release 1.0.2, base release/1.0.x, with fix #9, staged and CLEAN on 2026-11-17. Expected: tag v1.0.2, its GitHub Release, and noel/rpb-echo.api:1.0.2 re-tagged from the release-1.0.x-&lt;run&gt; build (the rehearsal's #7 cut v1.0.1). Already open, and staying open: forward-port PR #11, the port of fix #9 to main, which the release App opened about 19 seconds after #9 merged into release/1.0.x, during staging; and main's release PR #4, proposing 1.1.0 (features #3 and #8, and the rehearsal's port #6). A port opens when a change merges into a release branch, never when the release PR merges. Don't merge anything into the repository before the session, and push nothing to main: with port #11 open, any push to main turns #4's release-pr-version-check red. Tabs: Pull requests, PR #11, fix #9, PR #10, main's release PR #4, Actions, Settings → Rules → Rulesets. Click by click: (1) Pull requests: show #11 first. Base main, from forward-port/release-1.0.x/9/main, the same title as fix #9, labelled forward-port, a review request to the author. Open fix #9: the App's comment lists every target ("main: #11"). Say: the developer merges each port, or closes it saying why. (2) Open #10: base release/1.0.x, and the changelog with fix #9. Only the Technical Owner merges these. (3) Squash-merge it. Actions → release-please on release/1.0.x: it starts about 11 seconds after the merge; tag v1.0.2 and the GitHub Release at about +19 s; the retag job is done at about +42 s, its log: its images are tagged release-1.0.x-&lt;run&gt;, then tagged noel/rpb-echo.api:1.0.2. The forward-port job runs too and skips this merge: "#10 was not forward-ported: it is release-please's release PR". No release-branch job runs (only an X.Y.0 creates one). The run ends at about +47 s. While it runs, say: the fix was made against the code that's actually in the release; main may have changed it since. (4) Open main's release PR #4: still 1.1.0, because main is always-bump-minor; port #11, once merged, joins 1.1.0. Its release-pr-version-check shows green only because it last ran before the port existed: the next push to main fails it under the missing-ports rule until #11 is merged or closed. Worth a sentence. (5) Settings → Rules → Rulesets: seven rulesets; the branch ruleset on main and release/**, Release branch creation (release App only), and the tag rulesets (no update or deletion of v* tags). Say: this demo repo has one approver, so approvals and code owner review are off here; the templates turn them on. If it fails, go to the next slide (backup).</aside>
   </section>
 
   <section class="slide">
     <p class="kicker">Demo 3 · backup</p>
-    <h2>Release branches, from the rehearsal</h2>
+    <h2>Merge release PR #7, get <code>v1.0.1</code></h2>
+    <p class="backup-label"><span class="pill">From the rehearsal (one version earlier than live)</span></p>
     <!-- BACKUP:demo3 -->
-    <p class="muted placeholder">Rehearsal captures go here</p>
-    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). The captures come from the rehearsal, one version lower than the live run would have cut (v1.0.1 rather than v1.0.2). Walk them in order: the release branch's release PR; the patch tag and the re-tagged image; the forward-port PR to main; main's release PR still at 1.1.0; the rulesets page.</aside>
+    <div class="two-col dense backup">
+      <div>
+        <h3>Open before the merge</h3>
+        <table class="compact">
+          <tbody>
+            <tr><td><strong>#7</strong></td><td><code>chore(release/1.0.x): release 1.0.1</code>, base <code>release/1.0.x</code>. Bug Fixes: <strong>echo:</strong> stamp the demo fix … (#5)</td></tr>
+            <tr><td><strong>#6</strong></td><td><code>fix(echo): stamp the demo fix 20261118-000246</code>, base <code>main</code>, from <code>forward-port/release-1.0.x/5/main</code>: the port of fix #5, opened by the release App <strong>17 s after #5 merged</strong> into <code>release/1.0.x</code></td></tr>
+            <tr><td><strong>#4</strong></td><td><code>chore(main): release 1.1.0</code>, base <code>main</code>. Features: <strong>echo:</strong> stamp the demo feature … (#3)</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">The App's comment on #5: "this change merged into <code>release/1.0.x</code>, so it is forward-ported to every newer branch: <code>main</code>: #6"</p>
+      </div>
+      <div>
+        <h3>After merging #7</h3>
+        <table class="compact">
+          <tbody>
+            <tr><td>+0:11</td><td><code>release-please</code> run starts on <code>release/1.0.x</code></td></tr>
+            <tr><td><strong>+0:19</strong></td><td>Tag <code>v1.0.1</code> and the GitHub Release <em>v1.0.1</em></td></tr>
+            <tr><td><strong>+0:42</strong></td><td><code>retag</code> done <span class="yes">✓</span></td></tr>
+            <tr><td>+0:47</td><td>Run done <span class="yes">✓</span>; <code>release-branch</code> skipped (only an <code>X.Y.0</code> creates one)</td></tr>
+          </tbody>
+        </table>
+        <pre class="log">#7 was not forward-ported: it is
+  release-please's release PR.
+… its images are tagged release-1.0.x-11.
+tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
+        <p><code>main</code>'s release PR #4 still proposes <strong>1.1.0</strong>; port #6 still open</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: release PR #7 cut v1.0.1 (live, #10 cuts v1.0.2; live port #11, main's release PR #4). Walk it in order. (1) Left column, what was open before the merge. #7, the release branch's release PR, base release/1.0.x, with fix #5 in its changelog. #6, the forward-port of fix #5 to main: same title, opened by the release App 17 seconds after #5 merged into release/1.0.x, long before anyone touched the release PR. Ports open when a change merges into a release branch, never when the release PR merges. The App also commented on #5, listing every target. #4, main's release PR, proposing 1.1.0 from feat #3. (2) Right column, after merging #7: the run started at +11 s; tag v1.0.1 and its GitHub Release at +19 s; the forward-port job ran and skipped the release PR itself; retag was done at +42 s, adding 1.0.1 to the images the release-1.0.x-11 build had tested; release-branch skipped, since only an X.Y.0 creates a branch. (3) main's release PR still proposed 1.1.0: main and the release line move separately, and port #6, once merged, joins 1.1.0. Captures: demo/captures/demo3-rehearsal-*.</aside>
   </section>
 
   <!-- ============ 7. Side by side, and three scenarios ============ -->
@@ -885,7 +990,7 @@
       <p class="rp"><strong>Plain release-please</strong>Fix on <code>main</code>, hold other merges; the next release PR replaces it</p>
       <p class="rb"><strong>Release branches</strong>Fix on <code>release/X.Y.x</code>: the next patch; <code>main</code> keeps moving</p>
     </div>
-    <aside class="notes">⏱ 1.25 min. Sources: the how-to, "How do I fix a failed regression with plain release-please?" and "… with release branches?"; versioning-continuous.md. This answers our first question: can you keep merging to main while a version is in regression? Say 1.0.0 is in staging and fails. Continuous versioning: the fix merges to main, but whatever merged since goes along: feat: C already cut 1.1.0, so the fix is 1.1.1, with feat: C in it. Plain: the team held merges, so the next release PR is just the fix: 1.0.1 (or 1.1.0 if a feature slipped in). Release branches: the developer branches from release/1.0.x, fixes, merges back; the Technical Owner merges that branch's release PR, 1.0.1, re-tested in staging; the forward-port to main opens itself. Meanwhile main merged two features and nobody waited. In all three, production goes straight from the version it runs to the version that passes.</aside>
+    <aside class="notes">⏱ 1.25 min. Sources: the how-to, "How do I fix a failed regression with plain release-please?" and "… with release branches?"; versioning-continuous.md. This answers our first question: can you keep merging to main while a version is in regression? Say 1.0.0 is in staging and fails. Continuous versioning: the fix merges to main, but whatever merged since goes along: feat: C already cut 1.1.0, so the fix is 1.1.1, with feat: C in it. Plain: the team held merges, so the next release PR is just the fix: 1.0.1 (or 1.1.0 if a feature slipped in). Release branches: the developer branches from release/1.0.x, fixes, merges back, and the forward-port to main opens itself seconds later; the Technical Owner merges that branch's release PR, 1.0.1, re-tested in staging. Meanwhile main merged two features and nobody waited. In all three, production goes straight from the version it runs to the version that passes.</aside>
   </section>
 
   <section class="slide">
@@ -967,7 +1072,7 @@
       <p class="rp"><strong>Plain release-please</strong>Hotfix button: <code>hotfix/X.Y.x</code> from the production tag, the next patch, a forward-port</p>
       <p class="rb"><strong>Release branches</strong>Fix on the existing <code>release/X.Y.x</code>: the next patch, a forward-port</p>
     </div>
-    <aside class="notes">⏱ 1.5 min. Sources: versioning-release-please.md, "Hotfix branches" and "Where does a production hotfix go?"; the how-to's hotfix sections. This answers our second question: can you ship a fix alone? Production runs 1.0.0; main has a feature merged that isn't ready for production. Continuous versioning: there's no branch to fix on; the fix becomes the next version, 1.1.1, with the feature in it. Teams on CV avoid this by keeping main releasable (feature flags). Plain: the Technical Owner runs Actions → release-please → Run workflow with tag v1.0.0; it creates hotfix/1.0.x; the fix goes in by PR; the Technical Owner merges the branch's release PR, 1.0.1; the forward-port job opens the port to main. While hotfix/1.0.x exists, main can't release a 1.0.z (the version check blocks it), so main's next release is 1.1.0 (with only fixes on main, the check asks for a Release-As: 1.1.0); the Technical Owner deletes the hotfix branch once production runs a version from main. Release branches: release/1.0.x already exists; same fix, same patch, same forward-port, no button. If release/1.0.x already holds an unreleased fix, the hotfix releases with it.</aside>
+    <aside class="notes">⏱ 1.5 min. Sources: versioning-release-please.md, "Hotfix branches" and "Where does a production hotfix go?"; the how-to's hotfix sections. This answers our second question: can you ship a fix alone? Production runs 1.0.0; main has a feature merged that isn't ready for production. Continuous versioning: there's no branch to fix on; the fix becomes the next version, 1.1.1, with the feature in it. Teams on CV avoid this by keeping main releasable (feature flags). Plain: the Technical Owner runs Actions → release-please → Run workflow with tag v1.0.0; it creates hotfix/1.0.x; the fix goes in by PR, and the forward-port job opens its port to main as soon as it merges; the Technical Owner merges the branch's release PR, 1.0.1. While hotfix/1.0.x exists, main can't release a 1.0.z (the version check blocks it), so main's next release is 1.1.0 (with only fixes on main, the check asks for a Release-As: 1.1.0); the Technical Owner deletes the hotfix branch once production runs a version from main. Release branches: release/1.0.x already exists; same fix, same patch, same forward-port, no button. If release/1.0.x already holds an unreleased fix, the hotfix releases with it.</aside>
   </section>
 
   <section class="slide">

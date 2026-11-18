@@ -59,6 +59,10 @@ Every source of information used in this presentation goes here.
   - [`release-please-demo`](https://github.com/VectorLearning/release-please-demo): last release `echo@v4.5.0`, component tags, `hotfix/4.4.x` (cut from `echo@v4.4.1`, a `main` release; it released one hotfix, `echo@v4.4.2`, ported to `main` by #241)
   - [`release-please-branches-demo`](https://github.com/VectorLearning/release-please-branches-demo): staged for demo 3 (see the spec's demo preparation)
   - [`poc_echo_server_dotnet_legacy`](https://github.com/VectorLearning/poc_echo_server_dotnet_legacy): four-part tags such as `v1.3.1.2019`
+- Demo captures, `demo/captures/` (rehearsal of 2026-11-17, see `demo/README.md`): the backup slides (16, 21, 27) and the demo slides' timings are built from them, one version earlier than live. The PRs used:
+  - Demo 1, `poc_echo_server_dotnet`: rehearsal [#58](https://github.com/VectorLearning/poc_echo_server_dotnet/pull/58) (`v1.4.0`, tag at +300 s); live [#59](https://github.com/VectorLearning/poc_echo_server_dotnet/pull/59) (expected `v1.5.0`)
+  - Demo 2, `release-please-demo`: rehearsal release PR [#247](https://github.com/VectorLearning/release-please-demo/pull/247) (`echo@v4.6.0`, from feat #246 and fix #248; tag and Release at +25 s, re-tag of `main-600` done at +46 s); live release PR [#250](https://github.com/VectorLearning/release-please-demo/pull/250) (expected `echo@v4.7.0`, from feat #249 and fix #251)
+  - Demo 3, `release-please-branches-demo`: rehearsal release PR [#7](https://github.com/VectorLearning/release-please-branches-demo/pull/7) (`v1.0.1`, from fix #5; tag and Release at +19 s, re-tag of `release-1.0.x-11` done at +42 s) and its port [#6](https://github.com/VectorLearning/release-please-branches-demo/pull/6) (opened 17 s after #5 merged); live release PR [#10](https://github.com/VectorLearning/release-please-branches-demo/pull/10) (expected `v1.0.2`, from fix #9), its port [#11](https://github.com/VectorLearning/release-please-branches-demo/pull/11) (already open, opened 19 s after #9 merged), and `main`'s release PR [#4](https://github.com/VectorLearning/release-please-branches-demo/pull/4) (`release 1.1.0`)
 - [Moving to GitHub Actions](../moving-to-github-actions/) (2026-10-27): what the audience already saw; the reference for markup, tone and speaker notes. This deck corrects its forward-port slide: forward-ports are now opened automatically
 
 ### People consulted
@@ -74,5 +78,5 @@ Every source of information used in this presentation goes here.
 
 ## Notes
 
-- The diagrams (marked `<!-- DIAGRAM:<name> -->` in `index.html`) and the backup slides' rehearsal captures (`<!-- BACKUP:demoN -->`) are still to be added.
-- The demos' expected versions in the speaker notes assume one rehearsal before the session; confirm them against `demo/README.md` once the demos are re-staged.
+- The backup slides (`<!-- BACKUP:demoN -->`) carry the rehearsal of 2026-11-17, rebuilt as HTML from `demo/captures/`.
+- The demo slides' speaker notes carry the live PR numbers and expected versions staged on 2026-11-17 (`demo/README.md`). If the demos are re-staged, update the notes from the stage scripts' output.
