@@ -73,10 +73,6 @@ rehearsal's full build took ~5 min. Merge first, then talk over the run.
 
 ### Demo 2, plain release-please (`release-please-demo`)
 
-0. Optional, at the start of the section: merge the staged fix
-   [#252](https://github.com/VectorLearning/release-please-demo/pull/252). release-please rewrites
-   #250 within a minute (still `4.7.0`, a new Bug Fixes line); `main`'s trimmed build of #252 takes
-   ~2 min. Merge #250 only once its checks are green again. Skipped, #250 is ready as it is.
 1. Open the release PR: title `chore(main): release echo X.Y.Z`, body = the changelog with the
    staged `feat` and `fix`. Point at `.release-please-manifest.json` and `CHANGELOG.md` in
    **Files changed**.
@@ -85,7 +81,12 @@ rehearsal's full build took ~5 min. Merge first, then talk over the run.
 4. The **retag** job ends at **~+46 s**; its log: `module '.' was built at <sha>, 1 commit(s) before
    the release commit`, `its images are tagged main-<run>`, then
    `tagged noel/echo.api:X.Y.Z on sha256:…`: the tested image, no rebuild.
-5. Point at the existing `hotfix/4.4.x` branch as what a hotfix looks like.
+5. **The next release PR:** open the staged fix
+   [#252](https://github.com/VectorLearning/release-please-demo/pull/252). Merging #250 put it
+   behind `main`, so click **Update branch** and wait for its checks (~1.5 min). **Squash and
+   merge.** ~30 s later release-please opens a new release PR, `chore(main): release echo 4.7.1`,
+   with #252 under Bug Fixes. Leave it open.
+6. Point at the existing `hotfix/4.4.x` branch as what a hotfix looks like.
 
 ### Demo 3, release-please with release branches (`release-please-branches-demo`)
 
