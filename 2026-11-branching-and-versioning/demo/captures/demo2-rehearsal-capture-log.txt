@@ -1,0 +1,11 @@
+19:24:08  +11s  release-please.yml run started: https://github.com/VectorLearning/release-please-demo/actions/runs/44207494301
+19:24:22  +25s  tag echo@v4.6.0
+19:24:22  +25s  GitHub Release echo@v4.6.0
+19:24:49  +52s  release-please.yml run finished: success
+# demo 2, VectorLearning/release-please-demo#247 merged at 2026-11-18T00:23:57Z as b36db71
++11s  release-please.yml run started: https://github.com/VectorLearning/release-please-demo/actions/runs/44207494301
++25s  tag echo@v4.6.0
++25s  GitHub Release echo@v4.6.0
++52s  release-please.yml run finished: success
+
+captures: /Users/noelaguilar/workspaces/cowork/presentations/2026-11-branching-and-versioning/demo/captures/demo2-rehearsal-*

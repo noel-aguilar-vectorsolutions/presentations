@@ -1,0 +1,11 @@
+ * [new branch]      feat/echo-common-greeter-library -> origin/feat/echo-common-greeter-library
+ * [new tag]         v1.3.0               -> v1.3.0
+##[notice]no release-please-config.json: module references are not checked (Continuous versioning lists them in extra-paths).
+    "version": "1.4.0",
+    "tag": "v1.4.0",
+    "image-tag": "1.4.0"
+    "version": "1.4.0",
+    "tag": "v1.4.0",
+    "image-tag": "1.4.0"
+  matrix: [{"module":"src/Services/Echo","component":"","version-format":"semver","paths":["src/Services/Echo","src/docker/entrypoint.sh"],"changed":true,"version":"1.4.0","tag":"v1.4.0","create-tag":true,"image-tag":"1.4.0"}]
+  MATRIX: [{"module":"src/Services/Echo","component":"","version-format":"semver","paths":["src/Services/Echo","src/docker/entrypoint.sh"],"changed":true,"version":"1.4.0","tag":"v1.4.0","create-tag":true,"image-tag":"1.4.0"}]

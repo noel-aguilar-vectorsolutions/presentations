@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Branching and Versioning: Choosing a Strategy</title>
+<style>
+  :root {
+    /* Vector Solutions brand, sampled from the 2026-08 offsite deck's backgrounds and logo */
+    --b-deep: #1a439b;
+    --b-mid: #2c61ad;
+    --b-cyan: #2581c4;
+    --b-teal: #439ab8;
+    --b-green: #81c089;
+    --b-line-green: #9cc66b;
+    --b-line-blue: #5ba4e0;
+    --brand-gradient: linear-gradient(62deg, var(--b-green) 0%, var(--b-teal) 13%, var(--b-cyan) 30%, var(--b-mid) 58%, var(--b-deep) 100%);
+
+    --bg: #ffffff;
+    --fg: #26323a;
+    --heading: var(--b-deep);
+    --muted: #5b6670;
+    --accent: #0076b8;
+    --surface: #eef4fa;
+    --border: #d3e0ee;
+    --ok: #2f8a48;
+    --bad: #c0392b;
+    --warn: #c25a1c;
+    --tint-green: #ebf5ea;
+    --motif-opacity: .55;
+    /* Footer from vector-template.pptx's slide master: logo, then the green-blue-light blue strip */
+    --logo: url("assets/vector-logo.png");
+    --footer-strip: linear-gradient(90deg, #96d448 0%, #293d9a 65.8%, #5ab7e6 100%);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1a35;
+      --fg: #e6edf6;
+      --heading: #a9cdf5;
+      --muted: #9fb0c4;
+      --accent: #5cb6f2;
+      --surface: #142a52;
+      --border: #26406d;
+      --ok: #7ccb8a;
+      --bad: #f0716a;
+      --warn: #f29a5c;
+      --tint-green: #16354a;
+      --motif-opacity: .35;
+      --logo: url("assets/vector-logo-white.png");
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
+
+  .deck { height: 100vh; width: 100vw; overflow: hidden; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column; justify-content: center;
+    padding: 6vh 8vw;
+    font-size: max(14px, min(2.2vw, 3.9vh));
+    line-height: 1.45;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+  /* Footer on every slide: the logo bottom left, the strip to its right, the counter at the right */
+  .slide {
+    padding-bottom: 11vh;
+    background-image: var(--logo), var(--footer-strip);
+    background-repeat: no-repeat;
+    background-size: 14.6vw auto, 76vw 1.9vh;
+    background-position: 1.3vw calc(100% - 1.3vh), 16.8vw calc(100% - 2.9vh);
+  }
+
+  .slide h1 { font-size: 2.4em; line-height: 1.1; margin: 0 0 .4em; letter-spacing: -0.02em; color: var(--heading); }
+  .slide h2 { font-size: 1.6em; line-height: 1.15; margin: 0 0 .6em; letter-spacing: -0.01em; color: var(--heading); }
+  .slide h3 { font-size: 1.1em; margin: 0 0 .3em; color: var(--accent); }
+  .slide p, .slide li { max-width: 60ch; }
+  .slide ul, .slide ol { padding-left: 1.2em; margin: 0; }
+  .slide li + li { margin-top: .4em; }
+  .slide a { color: var(--accent); }
+  .slide img { max-width: 100%; max-height: 60vh; object-fit: contain; }
+  .slide code { font-family: var(--mono); font-size: .85em; background: var(--surface); padding: .1em .3em; border-radius: 4px; }
+  .slide pre { font-family: var(--mono); font-size: .7em; background: var(--surface); border: 1px solid var(--border); padding: 1em; border-radius: 8px; overflow: auto; }
+
+  .title-slide { justify-content: center; }
+  .title-slide h1 { font-size: 3em; }
+  .muted { color: var(--muted); }
+  .big { font-size: 1.6em; font-weight: 600; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: start; }
+  .kicker { font-size: .55em; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 .8em; }
+  .dense { font-size: .62em; }
+  .dense p, .dense li { max-width: none; }
+  .slide table { border-collapse: collapse; width: 100%; }
+  .slide th, .slide td { text-align: left; vertical-align: top; padding: .4em .7em; border-bottom: 1px solid var(--border); }
+  .slide th { color: var(--heading); font-weight: 600; }
+  .slide thead th { background: var(--surface); color: var(--muted); border-bottom: 2px solid var(--border); }
+  .slide thead th:first-child { border-radius: 8px 0 0 0; }
+  .slide thead th:last-child { border-radius: 0 8px 0 0; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6vw; }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1em 1.1em; box-shadow: 0 6px 18px -12px rgba(26, 67, 155, .45); }
+  .card p { margin: .3em 0 0; }
+  .card h3 { margin: 0; }
+  .callout { background: linear-gradient(90deg, var(--surface), var(--tint-green)); border: 1px solid var(--border); padding: .6em 1em; border-radius: 12px; margin-top: 1em; max-width: none; }
+  .num { display: inline-grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--brand-gradient); color: #fff; font-weight: 700; font-size: .8em; margin-bottom: .5em; }
+  .pill { display: inline-block; font-size: .55em; font-weight: 600; padding: .2em .7em; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); vertical-align: middle; }
+  .pill.warn { color: var(--warn); border-color: currentColor; }
+  .yes { color: var(--ok); font-weight: 700; }
+  .no { color: var(--bad); font-weight: 700; }
+
+  /* Inline SVG diagrams: <svg class="diagram" viewBox="..."> with these classes, so they follow dark mode */
+  .diagram { width: 100%; height: auto; max-height: 46vh; }
+  .dg-box { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+  .dg-box.accent { stroke: var(--accent); }
+  .dg-text { fill: var(--fg); font-family: var(--font); font-size: 18px; }
+  .dg-small { fill: var(--muted); font-family: var(--font); font-size: 15px; }
+  .dg-mono { fill: var(--fg); font-family: var(--mono); font-size: 15px; }
+  .dg-line { stroke: var(--muted); stroke-width: 2.5; fill: none; }
+  .dg-line.accent { stroke: var(--accent); }
+  .dg-line.dashed { stroke-dasharray: 7 6; }
+  .dg-zone { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 8 6; }
+  .dg-dot { fill: var(--bg); stroke: var(--muted); stroke-width: 3; }
+  .dg-dot.accent { fill: var(--accent); stroke: var(--accent); }
+  .dg-arrowhead { fill: var(--muted); }
+  .dg-arrowhead.accent { fill: var(--accent); }
+
+  /* Rounded-diamond outlines: the motif from the brand backgrounds */
+  .slide::before {
+    content: ""; position: absolute; top: -10vw; right: -7vw; width: 28vw; height: 28vw; pointer-events: none; opacity: var(--motif-opacity);
+    background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke-width='3'%3E%3Crect x='95' y='95' width='210' height='210' rx='44' transform='rotate(45 200 200)' stroke='%239cc66b'/%3E%3Crect x='115' y='125' width='210' height='210' rx='44' transform='rotate(45 220 230)' stroke='%235ba4e0'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* Brand slides: gradient background, white text. Add .photo for the title background image. */
+  .slide.brand { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, var(--brand-gradient); color: #fff; }
+  .slide.brand::before { --motif-opacity: .85; top: -19vw; right: -13vw; width: 42vw; height: 42vw; }
+  .slide.brand.photo { background: url("assets/vector-logo-white.png") 1.3vw calc(100% - 1.3vh) / 14.6vw auto no-repeat, #1a439b url("assets/brand-title.jpg") center / cover no-repeat; }
+  .slide.brand.photo::before { display: none; }
+  .slide.brand.photo > :not(.notes) { max-width: 52%; }
+  .slide.brand h1, .slide.brand h2, .slide.brand h3 { color: #fff; }
+  .slide.brand .muted { color: rgba(255, 255, 255, .82); }
+  .slide.brand .kicker { color: #cfeab0; }
+  .slide.brand code { background: rgba(255, 255, 255, .16); color: #fff; }
+  .slide.brand .card { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .3); box-shadow: none; backdrop-filter: blur(8px); }
+  .slide.brand .card .muted { color: #cfeab0; font-weight: 600; }
+  .slide.brand .callout { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .3); backdrop-filter: blur(8px); }
+  .slide.brand .num { background: #fff; color: var(--b-deep); }
+
+  .notes { display: none; }
+  /* Press N: the current slide's speaker notes in a panel at the bottom, for rehearsing */
+  body.show-notes .slide.active .notes {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto;
+    background: var(--surface); border-top: 2px solid var(--accent);
+    padding: 12px 8vw 28px; font-size: max(15px, .9vw); line-height: 1.5; color: var(--fg);
+  }
+
+  .counter { position: fixed; right: 1.3vw; bottom: calc(3.85vh - .65em); font-size: max(14px, .75vw); color: var(--muted); font-variant-numeric: tabular-nums; z-index: 2; }
+  body.on-brand .counter { color: rgba(255, 255, 255, .8); }
+
+  /* Click a slide's image to see it full size; click again or Esc to close. */
+  .slide img { cursor: zoom-in; }
+  dialog.zoom { padding: 0; border: 0; background: transparent; max-width: 96vw; max-height: 96vh; overflow: visible; cursor: zoom-out; }
+  dialog.zoom:focus, dialog.zoom:focus-visible { outline: none; }
+  dialog.zoom::backdrop { background: rgba(10, 20, 45, .82); }
+  dialog.zoom img { display: block; max-width: 96vw; max-height: 96vh; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+
+  @media (max-width: 700px) {
+    .slide { padding: 6vh 16px 11vh; font-size: 18px; }
+    .two-col, .cards, .cards.two { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { height: auto; }
+    .deck { height: auto; overflow: visible; }
+    .slide { position: relative; display: flex !important; width: 1280px; height: 720px; font-size: 26px; page-break-after: always; break-after: page; }
+    .counter { display: none; }
+    .slide { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.show-notes .slide.active .notes { display: none; }
+  }
+
+  /* Additions for this deck */
+  .slide h2 code { font-size: .8em; }
+  .slide h2 .pill { font-size: .45em; margin-left: .6em; }
+  .mid { font-size: .8em; }
+  .mid p, .mid li { max-width: none; }
+  .tight li + li { margin-top: .2em; }
+  .compact th, .compact td { padding: .28em .6em; }
+  .dense code { font-size: .95em; } /* keeps code in .58em tables at .55em or above */
+  .slide.brand ol li + li { margin-top: .55em; }
+  /* One caption per strategy under a diagram, in the strategies' colours */
+  .captions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6vw; font-size: .66em; margin-top: .9em; }
+  .captions p { margin: 0; max-width: none; padding-top: .45em; border-top: 4px solid var(--border); }
+  .captions strong { display: block; color: var(--heading); }
+  .slide thead th.cv, .slide thead th.rp, .slide thead th.rb { border-top: 4px solid var(--border); color: var(--heading); }
+  .captions .cv, .slide thead th.cv { border-top-color: var(--b-green); }
+  .captions .rp, .slide thead th.rp { border-top-color: var(--b-cyan); }
+  .captions .rb, .slide thead th.rb { border-top-color: var(--b-mid); }
+  .slide td.na { color: var(--muted); }
+  /* Backup slides: the rehearsal's captures, rebuilt as HTML (.dense is .62em; nothing here goes below .55em) */
+  .backup-label { margin: -.35em 0 .8em; }
+  .backup-label .pill { font-size: .7em; }
+  .backup h3 { margin: .7em 0 .25em; }
+  .backup > div > h3:first-child { margin-top: 0; }
+  .backup p { margin: .25em 0 .45em; }
+  .backup .pill { font-size: .9em; margin-left: .4em; }
+  .backup pre.log { font-size: .9em; margin: .5em 0; padding: .55em .8em; white-space: pre-wrap; }
+  .backup td:first-child { white-space: nowrap; }
+  .backup .changelog { padding: .5em .9em; margin: .4em 0 .6em; box-shadow: none; }
+  .backup .changelog p { margin: .15em 0; }
+  .backup .changelog .cl-head { margin-top: .4em; font-weight: 700; color: var(--heading); }
+  .backup .changelog ul { margin: 0; }
+  /* Cheat sheet: one slide that also prints as one page */
+  .cheat .kicker { margin-bottom: .4em; }
+  .cheat h2 { margin-bottom: .35em; }
+  .cheat th, .cheat td { padding: .32em .6em; }
+  .cheat .foot { margin: .6em 0 0; }
+  @media print {
+    .cheat { padding-top: 4vh; }
+  }
+</style>
+</head>
+<body>
+<main class="deck">
+
+  <!-- ============ 1. Why the choice matters ============ -->
+
+  <section class="slide title-slide brand photo">
+    <p class="kicker">For project tech leads</p>
+    <h1 style="font-size:2.3em">Branching and Versioning: Choosing a Strategy</h1>
+    <p class="big muted" style="font-weight:400;font-size:1.25em">Three ways to version, and the questions that pick yours</p>
+    <p class="muted">Noel Aguilar · DevOps<br><span style="font-size:.75em">2026-11-18</span></p>
+    <aside class="notes">⏱ 0.25 min. Introduce the session. This follows on from Moving to GitHub Actions (October 27): that session named the three versioning strategies; this one goes deep enough to choose one. Three short live demos, one per strategy. Hold questions to the end unless something blocks understanding; there are about five minutes for Q&amp;A.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Branching and Versioning</p>
+    <h2>What we'll cover</h2>
+    <ol>
+      <li><strong>Refresher:</strong> squash merge, PR titles, SemVer</li>
+      <li><strong>The three strategies</strong>, each with a live demo: Continuous versioning, plain release-please, release-please with release branches</li>
+      <li><strong>Side by side:</strong> three scenarios, rulesets, gotchas, the legacy format</li>
+      <li><strong>Choosing:</strong> a decision flow and a one-page cheat sheet</li>
+    </ol>
+    <aside class="notes">⏱ 0.5 min. The thread: by the end, each tech lead should be able to say which strategy fits their product, and why. None of the three is the default, so this is about informing the choice, not selling one.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Why the choice matters</p>
+    <h2>One strategy per repository, and it rarely changes</h2>
+    <p style="font-size:.8em; max-width:none; margin:0 0 .8em">A <strong>module</strong> is a folder versioned and released as one unit: one version, one line of tags. By default it's the whole repository; a monorepo has several. A repository uses <strong>one strategy for all its modules</strong>, and none is the default.</p>
+    <div class="cards dense" style="font-size:.72em">
+      <div class="card">
+        <span class="num">1</span>
+        <h3>Is every merge a release candidate, or do you collect features and plan a release?</h3>
+        <p>Every merge: <strong>Continuous versioning</strong>. Collect and plan: <strong>release-please</strong>.</p>
+      </div>
+      <div class="card">
+        <span class="num">2</span>
+        <h3>release-please: do you keep merging to <code>main</code> while a version is in regression?</h3>
+        <p>Yes: <strong>release branches</strong>.</p>
+      </div>
+      <div class="card">
+        <span class="num">3</span>
+        <h3>release-please: must you hotfix production without shipping unreleased work?</h3>
+        <p>Often: <strong>release branches</strong>. Rarely: <strong>plain</strong>.</p>
+      </div>
+    </div>
+    <p class="callout" style="font-size:.8em">Cut release branches today? That's release-please with release branches. Continuous versioning has none.</p>
+    <aside class="notes">⏱ 1.25 min. Source: cicd-standards docs/ci/versioning.md, "Which versioning strategy should a repository use?" and "What is a module?". A module is a folder of the repository versioned and released as one unit: one version, one line of tags (v1.2.0, or echo@v1.2.0 in a monorepo). It may produce several images; it is not an image, a .NET project or a Helm chart. With no configuration, the module is the whole repository. The first question splits the two models: Continuous versioning makes every build on main a release candidate as it lands; release-please collects features or epics in a release PR and someone decides when to cut. Questions 2 and 3 only apply under release-please, and choose between its two strategies. A team that cuts release branches by hand today lands on release-please with release branches; Continuous versioning never has release branches. A repository MUST use exactly one strategy, for all its modules. Between plain release-please and release branches, switching is one PR (the caller workflow and config files), once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please, the tags are compatible by design, but no repository has made that move yet. So in practice teams rarely switch once they've started. That's why it's worth deciding deliberately now. Keep the two questions in mind: every strategy slide comes back to them, and the decision flow at the end starts from them. Ask the room to think about how their team handles regression today.</aside>
+  </section>
+
+  <!-- ============ 2. Recap ============ -->
+
+  <section class="slide">
+    <p class="kicker">Recap</p>
+    <h2>Squash merge: one PR, one commit, one title</h2>
+    <svg class="diagram" viewBox="0 0 1000 280" role="img" aria-label="A pull request branch, feat/DAR-102-search, has three messy commits: wip, fix typo and address review. Squash merge turns them into one commit on main, titled with the PR title, feat(search): add clear button (DAR-102) (#123), which makes the next version a minor one.">
+      <defs>
+        <marker id="squash-merge-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="squash-merge-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- main -->
+      <text class="dg-mono" x="10" y="175">main</text>
+      <line class="dg-line" x1="60" y1="170" x2="975" y2="170" marker-end="url(#squash-merge-ah)"/>
+      <circle class="dg-dot" cx="100" cy="170" r="9"/>
+      <!-- the PR branch, squashed into one commit -->
+      <path class="dg-line" d="M100,161 C100,110 120,70 160,70 L480,70 C530,70 549,110 549,157" marker-end="url(#squash-merge-ah)"/>
+      <text class="dg-mono" x="170" y="104">feat/DAR-102-search</text>
+      <circle class="dg-dot" cx="210" cy="70" r="9"/>
+      <text class="dg-mono" x="210" y="46" text-anchor="middle">wip</text>
+      <circle class="dg-dot" cx="320" cy="70" r="9"/>
+      <text class="dg-mono" x="320" y="46" text-anchor="middle">fix typo</text>
+      <circle class="dg-dot" cx="440" cy="70" r="9"/>
+      <text class="dg-mono" x="440" y="46" text-anchor="middle">address review</text>
+      <text class="dg-small" x="566" y="112">squash merge</text>
+      <!-- the one commit on main -->
+      <circle class="dg-dot" cx="550" cy="170" r="11"/>
+      <line class="dg-line" x1="550" y1="181" x2="550" y2="200"/>
+      <rect class="dg-box" x="320" y="200" width="460" height="42" rx="8"/>
+      <text class="dg-mono" x="550" y="226" text-anchor="middle">feat(search): add clear button (DAR-102) (#123)</text>
+      <text class="dg-small" x="550" y="268" text-anchor="middle">one commit on main; its message is the PR title</text>
+      <line class="dg-line accent" x1="790" y1="221" x2="848" y2="221" marker-end="url(#squash-merge-aha)"/>
+      <text class="dg-text" x="860" y="227">next minor</text>
+    </svg>
+    <ul class="tight">
+      <li>Branch commits (<code>wip</code>, <code>fix typo</code>) never reach <code>main</code></li>
+      <li>The PR title becomes the commit's title on <code>main</code></li>
+      <li>Every strategy reads its versions from those titles</li>
+    </ul>
+    <aside class="notes">⏱ 1 min. A refresher from October, but it matters more than it looked then: everything in this session depends on it. With a merge commit, every commit on the branch lands on main, and a tool reading titles would see "wip" and "fix typo". With squash, main gets one commit per PR, titled by the PR. The repository setting is squash only, with the PR title and description as the commit message, so footers in the description (BREAKING CHANGE:, Release-As:) reach main too. Your branch commits can be as messy as you like.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Recap</p>
+    <h2>The PR title sets the version</h2>
+    <div class="dense compact" style="font-size:.66em">
+      <table>
+        <thead><tr><th>Title</th><th>Use it for</th><th>Bump</th></tr></thead>
+        <tbody>
+          <tr><td><code>feat:</code></td><td>Something new for the people who use the service</td><td>minor</td></tr>
+          <tr><td><code>fix:</code></td><td>A correction, a performance fix, a CVE bump: <code>fix(deps):</code></td><td>patch</td></tr>
+          <tr><td><code>docs:</code></td><td>Documentation only</td><td>none under release-please</td></tr>
+          <tr><td><code>chore:</code></td><td>Everything else: build, CI, tests, refactors, a routine <code>chore(deps):</code></td><td>none under release-please</td></tr>
+          <tr><td><code>feat!:</code>, or a <code>BREAKING&nbsp;CHANGE:</code> footer</td><td>A change callers must adapt to</td><td>major</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout">A merged title can't be changed. <strong>The PR-title check is the only cheap place to catch a wrong version.</strong></p>
+    <aside class="notes">⏱ 1.5 min. Source: versioning.md, "Which types should a title use?". Any Conventional Commit type is allowed and the check accepts them all, but four are recommended so nobody has to remember the rest. The question is: does the change alter what the service does for the people who use it? Use chore: in place of build:, ci:, test:, refactor: and style:, and fix: for perf:. revert: stays the type for taking a merged change out. A dependency bump is chore(deps):, or fix(deps): when it fixes a CVE, even when it's only a version number, so it releases and the changelog lists it. Retitle a Dependabot security PR fix(deps): before merging. The "none under release-please" column is a preview: under Continuous versioning, a chore: that changes a module's files still ships a patch. Once a title is a commit on a protected branch it can't be edited; retitling a merged PR changes nothing.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Recap</p>
+    <h2>A version tag marks a release candidate, not a release</h2>
+    <div class="cards two">
+      <div class="card">
+        <h3>Cut: a candidate</h3>
+        <p>The git tag <code>v1.4.0</code> is created. That build is now a release candidate, on its way to <code>staging</code>. Nothing is in production yet.</p>
+      </div>
+      <div class="card">
+        <h3>Released: in production</h3>
+        <p>The ArgoCD Promotion Manager promotes that same candidate to <code>production</code>.</p>
+      </div>
+    </div>
+    <p class="callout"><code>1.4.0</code> fails regression, <code>1.4.1</code> passes, and production goes straight to <code>1.4.1</code>. Normal, in every strategy.</p>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "When is a version cut, and when is it released?". This holds for all three strategies. Continuous versioning is not continuous deployment: every version it cuts is still only a release candidate. The Promotion Manager, not the tag list, is the record of what was released. A package published to CodeArtifact is the one exception (cut and released are the same event), but that's out of scope today.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Recap</p>
+    <h2>Every image gets a build tag; only a version gets a git tag</h2>
+    <div class="mid">
+      <table>
+        <thead><tr><th>What was built</th><th>Image tag</th><th>Git tag</th></tr></thead>
+        <tbody>
+          <tr><td>Branch <code>feat/DAR-102-search</code>, run 107</td><td><code>feat-DAR-102-search-107</code></td><td><span class="no">none</span></td></tr>
+          <tr><td>A version, <code>1.4.0</code></td><td><code>1.4.0</code></td><td><code>v1.4.0</code></td></tr>
+          <tr><td>Moving tags</td><td><span class="no">never</span>: no <code>latest</code>, no <code>main</code></td><td><span class="no">never</span> moved or deleted</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">A branch build's tag, <code>&lt;branch&gt;-&lt;run&gt;</code>, is on the image in the registry only. Which build gets the version differs by strategy: coming up.</p>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "How are builds tagged?" and "What do versions and version tags look like?". The branch name with each / replaced by -, then the workflow run number. Version tags are vX.Y.Z in git (the git convention, and release-please's default) and bare X.Y.Z on images and packages. A monorepo module's git tag carries its component: echo@v1.4.0. The difference by strategy, for later: under Continuous versioning, the build on main is tagged with the version it cuts. Under release-please, every build is branch-run, main included (main-412), and the version is added to that image at release.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Recap</p>
+    <h2>Not merged = not shipped</h2>
+    <ul>
+      <li>Anything merged to <code>main</code> is in the next version: the very next one under Continuous versioning, the next release PR under release-please</li>
+      <li>Work that isn't ready stays unmerged, or is merged behind a feature flag that's off</li>
+      <li>A merged change only comes out with a <code>revert:</code> PR</li>
+    </ul>
+    <p class="callout">This is what a hotfix runs into: whatever is on <code>main</code> ships with it, unless the strategy gives you another branch.</p>
+    <aside class="notes">⏱ 1 min. Source: versioning.md, "What must not be merged to main?". This is the rule the rest of the session builds on. A revert takes the code out, but it doesn't cancel the original commit's effect on the version, or, with release-please, its line in the changelog. The callout sets up the second of our two questions: if main has unreleased work and production needs a fix today, the strategy decides whether you can ship the fix alone.</aside>
+  </section>
+
+  <!-- ============ 3. SemVer ============ -->
+
+  <section class="slide">
+    <p class="kicker">SemVer</p>
+    <h2><code>MAJOR.MINOR.PATCH</code>: breaking, feature, fix</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>MAJOR <span class="muted">2.0.0</span></h3>
+        <p>A breaking change: callers must change something</p>
+      </div>
+      <div class="card">
+        <h3>MINOR <span class="muted">1.5.0</span></h3>
+        <p>A new feature; nothing breaks</p>
+      </div>
+      <div class="card">
+        <h3>PATCH <span class="muted">1.4.1</span></h3>
+        <p>A fix; nothing new</p>
+      </div>
+    </div>
+    <p class="callout">A monorepo has one version line per module, tagged <code>&lt;component&gt;@v1.4.0</code>.</p>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 36). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">SemVer, three ways</p>
+    <h2>Same PR title, different version</h2>
+    <div class="dense" style="font-size:.68em">
+      <table>
+        <thead><tr><th>Title</th><th class="cv">Continuous versioning</th><th class="rp">Plain release-please</th><th class="rb">Release branches: <code>main</code></th><th class="rb">Release branches: <code>release/X.Y.x</code></th></tr></thead>
+        <tbody>
+          <tr><th><code>fix:</code></th><td>patch</td><td>patch</td><td><strong>minor</strong> (<code>always-bump-minor</code>)</td><td>patch (<code>always-bump-patch</code>)</td></tr>
+          <tr><th><code>feat:</code></th><td>minor</td><td>minor</td><td>minor</td><td><strong>patch</strong>, with a warning on the PR: revert it (the default) or keep it on purpose</td></tr>
+          <tr><th><code>feat!:</code></th><td>major</td><td>major, unless the team sets <code>always-bump-minor</code></td><td>needs <code>Release-As: X.0.0</code>; the version check fails without it</td><td>still a patch, with a stronger warning: majors come from <code>main</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout">Release branches change the rules on purpose: <code>main</code> cuts minors, each release branch cuts patches.</p>
+    <aside class="notes">⏱ 1.75 min. The core slide. Sources: versioning.md's comparison table; versioning-release-please.md, "Why does main never release a patch version?", "What if a feature lands on a release branch?" and "How is a breaking change released?". Release branches come on slide 25: each minor version gets a branch, release/X.Y.x, that cuts its patches; this slide previews their rules. Walk it column by column. Continuous versioning and plain release-please bump by type, the textbook way. With release branches, main uses always-bump-minor, a release-please setting: even a release holding only fixes is the next minor (why: slide 26). Each release branch uses always-bump-patch, so anything merged there, even a feat:, ships as the next patch; a job comments on the PR to warn, but doesn't block it. The cost of always-bump-minor is that a breaking change no longer becomes a major by itself: it needs Release-As: X.0.0, a footer line in a PR description that sets the next version, on a PR to main. The release PR version check, a required check on every release PR (release-please / release-pr-version-check), fails main's release PR until it's there. That check applies from 1.0.0 on; below 1.0 a minor is the right bump for a breaking change. A plain release-please team may choose always-bump-minor too, and then gets the same rule.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">SemVer, three ways</p>
+    <h2>The type decides how much, or whether</h2>
+    <div class="dense" style="font-size:.66em">
+      <table>
+        <thead><tr><th>Title</th><th class="cv">Continuous versioning</th><th class="rp">Plain release-please</th><th class="rb">Release branches: <code>main</code></th><th class="rb">Release branches: <code>release/X.Y.x</code></th></tr></thead>
+        <tbody>
+          <tr><th><code>chore:</code> / <code>docs:</code></th><td><strong>patch</strong>, if it changes the module's files</td><td><strong>no release</strong></td><td>no release</td><td>no release</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards two" style="margin-top:1em">
+      <div class="card">
+        <h3>Continuous versioning</h3>
+        <p>A patch means "a build shipped", not "a bug was fixed".</p>
+      </div>
+      <div class="card">
+        <h3>release-please</h3>
+        <p>The type decides <strong>whether</strong> a change releases. <code>Release-As: X.Y.Z</code> forces a version, e.g. to ship a <code>chore:</code> alone.</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.25 min. Sources: versioning.md, "Which types should a title use?"; versioning-continuous.md, "In the SemVer format"; versioning-release-please.md, "When may the proposed version be overridden?"; the how-to, "How do I release a docs or chore change on its own?". Continuous versioning: every build on main that ships changes what's deployed, so it needs a new version, even when the commits don't call for one. "The module's files" are its folder and its extra-paths (other folders it's built from, listed in version-config.json), minus Markdown, docs/ and .github/, so a docs-only change builds nothing and cuts nothing. release-please: docs: and chore: wait for the next feat: or fix:. When one must reach production first (a CVE bump merged as chore(deps): by mistake, say), put "Release-As: 1.4.3" (the next patch) on its own line at the end of a PR description; release-please proposes that version. Release-As is the only correction after a merge. With release branches, main never releases a patch: put the footer on the release branch the production version came from, release/1.4.x, and merge its forward-port. On main, Release-As must be higher than every version tag in the repository, and, with release branches, a new minor or major. With plain release-please and unreleased work on main, the change goes on a hotfix branch.</aside>
+  </section>
+
+  <!-- ============ 4. Continuous versioning ============ -->
+
+  <section class="slide brand">
+    <p class="kicker">Strategy 1 of 3</p>
+    <h2 style="font-size:2.4em">Continuous versioning</h2>
+    <p class="big">Every merge to <code>main</code> that builds is a release candidate, tagged as it lands.</p>
+    <p class="muted">No release PR and no release branches: <code>main</code> is the only long-lived branch.</p>
+    <aside class="notes">⏱ 0.25 min. Section opener. Say the one line, then move on: the next slides show how it works, then the live demo.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Continuous versioning</p>
+    <h2><code>main</code> only: every merge that builds is a version</h2>
+    <svg class="diagram" viewBox="0 0 1000 265" role="img" aria-label="Continuous versioning uses main only. Topic branches feat/DAR-102-search and fix/DAR-103-retry each build an image named after the branch and run, such as feat-DAR-102-search-107 and fix-DAR-103-retry-112, with no version. Each squash merge to main cuts a version at once: v1.4.0 for the feat, v1.4.1 for the fix, v1.4.2 for a chore, which is still a patch. A docs-only merge builds nothing and gets no version.">
+      <defs>
+        <marker id="cv-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="cv-flow-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- main -->
+      <text class="dg-mono" x="10" y="195">main</text>
+      <line class="dg-line" x1="60" y1="190" x2="975" y2="190" marker-end="url(#cv-flow-ah)"/>
+      <circle class="dg-dot accent" cx="80" cy="190" r="11"/>
+      <text class="dg-mono" x="80" y="225" text-anchor="middle">v1.3.0</text>
+      <!-- feat topic branch -->
+      <path class="dg-line" d="M80,179 C80,130 100,90 140,90 L290,90 C330,90 349,130 349,177" marker-end="url(#cv-flow-ah)"/>
+      <circle class="dg-dot" cx="215" cy="90" r="9"/>
+      <text class="dg-mono" x="215" y="40" text-anchor="middle">feat/DAR-102-search</text>
+      <text class="dg-mono" x="215" y="65" text-anchor="middle">feat-DAR-102-search-107</text>
+      <text class="dg-small" x="215" y="121" text-anchor="middle">image, no version</text>
+      <circle class="dg-dot accent" cx="350" cy="190" r="11"/>
+      <text class="dg-mono" x="350" y="225" text-anchor="middle">v1.4.0</text>
+      <text class="dg-small" x="350" y="246" text-anchor="middle">feat: a minor</text>
+      <!-- fix topic branch -->
+      <path class="dg-line" d="M400,190 C400,130 420,90 460,90 L540,90 C580,90 599,130 599,177" marker-end="url(#cv-flow-ah)"/>
+      <circle class="dg-dot" cx="500" cy="90" r="9"/>
+      <text class="dg-mono" x="500" y="40" text-anchor="middle">fix/DAR-103-retry</text>
+      <text class="dg-mono" x="500" y="65" text-anchor="middle">fix-DAR-103-retry-112</text>
+      <circle class="dg-dot accent" cx="600" cy="190" r="11"/>
+      <text class="dg-mono" x="600" y="225" text-anchor="middle">v1.4.1</text>
+      <text class="dg-small" x="600" y="246" text-anchor="middle">fix: a patch</text>
+      <!-- chore and docs merges -->
+      <circle class="dg-dot accent" cx="730" cy="190" r="11"/>
+      <text class="dg-mono" x="730" y="225" text-anchor="middle">v1.4.2</text>
+      <text class="dg-small" x="730" y="246" text-anchor="middle">chore: still a patch</text>
+      <circle class="dg-dot" cx="895" cy="190" r="9"/>
+      <text class="dg-mono" x="895" y="225" text-anchor="middle">no tag</text>
+      <text class="dg-small" x="895" y="246" text-anchor="middle">docs: builds nothing</text>
+    </svg>
+    <ul class="tight">
+      <li>Topic branches build <code>&lt;branch&gt;-&lt;run&gt;</code> images, never a version</li>
+      <li>On <code>main</code>: compute the version, push image <code>1.4.0</code>, then tag <code>v1.4.0</code></li>
+      <li>Only changed modules build; a docs-only change builds nothing</li>
+    </ul>
+    <aside class="notes">⏱ 1.25 min. Source: versioning-continuous.md, "How does Continuous versioning work, end to end?". One workflow, ci.yml, calling app-ci. Its first job, Plan builds, runs compute-versions: which modules did this push change, and, on main, what's each one's next version, from the PR titles merged since that module's last tag. Each changed module is built once, tested and scanned as built, and only then pushed; on main, the git tag is created last, so a tag never points at a version whose images are missing or untested. A change that touches no module (docs, workflows, a chart outside the module folder) builds nothing. Main builds run one at a time, so versions are cut in order.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Continuous versioning</p>
+    <h2>Git tags are the whole record</h2>
+    <div class="two-col">
+      <div>
+        <h3>You get</h3>
+        <ul class="tight">
+          <li>A version per merge, computed from the titles</li>
+          <li>Only changed modules built and tagged</li>
+          <li>One version line per module in a monorepo</li>
+        </ul>
+      </div>
+      <div>
+        <h3>You don't get</h3>
+        <ul class="tight">
+          <li>A release PR to batch changes</li>
+          <li><code>CHANGELOG.md</code> or a GitHub Release</li>
+          <li>A branch to hotfix production on</li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout">Hotfix while <code>main</code> has unreleased work: <strong>not covered</strong>. The fix ships with everything merged before it.</p>
+    <aside class="notes">⏱ 1.25 min. Source: versioning-continuous.md, "Known limitations". No changelog or GitHub Release is generated: the git tags are the record of versions, and the Promotion Manager the record of what was released. The hotfix gap follows from "not merged = not shipped": every merge to main is the next version, so a fix can't skip work already merged. A team that needs that uses release-please with release branches. In practice this works for a team that keeps main releasable: small PRs, feature flags for unfinished work. Also a limitation: version tag creation isn't restricted (they're created with GITHUB_TOKEN), only moving and deleting them is blocked.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Continuous versioning</p>
+    <h2>Fits a team that ships each change as it lands</h2>
+    <div class="cards two">
+      <div class="card">
+        <h3>It fits</h3>
+        <ul class="tight">
+          <li>Each merged change goes to <code>staging</code> on its own</li>
+          <li><code>main</code> is kept releasable: small PRs, feature flags</li>
+          <li>A service monorepo whose modules share files or code directly (<code>extra-paths</code>)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>The files</h3>
+        <ul class="tight">
+          <li><code>version-config.json</code>: the modules, their format (<code>semver</code>), extra paths</li>
+          <li><code>build-config.json</code>: what each module builds</li>
+          <li><code>ci.yml</code>: calls <code>app-ci</code>, copied as-is</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.25 min. Sources: versioning.md, "Which model for a repository with several modules"; versioning-continuous.md, "What must a repository have?". The monorepo point matters: under Continuous versioning, a module lists whatever else it builds from in extra-paths (a shared entrypoint.sh, a library referenced directly), and a change to it cuts a version of every module that lists it. release-please can't do that (see the gotchas). Files only named, never opened: the set-up how-to (docs/how-to/set-up-continuous-versioning.md) walks through them. The pilot, poc_echo_server_dotnet, is what demo 1 uses.</aside>
+  </section>
+
+  <section class="slide brand">
+    <p class="kicker">Live demo 1</p>
+    <h2>Merge a <code>feat:</code>, get the next minor</h2>
+    <p class="muted"><code>poc_echo_server_dotnet</code>, the .NET pilot</p>
+    <ol>
+      <li>The staged <code>feat:</code> PR: checks green, branch image <code>feat-…-&lt;run&gt;</code>, no version</li>
+      <li>Squash-merge it first, then talk over the run</li>
+      <li>The <code>main</code> build's Plan builds job picks the next minor</li>
+      <li>The image is pushed with that version, then the merge commit is tagged</li>
+    </ol>
+    <aside class="notes">⏱ 5.5 min including the run. Live: PR #59, feat(echo): stamp the demo build 20261118-001425, staged and CLEAN on 2026-11-17, branch image noel/echo.api:feat-demo-20261118-001425-145. Expected: tag v1.5.0 and image noel/echo.api:1.5.0 (the rehearsal's #58 cut v1.4.0). Don't merge anything else into the repository before the session; leave PR #16 alone. The run takes the whole slot, so merge first and talk over it. Tabs open: PR #59, the Actions tab, Code → Tags, and the ECR repository for the echo image. Click by click: (1) Within the first minute, on PR #59: point at the title, feat(echo): …, the two required checks, CI / CI result and PR / Lint PR title, and the branch image feat-demo-20261118-001425-145: no version anywhere. (2) Click "Squash and merge"; point out the commit title box is the PR title; confirm. (3) Actions → build-test-publish on main: the run starts about 6 seconds after the merge. Open Plan builds (done at about +15 s): the module src/Services/Echo changed, "version": "1.5.0", "tag": "v1.5.0", "create-tag": true (compute-versions reads the titles merged since v1.4.0). (4) While it runs, say: only the changed module builds; the image is built once and tested as built; nothing is pushed until the tests and scans pass; the git tag comes last, so a tag never points at a missing image; there's no release PR, no changelog, no GitHub Release here; a docs-only change would build nothing at all. Rehearsal timings to pace by: Build done at about 1.8 minutes, Unit and Integration Test at about 4.3, Publish images at about 4.9, and Tag release commit about 5 minutes after the merge, its log saying Created tag 'v1.5.0' on &lt;sha&gt;; the run ends at about 5.2 minutes. (5) When it's green: Code → Tags shows v1.5.0 on the merge commit; ECR (or the run summary's digests) shows noel/echo.api:1.5.0. Harmless warnings: "Retention days cannot be greater than the maximum…" and ASP0014. If it fails, or isn't done when the slot is, go to the next slide (backup).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Demo 1 · backup</p>
+    <h2>Merge PR #58, get <code>v1.4.0</code></h2>
+    <p class="backup-label"><span class="pill">From the rehearsal (one version earlier than live)</span></p>
+    <!-- BACKUP:demo1 -->
+    <div class="two-col dense backup">
+      <div>
+        <h3>The PR, squash-merged to <code>main</code></h3>
+        <p><strong>#58</strong> <code>feat(echo): stamp the demo build 20261118-000218</code></p>
+        <p class="muted">Its branch build: <code>noel/echo.api:feat-demo-20261118-000218-143</code>, no version</p>
+        <h3>Plan builds: the version</h3>
+        <pre class="log">"module": "src/Services/Echo", "changed": true,
+"version": "1.4.0", "tag": "v1.4.0",
+"create-tag": true, "image-tag": "1.4.0"</pre>
+        <p>Last tag <code>v1.3.0</code>, plus a <code>feat:</code>: the next minor</p>
+        <h3>About 5 minutes after the merge</h3>
+        <p>Tag <code>v1.4.0</code> on the merge commit, and image <code>noel/echo.api:1.4.0</code></p>
+        <p class="muted">No release PR, no changelog, no GitHub Release</p>
+      </div>
+      <div>
+        <h3><code>main</code>'s run <span class="pill">started +0:06 after the merge</span></h3>
+        <table class="compact">
+          <thead><tr><th>Job</th><th></th><th>Done</th></tr></thead>
+          <tbody>
+            <tr><td>Plan builds</td><td class="yes">✓</td><td>+0:15</td></tr>
+            <tr><td>Helm / Plan</td><td class="yes">✓</td><td>+0:22</td></tr>
+            <tr><td>echo / SCA Scan (×3)</td><td class="yes">✓</td><td>+1:19</td></tr>
+            <tr><td>echo / Build</td><td class="yes">✓</td><td>+1:49</td></tr>
+            <tr><td>echo / Unit Test</td><td class="yes">✓</td><td>+4:15</td></tr>
+            <tr><td>echo / Integration Test</td><td class="yes">✓</td><td>+4:24</td></tr>
+            <tr><td>echo / Publish images</td><td class="yes">✓</td><td>+4:53</td></tr>
+            <tr><td><strong>echo / Tag release commit</strong></td><td class="yes">✓</td><td><strong>+5:02</strong></td></tr>
+            <tr><td>CI result</td><td class="yes">✓</td><td>+5:08</td></tr>
+          </tbody>
+        </table>
+        <pre class="log">Created tag 'v1.4.0' on 4ffffff…</pre>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: PR #58 cut v1.4.0 (live, #59 cuts v1.5.0). Walk it in order. (1) The PR: a feat: title, and its branch build pushed noel/echo.api:feat-demo-…-143, with no version: a topic branch never gets one. (2) Squash-merged; main's run started 6 seconds later. (3) Plan builds, done at +15 s: the module src/Services/Echo changed, and compute-versions read the feat: since v1.3.0 and chose 1.4.0, with create-tag true. (4) The run, right column: SCA scans and the build in under 2 minutes, both test jobs at about 4.3 minutes, Publish images at 4:53 (Helm / Validate skipped, nothing changed in the chart). Only after the images are pushed does Tag release commit run: its log says Created tag 'v1.4.0' on 4ffffff, 300 seconds after the merge. So a tag never points at an image that doesn't exist. (5) The result: tag v1.4.0 and image noel/echo.api:1.4.0; no release PR, no changelog, no GitHub Release. Captures: demo/captures/demo1-rehearsal-*.</aside>
+  </section>
+
+  <!-- ============ 5. Plain release-please ============ -->
+
+  <section class="slide brand">
+    <p class="kicker">Strategy 2 of 3</p>
+    <h2 style="font-size:2.4em">Plain release-please</h2>
+    <p class="big">Merges collect in a release PR; merging it cuts the version.</p>
+    <p class="muted"><code>main</code> is the only long-lived branch; a <code>hotfix/X.Y.x</code> appears only when production needs one.</p>
+    <aside class="notes">⏱ 0.25 min. Section opener. Say the one line, then move on: the next slides show how it works, then the live demo.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Plain release-please</p>
+    <h2>Merging the release PR cuts the version</h2>
+    <svg class="diagram" viewBox="0 0 1000 300" role="img" aria-label="Plain release-please. Each merge to main builds an image tagged main-10, main-11 and so on, and a release PR collects them. Merging it cuts v1.0.0 and re-tags the tested main-11 image. Production is on 1.0.x and needs a hotfix while main holds unreleased work, so the hotfix button creates hotfix/1.0.x from the production tag v1.0.0. A fix there releases v1.0.1 and is forward-ported to main, and the next release PR cuts v1.1.0.">
+      <defs>
+        <marker id="rp-plain-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="rp-plain-flow-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- release PR zones -->
+      <rect class="dg-zone" x="70" y="82" width="160" height="75" rx="10"/>
+      <text class="dg-small" x="150" y="74" text-anchor="middle">release PR</text>
+      <rect class="dg-zone" x="355" y="82" width="310" height="75" rx="10"/>
+      <text class="dg-small" x="510" y="74" text-anchor="middle">next release PR</text>
+      <!-- main -->
+      <text class="dg-mono" x="10" y="115">main</text>
+      <line class="dg-line" x1="60" y1="110" x2="975" y2="110" marker-end="url(#rp-plain-flow-ah)"/>
+      <circle class="dg-dot" cx="110" cy="110" r="9"/>
+      <text class="dg-mono" x="110" y="145" text-anchor="middle">main-10</text>
+      <circle class="dg-dot" cx="190" cy="110" r="9"/>
+      <text class="dg-mono" x="190" y="145" text-anchor="middle">main-11</text>
+      <circle class="dg-dot accent" cx="280" cy="110" r="11"/>
+      <text class="dg-mono" x="280" y="38" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="280" y="60" text-anchor="middle">re-tags main-11</text>
+      <circle class="dg-dot" cx="400" cy="110" r="9"/>
+      <text class="dg-mono" x="400" y="145" text-anchor="middle">main-12</text>
+      <text class="dg-small" x="400" y="180" text-anchor="middle">feat: B, unreleased</text>
+      <circle class="dg-dot" cx="620" cy="110" r="9"/>
+      <text class="dg-mono" x="620" y="145" text-anchor="middle">main-13</text>
+      <circle class="dg-dot accent" cx="740" cy="110" r="11"/>
+      <text class="dg-mono" x="740" y="38" text-anchor="middle">v1.1.0</text>
+      <text class="dg-small" x="740" y="60" text-anchor="middle">re-tags main-13</text>
+      <circle class="dg-dot" cx="870" cy="110" r="9"/>
+      <text class="dg-mono" x="870" y="145" text-anchor="middle">main-14</text>
+      <!-- hotfix/1.0.x from the production tag -->
+      <path class="dg-line accent" d="M280,121 C280,190 300,230 340,230 L760,230" marker-end="url(#rp-plain-flow-aha)"/>
+      <text class="dg-mono" x="772" y="235">hotfix/1.0.x</text>
+      <circle class="dg-dot" cx="460" cy="230" r="9"/>
+      <text class="dg-mono" x="460" y="260" text-anchor="middle">fix: X</text>
+      <circle class="dg-dot accent" cx="560" cy="230" r="11"/>
+      <text class="dg-mono" x="560" y="260" text-anchor="middle">v1.0.1</text>
+      <text class="dg-small" x="300" y="288">created by the hotfix button from v1.0.0, the production tag</text>
+      <!-- forward-port -->
+      <path class="dg-line dashed" d="M466,222 C500,170 560,130 610,116" marker-end="url(#rp-plain-flow-ah)"/>
+      <text class="dg-small" x="556" y="190">forward-port</text>
+    </svg>
+    <ul class="tight">
+      <li><code>main</code> builds <code>main-&lt;run&gt;</code> images, with no version yet</li>
+      <li>Merging the release PR tags <code>vX.Y.Z</code> and writes a GitHub Release</li>
+      <li>The hotfix button cuts <code>hotfix/X.Y.x</code> from the production tag, <strong>only</strong> when <code>main</code> has moved on</li>
+    </ul>
+    <aside class="notes">⏱ 1.25 min. Source: versioning-release-please.md, "How does plain release-please work?" and "Hotfix branches". After every releasable merge (feat:, fix:, a breaking change), release-please updates one standing release PR with the next version and its changelog. Nothing is cut until a person merges it: anyone with merge rights merges main's release PR, since it goes to staging first. A hotfix branch is rare: if nothing has merged to main since the production version was cut, the hotfix goes on main like any fix. Only when main has unreleased work does the Technical Owner (the project lead, or whoever decides for the repository) press the hotfix button, Actions → release-please → Run workflow, with the production tag; the workflow creates hotfix/X.Y.x from it, and the fix goes in by PR. Seconds after the fix merges, the forward-port job opens its port back to main: a forward-port is a PR that carries the same change to main. Only the Technical Owner merges the branch's release PR, which cuts the next patch, because it goes to production. While the hotfix branch exists, main can't release on its line: the version check blocks it, so main's next release is a minor (with only fixes on main, the check asks for a Release-As).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Plain release-please</p>
+    <h2>The tested image gets the version: no rebuild</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Re-tag</h3>
+        <p>The release adds <code>1.4.0</code> to the image <code>main</code> already built and tested, <code>main-412</code>: same digest.</p>
+      </div>
+      <div class="card">
+        <h3>Changelog</h3>
+        <p><code>CHANGELOG.md</code> and a GitHub Release, written from the PR titles.</p>
+      </div>
+      <div class="card">
+        <h3>You decide when</h3>
+        <p>Nothing is cut until a person merges the release PR.</p>
+      </div>
+    </div>
+    <p class="callout">Build once, promote many: what regression tested is byte for byte what ships.</p>
+    <aside class="notes">⏱ 1.25 min. Source: versioning-release-please.md, "What happens when the release PR merges?". The release commit (chore(main): release 1.4.0) only changes the manifest and CHANGELOG.md, so it builds nothing. The retag job walks back to the commit before it that built (normally its parent), waits for that build to finish, checks each image's org.opencontainers.image.revision label is that commit's SHA, and only then adds 1.4.0 to the same digest. It never falls back to "the newest image". The Promotion Manager sees 1.4.0 appear as a push and can promote it. The changelog is the benefit people remember: QA, support and product can read what's in a version without asking a developer.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Plain release-please</p>
+    <h2>Fits a team that batches changes, and can hold merges</h2>
+    <div class="cards two">
+      <div class="card">
+        <h3>When regression fails</h3>
+        <ul class="tight mid">
+          <li>Fix it on <code>main</code></li>
+          <li><strong>Hold other merges</strong>, so the next version stays small</li>
+          <li>The next release PR replaces the failed version in <code>staging</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>The files</h3>
+        <ul class="tight mid">
+          <li><code>release-please-config.json</code>: release type, excluded paths</li>
+          <li><code>.release-please-manifest.json</code>: the last version</li>
+          <li><code>release-please.yml</code>: calls <code>app-release-please.yml</code>, which <em>is</em> the choice</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 1.25 min. It fits a team that ships several changes together, on a schedule or after a round of regression, can hold merges while a version is in regression, and rarely patches an older version. Sources: versioning.md, "Which versioning strategy should a repository use?"; the how-to, "How do I fix a failed regression with plain release-please?". The next version after a failed 1.4.0 is 1.4.1, or 1.5.0 if a feature merged meanwhile, which is why you hold merges. The strategy is chosen by which reusable workflow the caller workflow, .github/workflows/release-please.yml, calls: app-release-please.yml for plain, app-release-please-release-branches.yml for release branches. release-please itself knows nothing about release branches. A service uses release-type simple, which writes only the manifest, CHANGELOG.md and version.txt if it exists. The repository settings and rulesets come from cicd-standards templates/release-please/, applied once during setup.</aside>
+  </section>
+
+  <section class="slide brand">
+    <p class="kicker">Live demo 2</p>
+    <h2>Plain release-please: merge the release PR</h2>
+    <p class="muted"><code>release-please-demo</code>, a .NET echo service with component tags, <code>echo@v…</code></p>
+    <ol>
+      <li>Read the open release PR: the next minor, and its changelog from one <code>feat:</code> and one <code>fix:</code></li>
+      <li>Merge it: tag <code>echo@v…</code> and a GitHub Release, about 25 seconds later</li>
+      <li>The <code>retag</code> job adds the version to the image <code>main</code> already built</li>
+      <li>Then <code>hotfix/4.4.x</code>: what a hotfix branch looks like</li>
+    </ol>
+    <aside class="notes">⏱ 5.5 min including the run. Live: release PR #250, chore(main): release echo 4.7.0, with feat #249 and fix #251, staged and CLEAN on 2026-11-17. Expected: tag echo@v4.7.0, the GitHub Release, and noel/echo.api:4.7.0 (with echo.backgroundtasks and echo.migrations) re-tagged from the main-&lt;run&gt; build of fix #251 (the rehearsal's #247 cut echo@v4.6.0 from main-600). Don't merge anything else into the repository before the session. Tabs: PR #250, the Actions tab, Releases, the ECR repository. Click by click: (1) Open PR #250, opened by the release App (vectorlearning-release, the organization's GitHub App that opens release PRs and creates tags and branches). Its body is the changelog: a Features line for #249 and a Bug Fixes line for #251, one per PR title. Files changed: .release-please-manifest.json and CHANGELOG.md. Point at the checks: release-please / release-pr-version-check is required. Say: this PR has been rewritten after every merge; nothing is released until a person merges it. (2) Squash-merge it. (3) Actions → release-please on main: it starts about 11 seconds after the merge. The tag echo@v4.7.0 and the GitHub Release appear at about +25 s (Code → Tags, Releases). (4) The retag job is done at about +46 s; its log: module '.' was built at &lt;sha&gt;, 1 commit(s) before the release commit; its images are tagged main-&lt;run&gt;; then tagged noel/echo.api:4.7.0 on sha256:…. Say: the release commit itself builds nothing; the image getting 4.7.0 is the one main built and the team tested as main-&lt;run&gt;; same digest, no rebuild. The run ends at about +52 s; the skipped jobs (release-pr-version-check, hotfix-branch, forward-port) are normal on a push. (5) Releases page: echo v4.7.0 with the changelog. (6) Branches → hotfix/4.4.x: created by the hotfix button from echo@v4.4.1, the production tag, while main had moved on. It released one hotfix, echo@v4.4.2, and the forward-port action opened the fix's port to main, #241. If it fails, go to the next slide (backup).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Demo 2 · backup</p>
+    <h2>Merge release PR #247, get <code>echo@v4.6.0</code></h2>
+    <p class="backup-label"><span class="pill">From the rehearsal (one version earlier than live)</span></p>
+    <!-- BACKUP:demo2 -->
+    <div class="two-col dense backup">
+      <div>
+        <h3>The release PR, opened by the release App</h3>
+        <p><strong>#247</strong> <code>chore(main): release echo 4.6.0</code>, base <code>main</code></p>
+        <div class="card changelog">
+          <p><strong>4.6.0</strong> (2026-11-18)</p>
+          <p class="cl-head">Features</p>
+          <ul><li><strong>echo:</strong> stamp the demo feature 20261118-000219 (#246)</li></ul>
+          <p class="cl-head">Bug Fixes</p>
+          <ul><li><strong>echo:</strong> stamp the demo fix 20261118-000219 (#248)</li></ul>
+        </div>
+        <p class="muted">Files changed: <code>.release-please-manifest.json</code>, <code>CHANGELOG.md</code></p>
+        <p class="muted">Skipped on the merge, as normal on a push: <code>release-pr-version-check</code>, <code>hotfix-branch</code>, <code>forward-port</code></p>
+      </div>
+      <div>
+        <h3>After the merge</h3>
+        <table class="compact">
+          <tbody>
+            <tr><td>+0:11</td><td><code>release-please</code> run starts</td></tr>
+            <tr><td><strong>+0:25</strong></td><td>Tag <code>echo@v4.6.0</code> and the GitHub Release <em>echo: v4.6.0</em>, with the same changelog</td></tr>
+            <tr><td><strong>+0:46</strong></td><td><code>retag</code> done <span class="yes">✓</span>: the tested image gets the version</td></tr>
+            <tr><td>+0:52</td><td>Run done <span class="yes">✓</span></td></tr>
+          </tbody>
+        </table>
+        <pre class="log">module '.' was built at 790c91d,
+  1 commit(s) before the release commit b36db71.
+build run … (run number 600) succeeded;
+  its images are tagged main-600.
+tagged noel/echo.api:4.6.0 on sha256:164e1e48…</pre>
+        <p class="muted">Also <code>echo.backgroundtasks</code> and <code>echo.migrations</code>: same digests as <code>main-600</code>, no rebuild</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: release PR #247 cut echo@v4.6.0 (live, #250 cuts echo@v4.7.0). Walk it in order. (1) The release PR, chore(main): release echo 4.6.0, opened by the release App: its body is the changelog, one Features line for feat #246 and one Bug Fixes line for fix #248, written from their PR titles; it changes only the manifest and CHANGELOG.md. (2) Squash-merged; the release-please run started 11 seconds later. (3) At +25 s the tag echo@v4.6.0 and the GitHub Release echo: v4.6.0, with the same changelog. (4) At +46 s the retag job was done; its log, right column: the module was built at the fix's commit, one commit before the release commit, by build run 600, whose images are tagged main-600; it added 4.6.0 to those same digests, for all three images. No rebuild: what was tested is what ships. (5) The whole run took 52 seconds; the skipped jobs are normal on a push. Then, if there's time, the hotfix/4.4.x branch in the repository, as on the demo slide. Captures: demo/captures/demo2-rehearsal-*.</aside>
+  </section>
+
+  <!-- ============ 6. release-please with release branches ============ -->
+
+  <section class="slide brand">
+    <p class="kicker">Strategy 3 of 3</p>
+    <h2 style="font-size:2.4em">release-please with release branches</h2>
+    <p class="big">Plain release-please, plus a <code>release/X.Y.x</code> branch for every minor version.</p>
+    <p class="muted">Regression fixes and hotfixes go there while <code>main</code> keeps moving.</p>
+    <aside class="notes">⏱ 0.25 min. Section opener. Say the one line, then move on: the next slides show how it works, then the live demo.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">release-please with release branches</p>
+    <h2>Every minor version gets its own <code>release/X.Y.x</code></h2>
+    <svg class="diagram" viewBox="0 0 1000 325" role="img" aria-label="release-please with release branches. main merges feat: A and feat: B, and merging the release PR cuts v1.0.0, which creates release/1.0.x automatically. main keeps merging feat: C toward v1.1.0. A fix on release/1.0.x releases v1.0.1, and a forward-port PR to main opens automatically for the developer to merge. v1.1.0 creates release/1.1.x. main never releases a patch, because it is set to always-bump-minor.">
+      <defs>
+        <marker id="rp-branches-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="rp-branches-flow-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- main -->
+      <text class="dg-mono" x="10" y="105">main</text>
+      <line class="dg-line" x1="60" y1="100" x2="975" y2="100" marker-end="url(#rp-branches-flow-ah)"/>
+      <circle class="dg-dot" cx="110" cy="100" r="9"/>
+      <text class="dg-mono" x="110" y="135" text-anchor="middle">feat: A</text>
+      <circle class="dg-dot" cx="190" cy="100" r="9"/>
+      <text class="dg-mono" x="190" y="135" text-anchor="middle">feat: B</text>
+      <circle class="dg-dot accent" cx="280" cy="100" r="11"/>
+      <text class="dg-mono" x="280" y="50" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="280" y="72" text-anchor="middle">release PR merged</text>
+      <circle class="dg-dot" cx="400" cy="100" r="9"/>
+      <text class="dg-mono" x="400" y="135" text-anchor="middle">feat: C</text>
+      <circle class="dg-dot" cx="580" cy="100" r="9"/>
+      <text class="dg-mono" x="580" y="135" text-anchor="middle">port: X</text>
+      <circle class="dg-dot" cx="665" cy="100" r="9"/>
+      <text class="dg-mono" x="665" y="135" text-anchor="middle">feat: D</text>
+      <circle class="dg-dot accent" cx="760" cy="100" r="11"/>
+      <text class="dg-mono" x="760" y="50" text-anchor="middle">v1.1.0</text>
+      <text class="dg-small" x="760" y="72" text-anchor="middle">the next minor</text>
+      <text class="dg-small" x="990" y="145" text-anchor="end">main never releases a patch</text>
+      <text class="dg-small" x="990" y="166" text-anchor="end">(always-bump-minor)</text>
+      <!-- release/1.0.x -->
+      <path class="dg-line accent" d="M280,111 C280,160 300,200 340,200 L700,200" marker-end="url(#rp-branches-flow-aha)"/>
+      <text class="dg-mono" x="302" y="205" text-anchor="end">release/1.0.x</text>
+      <text class="dg-small" x="302" y="228" text-anchor="end">created automatically</text>
+      <circle class="dg-dot" cx="450" cy="200" r="9"/>
+      <text class="dg-mono" x="450" y="232" text-anchor="middle">fix: X</text>
+      <circle class="dg-dot accent" cx="540" cy="200" r="11"/>
+      <text class="dg-mono" x="540" y="232" text-anchor="middle">v1.0.1</text>
+      <!-- forward-port -->
+      <path class="dg-line dashed" d="M456,192 C490,150 540,115 571,106" marker-end="url(#rp-branches-flow-ah)"/>
+      <text class="dg-small" x="588" y="164">forward-port PR,</text>
+      <text class="dg-small" x="588" y="183">opened automatically</text>
+      <!-- release/1.1.x -->
+      <path class="dg-line accent" d="M760,111 C760,200 780,280 820,280 L975,280" marker-end="url(#rp-branches-flow-aha)"/>
+      <text class="dg-mono" x="830" y="315">release/1.1.x</text>
+    </svg>
+    <ul class="tight">
+      <li>Cutting <code>X.Y.0</code> on <code>main</code> creates <code>release/X.Y.x</code> from its tag (the <code>x</code> is literal)</li>
+      <li>Fixes go on the release branch as patches; it's never merged back</li>
+      <li>Several can be live: production on <code>1.0.2</code>, <code>1.1.0</code> in regression</li>
+    </ul>
+    <aside class="notes">⏱ 1 min. Source: versioning-release-please.md, "How do release branches work?". The x is literal: one branch per minor version, release/1.0.x holds 1.0.1, 1.0.2 and so on. The workflow (app-release-please-release-branches.yml) creates it, as the release App, right after main's release PR cuts X.Y.0: the release commit plus one commit with the branch's own config. Nobody creates one by hand. The release branch first stabilizes the version while it's in regression, then maintains it with hotfixes once it's in production, so there's no separate hotfix branch under this strategy. It's never merged into main: each fix reaches main by its own forward-port PR. Anyone with merge rights merges main's release PR; only the Technical Owner merges a release branch's release PR, because a patch can be a production hotfix. The Technical Owner deletes the branch once production runs a later minor. In industry terms: trunk-based development with branch-for-release. Teams that cut release/1.0.0 branches by hand today land here.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">release-please with release branches</p>
+    <h2><code>main</code> never releases a patch</h2>
+    <ul class="tight">
+      <li><code>always-bump-minor</code> on <code>main</code>: every release is the next minor, whatever the titles say</li>
+      <li><code>always-bump-patch</code> on each release branch: every release is the next patch</li>
+    </ul>
+    <div class="dense" style="font-size:.66em; margin-top:.8em">
+      <table>
+        <thead><tr><th>After <code>v1.1.0</code>, merged</th><th>Branch</th><th>release-please's default</th><th>With the setting</th></tr></thead>
+        <tbody>
+          <tr><td>only <code>fix:</code> PRs (forward-ports)</td><td><code>main</code></td><td><code>1.1.1</code>: <span class="no">clashes</span> with <code>release/1.1.x</code></td><td><code>1.2.0</code></td></tr>
+          <tr><td>a <code>fix:</code></td><td><code>release/1.1.x</code></td><td><code>1.1.1</code></td><td><code>1.1.1</code></td></tr>
+          <tr><td>a <code>feat:</code> (by mistake)</td><td><code>release/1.1.x</code></td><td><code>1.2.0</code>: <span class="no">clashes</span> with <code>main</code></td><td><code>1.1.1</code>, with a warning</td></tr>
+          <tr><td>a <code>feat!:</code></td><td><code>main</code></td><td><code>2.0.0</code></td><td><code>1.2.0</code>: add <code>Release-As: 2.0.0</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout" style="font-size:.8em">Each version line owns its numbers: <code>main</code> the minors, <code>release/1.1.x</code> the <code>1.1.*</code> patches.</p>
+    <aside class="notes">⏱ 1 min. Source: versioning-release-please.md, "Why does main never release a patch version?" and "What if a feature lands on a release branch?". Walk the table top to bottom. Row 1: after 1.1.0 is cut, release/1.1.x exists and owns 1.1.1, 1.1.2 and so on. If main has only merged fixes, typically the forward-ports of fixes from the release branch, release-please's default would propose 1.1.1 for main too. always-bump-minor makes it 1.2.0. Row 2: the release branch's own fixes release as 1.1.1, as expected. Row 3: a feat: merged into a release branch by mistake would by default become 1.2.0, the version main will cut; always-bump-patch keeps it a patch, and the workflow warns on the PR so the Technical Owner can revert it. Row 4: the price, a breaking change on main still proposes a minor, so a major needs Release-As; the version check fails the release PR until it's there. release-please computes main's version from main alone and can't see release branches. Without always-bump-minor, main would propose 1.1.1 after 1.1.0, the very version release/1.1.x releases next; whichever merged second would find its tag taken, and that branch's changelog goes wrong. The workflow fails if main's config lacks always-bump-minor. The price, majors by Release-As (slide 10), is small: a major is a deliberate, rare event anyway.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">release-please with release branches</p>
+    <h2>Forward-ports open themselves</h2>
+    <p style="font-size:.85em; max-width:none">A <strong>forward-port</strong> is an ordinary PR that carries <strong>one</strong> change from a release branch to <code>main</code>, reviewed and squash-merged like any other. Not a cherry-pick pushed straight to <code>main</code>, and never a merge of the release branch back.</p>
+    <ul class="tight">
+      <li>Any PR merged into a release or hotfix branch: the release App opens a PR with the same title to <code>main</code>, and to each newer release branch</li>
+      <li>The developer merges each, or closes it saying why</li>
+      <li>A release PR is blocked while a port into its branch is missing</li>
+      <li>A change to a workflow file is labelled <code>forward-port-needed</code> and ported by hand</li>
+    </ul>
+    <aside class="notes">⏱ 0.75 min. Source: versioning-release-please.md, "What is a forward-port?". It copies the change, not the branch: nothing else on the release branch comes with it. Because it's a normal PR, it gets the same checks, review and squash merge as any other, and its title lands in main's changelog. Under the hood the action builds the port's branch with git cherry-pick, so if someone asks: yes, but the result is a PR that a developer reviews and merges, not a commit pushed onto main. Correction to the October deck, which said forward-ports were opened by hand until an action existed (COREOPS-4416). Now both release-please workflows run a forward-port job on every push to a release/** or hotfix/** branch (github-actions app-release-please-release-branches.yml and app-release-please.yml, release/forward-port). It cherry-picks the change onto a branch named forward-port/&lt;source&gt;/&lt;pr&gt;/&lt;target&gt; cut from the target, opens the PR as the release App with the original's title, labels it forward-port and asks the original author for a review. One change per PR, never bundled. Where it can't (a conflict, or a file under .github/workflows/, which the App has no permission to push), it labels the original forward-port-needed and its comment names the branch to use for the hand-made port. The release PR version check holds the target's release PR until every port is merged or closed. Demo 3 shows one, already open: it opened seconds after the fix merged into release/1.0.x, not when the release PR merged.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">release-please with release branches</p>
+    <h2>Fits a team that keeps merging during regression</h2>
+    <div class="cards two">
+      <div class="card">
+        <h3>It fits</h3>
+        <ul class="tight mid">
+          <li>You keep merging to <code>main</code> while a version is in regression</li>
+          <li>You must hotfix production without shipping unreleased work</li>
+          <li>You cut release branches by hand today</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>The files, beyond plain</h3>
+        <ul class="tight mid">
+          <li><code>release-please.yml</code> calls <code>app-release-please-release-branches.yml</code></li>
+          <li><code>always-bump-minor</code> in <code>release-please-config.json</code></li>
+          <li>Each release branch gets its own config, written by the workflow</li>
+        </ul>
+      </div>
+    </div>
+    <p class="callout">The cost is people's time, not setup: every fix's forward-port PR needs a review and merge, and each live release branch has its own release PR for the Technical Owner to approve and merge. The App opens them all.</p>
+    <aside class="notes">⏱ 1 min. Sources: versioning.md, "Which versioning strategy should a repository use?"; versioning-release-please.md, "What must a repository have?". The branch config is release-please-config.release-branch.json, with always-bump-patch; it must never be on main. A repository with release branches never has hotfix/** branches: the release branch of the version in production takes the hotfix. Multi-module release branches (release/&lt;component&gt;-X.Y.x) are in the standard but haven't been run on a live repository yet: the first monorepo to use them checks them on its first release.</aside>
+  </section>
+
+  <section class="slide brand">
+    <p class="kicker">Live demo 3</p>
+    <h2>Release branches: merge a patch release PR</h2>
+    <p class="muted"><code>release-please-branches-demo</code>, plain <code>vX.Y.Z</code> tags</p>
+    <ol>
+      <li>Staged: a <code>fix:</code> merged into <code>release/1.0.x</code> with its release PR open, and a <code>feat:</code> on <code>main</code>, unreleased</li>
+      <li>Already open: the fix's forward-port PR to <code>main</code>, opened by itself seconds after the fix merged</li>
+      <li>Merge the release branch's release PR: the next patch, its tag, the re-tagged image</li>
+      <li><code>main</code>'s release PR still proposes the next minor</li>
+      <li>A quick look at the repository's rulesets</li>
+    </ol>
+    <aside class="notes">⏱ 5.5 min including the run. Live: release PR #10, chore(release/1.0.x): release 1.0.2, base release/1.0.x, with fix #9, staged and CLEAN on 2026-11-17. Expected: tag v1.0.2, its GitHub Release, and noel/rpb-echo.api:1.0.2 re-tagged from the release-1.0.x-&lt;run&gt; build (the rehearsal's #7 cut v1.0.1). Already open, and staying open: forward-port PR #11, the port of fix #9 to main, which the release App opened about 19 seconds after #9 merged into release/1.0.x, during staging; and main's release PR #4, proposing 1.1.0 (features #3 and #8, and the rehearsal's port #6). A port opens when a change merges into a release branch, never when the release PR merges. Don't merge anything into the repository before the session, and push nothing to main: with port #11 open, any push to main turns #4's release-pr-version-check red. Tabs: Pull requests, PR #11, fix #9, PR #10, main's release PR #4, Actions, Settings → Rules → Rulesets. Click by click: (1) Pull requests: show #11 first. Base main, from forward-port/release-1.0.x/9/main, the same title as fix #9, labelled forward-port, a review request to the author. Open fix #9: the App's comment lists every target ("main: #11"). Say: the developer merges each port, or closes it saying why. (2) Open #10: base release/1.0.x, and the changelog with fix #9. Only the Technical Owner merges these. (3) Squash-merge it. Actions → release-please on release/1.0.x: it starts about 11 seconds after the merge; tag v1.0.2 and the GitHub Release at about +19 s; the retag job is done at about +42 s, its log: its images are tagged release-1.0.x-&lt;run&gt;, then tagged noel/rpb-echo.api:1.0.2. The forward-port job runs too and skips this merge: "#10 was not forward-ported: it is release-please's release PR". No release-branch job runs (only an X.Y.0 creates one). The run ends at about +47 s. While it runs, say: the fix was made against the code that's actually in the release; main may have changed it since. (4) Open main's release PR #4: still 1.1.0, because main is always-bump-minor; port #11, once merged, joins 1.1.0. Its release-pr-version-check shows green only because it last ran before the port existed: the next push to main fails it under the missing-ports rule until #11 is merged or closed. Worth a sentence. (5) Settings → Rules → Rulesets: seven rulesets; the branch ruleset on main and release/**, Release branch creation (release App only), and the tag rulesets (no update or deletion of v* tags). Say: this demo repo has one approver, so approvals and code owner review are off here; the templates turn them on. If it fails, go to the next slide (backup).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Demo 3 · backup</p>
+    <h2>Merge release PR #7, get <code>v1.0.1</code></h2>
+    <p class="backup-label"><span class="pill">From the rehearsal (one version earlier than live)</span></p>
+    <!-- BACKUP:demo3 -->
+    <div class="two-col dense backup">
+      <div>
+        <h3>Open before the merge</h3>
+        <table class="compact">
+          <tbody>
+            <tr><td><strong>#7</strong></td><td><code>chore(release/1.0.x): release 1.0.1</code>, base <code>release/1.0.x</code>. Bug Fixes: <strong>echo:</strong> stamp the demo fix … (#5)</td></tr>
+            <tr><td><strong>#6</strong></td><td><code>fix(echo): stamp the demo fix 20261118-000246</code>, base <code>main</code>, from <code>forward-port/release-1.0.x/5/main</code>: the port of fix #5, opened by the release App <strong>17 s after #5 merged</strong> into <code>release/1.0.x</code></td></tr>
+            <tr><td><strong>#4</strong></td><td><code>chore(main): release 1.1.0</code>, base <code>main</code>. Features: <strong>echo:</strong> stamp the demo feature … (#3)</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">The App's comment on #5: "this change merged into <code>release/1.0.x</code>, so it is forward-ported to every newer branch: <code>main</code>: #6"</p>
+      </div>
+      <div>
+        <h3>After merging #7</h3>
+        <table class="compact">
+          <tbody>
+            <tr><td>+0:11</td><td><code>release-please</code> run starts on <code>release/1.0.x</code></td></tr>
+            <tr><td><strong>+0:19</strong></td><td>Tag <code>v1.0.1</code> and the GitHub Release <em>v1.0.1</em></td></tr>
+            <tr><td><strong>+0:42</strong></td><td><code>retag</code> done <span class="yes">✓</span></td></tr>
+            <tr><td>+0:47</td><td>Run done <span class="yes">✓</span>; <code>release-branch</code> skipped (only an <code>X.Y.0</code> creates one)</td></tr>
+          </tbody>
+        </table>
+        <pre class="log">#7 was not forward-ported: it is
+  release-please's release PR.
+… its images are tagged release-1.0.x-11.
+tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
+        <p><code>main</code>'s release PR #4 still proposes <strong>1.1.0</strong>; port #6 still open</p>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: release PR #7 cut v1.0.1 (live, #10 cuts v1.0.2; live port #11, main's release PR #4). Walk it in order. (1) Left column, what was open before the merge. #7, the release branch's release PR, base release/1.0.x, with fix #5 in its changelog. #6, the forward-port of fix #5 to main: same title, opened by the release App 17 seconds after #5 merged into release/1.0.x, long before anyone touched the release PR. Ports open when a change merges into a release branch, never when the release PR merges. The App also commented on #5, listing every target. #4, main's release PR, proposing 1.1.0 from feat #3. (2) Right column, after merging #7: the run started at +11 s; tag v1.0.1 and its GitHub Release at +19 s; the forward-port job ran and skipped the release PR itself; retag was done at +42 s, adding 1.0.1 to the images the release-1.0.x-11 build had tested; release-branch skipped, since only an X.Y.0 creates a branch. (3) main's release PR still proposed 1.1.0: main and the release line move separately, and port #6, once merged, joins 1.1.0. Captures: demo/captures/demo3-rehearsal-*.</aside>
+  </section>
+
+  <!-- ============ 7. Side by side, and three scenarios ============ -->
+
+  <section class="slide">
+    <p class="kicker">Side by side</p>
+    <h2>What the scenarios won't show</h2>
+    <div class="dense compact" style="font-size:.66em">
+      <table>
+        <thead><tr><th></th><th class="cv">Continuous versioning</th><th class="rp">Plain release-please</th><th class="rb">release-please with release branches</th></tr></thead>
+        <tbody>
+          <tr><th>Batching</th><td>None: one merge, one version</td><td>The release PR collects everything since the last version</td><td>As plain</td></tr>
+          <tr><th>Changelog</th><td class="na">None: git tags are the record</td><td><code>CHANGELOG.md</code> and a GitHub Release</td><td>As plain</td></tr>
+          <tr><th>Monorepo fit</th><td>Modules that share files or code directly</td><td>Self-contained modules, shared code as a published package, or one <code>linked-versions</code> group</td><td>As plain; per-module release branches not yet proven live</td></tr>
+          <tr><th>Merge method</th><td>Squash (four-part legacy: merge commits allowed)</td><td>Squash only</td><td>Squash only</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <aside class="notes">⏱ 1 min. Source: versioning.md, the comparison table under "Which versioning strategy should a repository use?" and the monorepo section. Four rows the scenarios that follow don't show; the rest of the comparison is in the scenarios and on the cheat sheet. Batching and the changelog are what a team gets from a release PR. Monorepo: release-please releases a module only for commits in its own folder, so modules that share code directly fit Continuous versioning; release-please fits self-contained modules, or one linked-versions group (modules that always share one version). Both give a module the same tags, component@vX.Y.Z. Not proven yet: release branches per module, and a linked-versions group with release PRs of its own (the workflows refuse that combination).</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Scenario 1</p>
+    <h2>Regression fails on the version in <code>staging</code></h2>
+    <svg class="diagram" viewBox="0 0 1000 378" role="img" aria-label="Regression fails on the version in staging, under each strategy. Continuous versioning: the fix merges to main and its version, v1.1.1, includes everything merged since, such as feat: C. Plain release-please: the fix merges to main while other merges are held, and the next release PR cuts v1.0.1. Release branches: the fix goes on release/1.0.x and releases v1.0.1 while main keeps merging; the fix is forward-ported to main.">
+      <defs>
+        <marker id="scenario-regression-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="scenario-regression-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <line class="dg-zone" x1="0" y1="124" x2="1000" y2="124"/>
+      <line class="dg-zone" x1="0" y1="250" x2="1000" y2="250"/>
+    
+      <!-- Lane 1: Continuous versioning -->
+      <text class="dg-text" x="10" y="36">Continuous</text>
+      <text class="dg-text" x="10" y="58">versioning</text>
+      <line class="dg-line" x1="200" y1="40" x2="920" y2="40" marker-end="url(#scenario-regression-ah)"/>
+      <text class="dg-mono" x="930" y="45">main</text>
+      <circle class="dg-dot accent" cx="300" cy="40" r="11"/>
+      <text class="dg-mono" x="300" y="20" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="270" y="20" text-anchor="end">in staging</text>
+      <text class="dg-small" x="290" y="68" text-anchor="end">fails regression</text>
+      <circle class="dg-dot accent" cx="430" cy="40" r="11"/>
+      <text class="dg-mono" x="430" y="20" text-anchor="middle">v1.1.0</text>
+      <text class="dg-mono" x="430" y="68" text-anchor="middle">feat: C</text>
+      <circle class="dg-dot accent" cx="560" cy="40" r="11"/>
+      <text class="dg-mono" x="560" y="20" text-anchor="middle">v1.1.1</text>
+      <text class="dg-mono" x="560" y="68" text-anchor="middle">fix: X</text>
+      <text class="dg-small" x="605" y="68">v1.1.1 is the fix plus everything</text>
+      <text class="dg-small" x="605" y="88">merged since v1.0.0 (feat: C)</text>
+    
+      <!-- Lane 2: plain release-please -->
+      <text class="dg-text" x="10" y="162">Plain</text>
+      <text class="dg-text" x="10" y="184">release-please</text>
+      <rect class="dg-zone" x="360" y="130" width="270" height="78" rx="10"/>
+      <text class="dg-small" x="495" y="147" text-anchor="middle">hold other merges</text>
+      <line class="dg-line" x1="200" y1="166" x2="920" y2="166" marker-end="url(#scenario-regression-ah)"/>
+      <text class="dg-mono" x="930" y="171">main</text>
+      <circle class="dg-dot accent" cx="300" cy="166" r="11"/>
+      <text class="dg-mono" x="300" y="146" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="270" y="146" text-anchor="end">in staging</text>
+      <text class="dg-small" x="290" y="194" text-anchor="end">fails regression</text>
+      <circle class="dg-dot" cx="495" cy="166" r="9"/>
+      <text class="dg-mono" x="495" y="194" text-anchor="middle">fix: X</text>
+      <circle class="dg-dot accent" cx="690" cy="166" r="11"/>
+      <text class="dg-mono" x="690" y="146" text-anchor="middle">v1.0.1</text>
+      <text class="dg-small" x="690" y="194" text-anchor="middle">next release PR</text>
+    
+      <!-- Lane 3: release branches -->
+      <text class="dg-text" x="10" y="288">Release</text>
+      <text class="dg-text" x="10" y="310">branches</text>
+      <line class="dg-line" x1="200" y1="292" x2="920" y2="292" marker-end="url(#scenario-regression-ah)"/>
+      <text class="dg-mono" x="930" y="297">main</text>
+      <circle class="dg-dot accent" cx="300" cy="292" r="11"/>
+      <text class="dg-mono" x="300" y="272" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="270" y="272" text-anchor="end">in staging</text>
+      <text class="dg-small" x="290" y="320" text-anchor="end">fails regression</text>
+      <circle class="dg-dot" cx="390" cy="292" r="9"/>
+      <text class="dg-mono" x="390" y="320" text-anchor="middle">feat: C</text>
+      <circle class="dg-dot" cx="480" cy="292" r="9"/>
+      <text class="dg-mono" x="480" y="320" text-anchor="middle">feat: D</text>
+      <circle class="dg-dot" cx="800" cy="292" r="9"/>
+      <text class="dg-mono" x="800" y="272" text-anchor="middle">port: X</text>
+      <path class="dg-line accent" d="M300,303 C300,327 320,344 350,344 L860,344" marker-end="url(#scenario-regression-aha)"/>
+      <text class="dg-mono" x="870" y="349">release/1.0.x</text>
+      <circle class="dg-dot" cx="540" cy="344" r="9"/>
+      <text class="dg-mono" x="540" y="370" text-anchor="middle">fix: X</text>
+      <circle class="dg-dot accent" cx="690" cy="344" r="11"/>
+      <text class="dg-mono" x="690" y="370" text-anchor="middle">v1.0.1</text>
+      <path class="dg-line dashed" d="M547,338 C650,332 750,316 791,297" marker-end="url(#scenario-regression-ah)"/>
+    </svg>
+    <div class="captions">
+      <p class="cv"><strong>Continuous versioning</strong>Fix on <code>main</code>; the next merge is the next version</p>
+      <p class="rp"><strong>Plain release-please</strong>Fix on <code>main</code>, hold other merges; the next release PR replaces it</p>
+      <p class="rb"><strong>Release branches</strong>Fix on <code>release/X.Y.x</code>: the next patch; <code>main</code> keeps moving</p>
+    </div>
+    <aside class="notes">⏱ 1.25 min. Sources: the how-to, "How do I fix a failed regression with plain release-please?" and "… with release branches?"; versioning-continuous.md. This answers our first question: can you keep merging to main while a version is in regression? Say 1.0.0 is in staging and fails. Continuous versioning: the fix merges to main, but whatever merged since goes along: feat: C already cut 1.1.0, so the fix is 1.1.1, with feat: C in it. Plain: the team held merges, so the next release PR is just the fix: 1.0.1 (or 1.1.0 if a feature slipped in). Release branches: the developer branches from release/1.0.x, fixes, merges back, and the forward-port to main opens itself seconds later; the Technical Owner merges that branch's release PR, 1.0.1, re-tested in staging. Meanwhile main merged two features and nobody waited. In all three, production goes straight from the version it runs to the version that passes.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Scenario 2</p>
+    <h2>Urgent hotfix while <code>main</code> has unreleased work</h2>
+    <svg class="diagram" viewBox="0 0 1000 378" role="img" aria-label="Production needs a hotfix while main has unreleased work, under each strategy. Continuous versioning does not cover it: the fix's version, v1.1.1, ships with everything merged before it, such as feat: C. Plain release-please: the hotfix button creates hotfix/1.0.x from the production tag v1.0.0, the fix releases v1.0.1 there, and it is forward-ported to main. Release branches: release/1.0.x already exists, the fix releases v1.0.1 there, and it is forward-ported to main.">
+      <defs>
+        <marker id="scenario-hotfix-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="scenario-hotfix-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <line class="dg-zone" x1="0" y1="124" x2="1000" y2="124"/>
+      <line class="dg-zone" x1="0" y1="250" x2="1000" y2="250"/>
+    
+      <!-- Lane 1: Continuous versioning -->
+      <text class="dg-text" x="10" y="36">Continuous</text>
+      <text class="dg-text" x="10" y="58">versioning</text>
+      <line class="dg-line" x1="200" y1="40" x2="920" y2="40" marker-end="url(#scenario-hotfix-ah)"/>
+      <text class="dg-mono" x="930" y="45">main</text>
+      <circle class="dg-dot accent" cx="300" cy="40" r="11"/>
+      <text class="dg-mono" x="300" y="20" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="270" y="20" text-anchor="end">in production</text>
+      <circle class="dg-dot accent" cx="430" cy="40" r="11"/>
+      <text class="dg-mono" x="430" y="20" text-anchor="middle">v1.1.0</text>
+      <text class="dg-mono" x="430" y="68" text-anchor="middle">feat: C</text>
+      <circle class="dg-dot accent" cx="560" cy="40" r="11"/>
+      <text class="dg-mono" x="560" y="20" text-anchor="middle">v1.1.1</text>
+      <text class="dg-mono" x="560" y="68" text-anchor="middle">fix: X</text>
+      <text class="dg-text" x="610" y="73">✗ Not covered</text>
+      <text class="dg-small" x="610" y="95">the fix ships with everything merged (feat: C)</text>
+    
+      <!-- Lane 2: plain release-please -->
+      <text class="dg-text" x="10" y="162">Plain</text>
+      <text class="dg-text" x="10" y="184">release-please</text>
+      <line class="dg-line" x1="200" y1="166" x2="920" y2="166" marker-end="url(#scenario-hotfix-ah)"/>
+      <text class="dg-mono" x="930" y="171">main</text>
+      <circle class="dg-dot accent" cx="300" cy="166" r="11"/>
+      <text class="dg-mono" x="300" y="146" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="270" y="146" text-anchor="end">in production</text>
+      <circle class="dg-dot" cx="430" cy="166" r="9"/>
+      <text class="dg-small" x="430" y="146" text-anchor="middle">unreleased</text>
+      <text class="dg-mono" x="430" y="194" text-anchor="middle">feat: C</text>
+      <circle class="dg-dot" cx="780" cy="166" r="9"/>
+      <text class="dg-mono" x="780" y="146" text-anchor="middle">port: X</text>
+      <path class="dg-line accent" d="M300,177 C300,201 320,218 350,218 L860,218" marker-end="url(#scenario-hotfix-aha)"/>
+      <text class="dg-mono" x="870" y="223">hotfix/1.0.x</text>
+      <text class="dg-small" x="286" y="207" text-anchor="end">hotfix button</text>
+      <text class="dg-small" x="330" y="244">from the production tag</text>
+      <circle class="dg-dot" cx="560" cy="218" r="9"/>
+      <text class="dg-mono" x="560" y="244" text-anchor="middle">fix: X</text>
+      <circle class="dg-dot accent" cx="650" cy="218" r="11"/>
+      <text class="dg-mono" x="650" y="244" text-anchor="middle">v1.0.1</text>
+      <path class="dg-line dashed" d="M565,210 C600,190 710,182 772,171" marker-end="url(#scenario-hotfix-ah)"/>
+    
+      <!-- Lane 3: release branches -->
+      <text class="dg-text" x="10" y="288">Release</text>
+      <text class="dg-text" x="10" y="310">branches</text>
+      <line class="dg-line" x1="200" y1="292" x2="920" y2="292" marker-end="url(#scenario-hotfix-ah)"/>
+      <text class="dg-mono" x="930" y="297">main</text>
+      <circle class="dg-dot accent" cx="300" cy="292" r="11"/>
+      <text class="dg-mono" x="300" y="272" text-anchor="middle">v1.0.0</text>
+      <text class="dg-small" x="270" y="272" text-anchor="end">in production</text>
+      <circle class="dg-dot" cx="430" cy="292" r="9"/>
+      <text class="dg-small" x="430" y="272" text-anchor="middle">unreleased</text>
+      <text class="dg-mono" x="430" y="320" text-anchor="middle">feat: C</text>
+      <circle class="dg-dot" cx="780" cy="292" r="9"/>
+      <text class="dg-mono" x="780" y="272" text-anchor="middle">port: X</text>
+      <path class="dg-line accent" d="M300,303 C300,327 320,344 350,344 L860,344" marker-end="url(#scenario-hotfix-aha)"/>
+      <text class="dg-mono" x="870" y="349">release/1.0.x</text>
+      <text class="dg-small" x="286" y="333" text-anchor="end">already exists</text>
+      <text class="dg-small" x="330" y="370">created with v1.0.0</text>
+      <circle class="dg-dot" cx="560" cy="344" r="9"/>
+      <text class="dg-mono" x="560" y="370" text-anchor="middle">fix: X</text>
+      <circle class="dg-dot accent" cx="650" cy="344" r="11"/>
+      <text class="dg-mono" x="650" y="370" text-anchor="middle">v1.0.1</text>
+      <path class="dg-line dashed" d="M565,336 C600,316 710,308 772,297" marker-end="url(#scenario-hotfix-ah)"/>
+    </svg>
+    <div class="captions">
+      <p class="cv"><strong>Continuous versioning</strong>Not covered: the fix ships with everything merged</p>
+      <p class="rp"><strong>Plain release-please</strong>Hotfix button: <code>hotfix/X.Y.x</code> from the production tag, the next patch, a forward-port</p>
+      <p class="rb"><strong>Release branches</strong>Fix on the existing <code>release/X.Y.x</code>: the next patch, a forward-port</p>
+    </div>
+    <aside class="notes">⏱ 1.5 min. Sources: versioning-release-please.md, "Hotfix branches" and "Where does a production hotfix go?"; the how-to's hotfix sections. This answers our second question: can you ship a fix alone? Production runs 1.0.0; main has a feature merged that isn't ready for production. Continuous versioning: there's no branch to fix on; the fix becomes the next version, 1.1.1, with the feature in it. Teams on CV avoid this by keeping main releasable (feature flags). Plain: the Technical Owner runs Actions → release-please → Run workflow with tag v1.0.0; it creates hotfix/1.0.x; the fix goes in by PR, and the forward-port job opens its port to main as soon as it merges; the Technical Owner merges the branch's release PR, 1.0.1. While hotfix/1.0.x exists, main can't release a 1.0.z (the version check blocks it), so main's next release is 1.1.0 (with only fixes on main, the check asks for a Release-As: 1.1.0); the Technical Owner deletes the hotfix branch once production runs a version from main. Release branches: release/1.0.x already exists; same fix, same patch, same forward-port, no button. If release/1.0.x already holds an unreleased fix, the hotfix releases with it.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Scenario 3</p>
+    <h2>A breaking change ships</h2>
+    <svg class="diagram" viewBox="0 0 1000 378" role="img" aria-label="A breaking change, feat!:, under each strategy. Continuous versioning: merging it moves v1.4.0 to v2.0.0 automatically. Plain release-please: the release PR proposes 2.0.0 by default; if main sets always-bump-minor, it needs a Release-As: 2.0.0 footer. Release branches: the release PR proposes 1.5.0 and the version check fails; a PR with Release-As: 2.0.0 makes it v2.0.0, which creates release/2.0.x.">
+      <defs>
+        <marker id="scenario-breaking-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="scenario-breaking-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <line class="dg-zone" x1="0" y1="124" x2="1000" y2="124"/>
+      <line class="dg-zone" x1="0" y1="250" x2="1000" y2="250"/>
+    
+      <!-- Lane 1: Continuous versioning -->
+      <text class="dg-text" x="10" y="36">Continuous</text>
+      <text class="dg-text" x="10" y="58">versioning</text>
+      <line class="dg-line" x1="200" y1="40" x2="920" y2="40" marker-end="url(#scenario-breaking-ah)"/>
+      <text class="dg-mono" x="930" y="45">main</text>
+      <circle class="dg-dot accent" cx="300" cy="40" r="11"/>
+      <text class="dg-mono" x="300" y="20" text-anchor="middle">v1.4.0</text>
+      <circle class="dg-dot accent" cx="430" cy="40" r="11"/>
+      <text class="dg-mono" x="430" y="20" text-anchor="middle">v2.0.0</text>
+      <text class="dg-mono" x="430" y="68" text-anchor="middle">feat!: drop v1 API</text>
+      <text class="dg-small" x="480" y="20">a major, automatically, when it merges</text>
+    
+      <!-- Lane 2: plain release-please -->
+      <text class="dg-text" x="10" y="162">Plain</text>
+      <text class="dg-text" x="10" y="184">release-please</text>
+      <line class="dg-line" x1="200" y1="166" x2="920" y2="166" marker-end="url(#scenario-breaking-ah)"/>
+      <text class="dg-mono" x="930" y="171">main</text>
+      <circle class="dg-dot accent" cx="300" cy="166" r="11"/>
+      <text class="dg-mono" x="300" y="146" text-anchor="middle">v1.4.0</text>
+      <circle class="dg-dot" cx="430" cy="166" r="9"/>
+      <text class="dg-mono" x="430" y="194" text-anchor="middle">feat!: drop v1 API</text>
+      <text class="dg-small" x="555" y="146" text-anchor="middle">release PR proposes 2.0.0</text>
+      <circle class="dg-dot accent" cx="690" cy="166" r="11"/>
+      <text class="dg-mono" x="690" y="146" text-anchor="middle">v2.0.0</text>
+      <text class="dg-small" x="349" y="222">if main sets always-bump-minor, it needs <tspan class="dg-mono">Release-As: 2.0.0</tspan></text>
+    
+      <!-- Lane 3: release branches -->
+      <text class="dg-text" x="10" y="288">Release</text>
+      <text class="dg-text" x="10" y="310">branches</text>
+      <line class="dg-line" x1="200" y1="292" x2="920" y2="292" marker-end="url(#scenario-breaking-ah)"/>
+      <text class="dg-mono" x="930" y="297">main</text>
+      <circle class="dg-dot accent" cx="300" cy="292" r="11"/>
+      <text class="dg-mono" x="300" y="272" text-anchor="middle">v1.4.0</text>
+      <circle class="dg-dot" cx="430" cy="292" r="9"/>
+      <text class="dg-mono" x="430" y="320" text-anchor="middle">feat!: drop v1 API</text>
+      <text class="dg-small" x="535" y="272" text-anchor="middle">release PR: 1.5.0, check fails ✗</text>
+      <circle class="dg-dot" cx="640" cy="292" r="9"/>
+      <text class="dg-mono" x="640" y="320" text-anchor="middle">Release-As: 2.0.0</text>
+      <circle class="dg-dot accent" cx="760" cy="292" r="11"/>
+      <text class="dg-mono" x="760" y="272" text-anchor="middle">v2.0.0</text>
+      <path class="dg-line accent" d="M760,303 C760,327 780,344 810,344 L960,344" marker-end="url(#scenario-breaking-aha)"/>
+      <text class="dg-mono" x="815" y="370">release/2.0.x</text>
+    </svg>
+    <div class="captions">
+      <p class="cv"><strong>Continuous versioning</strong><code>feat!:</code> merges: the next major, automatically</p>
+      <p class="rp"><strong>Plain release-please</strong>The release PR proposes the next major, unless <code>always-bump-minor</code> is set</p>
+      <p class="rb"><strong>Release branches</strong><code>Release-As: X.0.0</code> on <code>main</code>, enforced; it creates <code>release/X.0.x</code></p>
+    </div>
+    <aside class="notes">⏱ 1.25 min. Source: versioning-release-please.md, "How is a breaking change released?". In every strategy, the breaking change merges with an honest title, feat!: or a BREAKING CHANGE: footer, so the changelog lists it under Breaking Changes. Continuous versioning: the merge itself cuts 2.0.0. Plain: release-please proposes 2.0.0 by itself, unless the team chose always-bump-minor. Release branches: release-please proposes only 1.5.0, and the release PR version check fails it, naming the footer to use; put "Release-As: 2.0.0" in the description of that PR or the next one to main; merging the release PR cuts 2.0.0 and creates release/2.0.x. A feat!: that wasn't really breaking is confirmed as a minor with Release-As: 1.5.0, which also passes the check.</aside>
+  </section>
+
+  <!-- ============ 8. Rulesets and squash merge ============ -->
+
+  <section class="slide">
+    <p class="kicker">Rulesets and squash merge</p>
+    <h2>Squash only: versions come from titles people reviewed</h2>
+    <ul>
+      <li>Continuous versioning (SemVer format): a merge commit in a module's range fails the build</li>
+      <li>release-please requires it, or <code>wip</code> and <code>fix typo</code> land in the changelog and can change the bump</li>
+    </ul>
+    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 41). The templates also turn on "Automatically delete head branches".</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Rulesets and squash merge</p>
+    <h2>What the rulesets protect</h2>
+    <svg class="diagram" viewBox="0 0 1000 425" role="img" aria-label="What the rulesets allow. main already exists and is never deleted; it changes only by PR: squash merge, checks green, up to date, code owner approval, and no direct or force push. release/** branches are created only by the release App, change only by PR under the same rules, and are deleted only by Technical Owners. hotfix/** branches are created by the release App's hotfix button, or by a Technical Owner only when the button can't, change only by PR, and are deleted only by Technical Owners. Version tags, v* and *@v*, are created only by the release App and are never updated or deleted. Continuous versioning differs: its branch ruleset covers main only, and the build's own token creates tags, so only updating and deleting them is blocked.">
+      <!-- column headers -->
+      <text class="dg-mono" x="224" y="30" text-anchor="middle">main</text>
+      <text class="dg-mono" x="448" y="30" text-anchor="middle">release/**</text>
+      <text class="dg-mono" x="672" y="30" text-anchor="middle">hotfix/**</text>
+      <text class="dg-mono" x="896" y="30" text-anchor="middle">v* and *@v* tags</text>
+      <!-- row labels -->
+      <text class="dg-text" x="10" y="101">Create</text>
+      <text class="dg-text" x="10" y="231">Change</text>
+      <text class="dg-text" x="10" y="341">Delete</text>
+    
+      <!-- Create row -->
+      <rect class="dg-box" x="120" y="45" width="208" height="100" rx="10"/>
+      <text class="dg-text" x="134" y="85">—</text>
+      <text class="dg-small" x="134" y="109">exists from the start</text>
+      <rect class="dg-box" x="344" y="45" width="208" height="100" rx="10"/>
+      <text class="dg-text" x="358" y="85">release App only</text>
+      <text class="dg-small" x="358" y="109">automatic, at each X.Y.0</text>
+      <rect class="dg-box" x="568" y="45" width="208" height="100" rx="10"/>
+      <text class="dg-text" x="582" y="71">release App</text>
+      <text class="dg-small" x="582" y="91">(the hotfix button)</text>
+      <text class="dg-text" x="582" y="115">or a Technical Owner,</text>
+      <text class="dg-small" x="582" y="134">when the button can't</text>
+      <rect class="dg-box" x="792" y="45" width="208" height="100" rx="10"/>
+      <text class="dg-text" x="806" y="85">release App only *</text>
+      <text class="dg-small" x="806" y="109">when a version is cut</text>
+    
+      <!-- Change row -->
+      <rect class="dg-box" x="120" y="155" width="208" height="140" rx="10"/>
+      <text class="dg-text" x="134" y="182">Only by PR</text>
+      <text class="dg-small" x="134" y="206">squash merge</text>
+      <text class="dg-small" x="134" y="228">checks green, up to date</text>
+      <text class="dg-small" x="134" y="250">code owner approves</text>
+      <text class="dg-small" x="134" y="272">no direct or force push</text>
+      <rect class="dg-box" x="344" y="155" width="208" height="140" rx="10"/>
+      <text class="dg-text" x="358" y="182">Only by PR</text>
+      <text class="dg-small" x="358" y="204">same rules as main</text>
+      <rect class="dg-box" x="568" y="155" width="208" height="140" rx="10"/>
+      <text class="dg-text" x="582" y="182">Only by PR</text>
+      <text class="dg-small" x="582" y="204">same rules as main</text>
+      <rect class="dg-box" x="792" y="155" width="208" height="140" rx="10"/>
+      <text class="dg-text" x="806" y="182">Never</text>
+      <text class="dg-small" x="806" y="204">release-please finds its</text>
+      <text class="dg-small" x="806" y="223">last release by its tag</text>
+    
+      <!-- Delete row -->
+      <rect class="dg-box" x="120" y="305" width="208" height="60" rx="10"/>
+      <text class="dg-text" x="134" y="341">Never</text>
+      <rect class="dg-box" x="344" y="305" width="208" height="60" rx="10"/>
+      <text class="dg-text" x="358" y="341">Technical Owners</text>
+      <rect class="dg-box" x="568" y="305" width="208" height="60" rx="10"/>
+      <text class="dg-text" x="582" y="341">Technical Owners</text>
+      <rect class="dg-box" x="792" y="305" width="208" height="60" rx="10"/>
+      <text class="dg-text" x="806" y="341">Never</text>
+    
+      <text class="dg-small" x="10" y="393">* Continuous versioning: a branch ruleset on main only, and the build's own token creates tags,</text>
+      <text class="dg-small" x="22" y="414">so only updating and deleting them is blocked.</text>
+    </svg>
+    <ul class="tight mid">
+      <li><strong>Branches:</strong> PR and checks required, up to date, no direct or force pushes</li>
+      <li><strong>Creating <code>release/**</code> and <code>hotfix/**</code>:</strong> the release App; a Technical Owner creates <code>hotfix/**</code> only when the button can't</li>
+      <li><strong>Version tags:</strong> nobody moves or deletes them; under release-please only the App creates them</li>
+    </ul>
+    <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "What must a repository have?" (Repository settings); versioning-continuous.md for the CV differences. release-please: one branch ruleset template covers main, release/** and hotfix/**: pull request required; the PR-title check (PR / Lint PR title), the build (CI / CI result) and the release PR version check (release-please / release-pr-version-check) required, accepted only from GitHub Actions; branches up to date before merging; no direct or force pushes; nobody bypasses. Only the release App creates release/** (through the workflow); the App or a Technical Owner creates hotfix/** (a Technical Owner only when the hotfix button can't); only Technical Owners delete either. Tag rulesets on v* and *@v*: only the App creates version tags, and nobody updates or deletes them. Why tags matter so much: release-please finds its last release by the tag named in the manifest, so a moved or hand-made tag breaks the next version. Continuous versioning differs: its branch ruleset is on main only (it has no release or hotfix branches), and it creates tags with the workflow's GITHUB_TOKEN, so its tag ruleset blocks only updating and deleting.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Rulesets and squash merge</p>
+    <h2>A person approves every PR, the release PR included</h2>
+    <ul>
+      <li>Code owner approval is required. The release App can approve a PR, but its approval never counts: the App is never a code owner</li>
+      <li>Technical Owners are named in <code>CODEOWNERS</code>, and in the ruleset that lets them delete <code>release/**</code> and <code>hotfix/**</code></li>
+    </ul>
+    <p class="callout">You don't write rulesets: cicd-standards <code>templates/</code> has them, and the setup how-tos apply them.</p>
+    <aside class="notes">⏱ 0.75 min. Sources: versioning-release-please.md, "Repository settings"; versioning-continuous.md, "What must a repository have?". Every repository on these strategies has a CODEOWNERS file naming its Technical Owners, and every PR needs a code owner's approval, the release PR included. A plain required approval isn't enough: the App can approve a PR, and that approval would count, and any workflow on any branch can mint the App's token, so anyone with write access could have their PR approve itself. Requiring a code owner closes that: the App is never one, so a person always approves. New commits dismiss earlier approvals; Update branch keeps them. Templates: templates/continuous-versioning/ and templates/release-please/, applied by docs/how-to/set-up-continuous-versioning.md and set-up-release-please.md. The demo repos have one approver, so approvals are off there; that is a demo shortcut, not the rule.</aside>
+  </section>
+
+  <!-- ============ 9. Gotchas ============ -->
+
+  <section class="slide">
+    <p class="kicker">Gotchas</p>
+    <h2>Merging under the up-to-date rule</h2>
+    <ul>
+      <li>After any merge, every other open PR needs <strong>Update branch</strong></li>
+      <li>On a release PR, <strong>Update branch</strong> only after <code>docs:</code> or <code>chore:</code> merges; after a <code>feat:</code> or <code>fix:</code>, wait a minute for release-please</li>
+      <li>Never <strong>Update with rebase</strong> on a release PR</li>
+      <li>Blocked with every check green? The version check was cancelled: re-run it</li>
+    </ul>
+    <aside class="notes">⏱ 1.25 min. Sources: versioning-release-please.md, "Repository settings" and "Known limitations"; the how-to, "What if a release PR is blocked with every check green?". The up-to-date rule exists for the release PR (so it can only merge once it describes everything on the branch), but a ruleset can't single one PR out, so it applies to every PR into main, release/** and hotfix/**. That's the cost; the benefit is that every PR's checks ran against the exact code it merges into. After a feat: or fix:, release-please rewrites its PR, usually within a minute; Update branch before then makes the release PR mergeable with a version and changelog that leave the new change out (the version check catches it). After docs: or chore:, release-please leaves its PR alone, so Update branch is the way to unblock it. Update with rebase rewrites release-please's commit and the check fails it. The cancelled check: release-please pushes twice within a second, and GitHub sometimes cancels the newer run; open the cancelled release-please run for the release PR's branch and Re-run all jobs. The workflow fix is COREOPS-4698.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Gotchas</p>
+    <h2>Versions you didn't expect</h2>
+    <ul>
+      <li>A <code>fix:</code> that changes only files the build skips cuts a version with no image: title it <code>docs:</code> or <code>chore:</code></li>
+      <li>A revert is a new version under Continuous versioning, and stays in release-please's changelog</li>
+    </ul>
+    <aside class="notes">⏱ 0.75 min. Sources: versioning-release-please.md, "Known limitations"; versioning-continuous.md, "How is a revert versioned?". (1) The build ignores docs/, .github/, .circleci/, Markdown anywhere, LICENSE, build-config.json and release-please's own files; release-please only skips the folders in its exclude-paths. The template lists docs, .github and .circleci, so the common gap is a fix: touching only, say, a root README.md or build-config.json: release-please cuts a version, no build made an image, and the retag job fails. (2) A revert under Continuous versioning bumps like a chore: a patch. GitHub's own "Revert …" title isn't a Conventional Commit: retitle it revert:.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Gotchas</p>
+    <h2>Branches, Releases and running images</h2>
+    <ul class="mid">
+      <li>Each live release or hotfix branch runs its own caller workflow: a library pin bump is a PR into each</li>
+      <li>The release App can't touch <code>.github/workflows/</code>: those changes are ported by hand, and the hotfix button refuses an older tag whose workflow files differ</li>
+      <li>GitHub's "Latest" release is the one created last, maybe a patch on an older line: use the environment's version</li>
+      <li>Under release-please the running image doesn't know its version: inject it at deploy time</li>
+      <li>release-please monorepos: modules can't share code <em>directly</em>, except inside one <code>linked-versions</code> group</li>
+    </ul>
+    <aside class="notes">⏱ 1.5 min. Source: versioning-release-please.md, "Known limitations". (1) A push to release/1.0.x runs release-please.yml as it is on that branch, so when the library pin moves on main, open a chore: PR into each live branch too. (2) The release App has no Workflows permission, on purpose, so it can't push anything under .github/workflows/: the forward-port job labels such a change forward-port-needed (slide 27), and GitHub refuses the hotfix job a branch at a commit whose workflow files differ from today's, which is usual for an older release; a Technical Owner then pushes the branch with the same config commit (the how-to has the steps). (3) The Releases API marks every new release Latest, and release-please can't turn it off. (4) The image was built as main-412 and re-tagged, never rebuilt, so a version file inside it (package.json, version.txt) holds the previous version: an app that reports its version gets it from the deployment; how is not standardized yet (the CI → GitOps Handoff standard, Planned, will say). (5) release-please releases a module only for commits in its own folder, so a change only to shared code releases nothing; the build's shared-code guard fails such a reference. That shape fits Continuous versioning.</aside>
+  </section>
+
+  <!-- ============ 10. The legacy four-part format ============ -->
+
+  <section class="slide">
+    <p class="kicker">Legacy</p>
+    <h2>The four-part format: don't start new ones <span class="pill warn">legacy</span></h2>
+    <div class="two-col">
+      <div>
+        <h3>What it is</h3>
+        <ul class="tight mid">
+          <li><code>X.Y.Z.N</code>, e.g. <code>1.4.0.7284</code>, from dynamo-config</li>
+          <li>Merge commits allowed</li>
+          <li>Not SemVer: npm can't publish it</li>
+          <li><code>N</code> is the run number plus <code>run-number-offset</code>: renaming <code>ci.yml</code> breaks it</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Moving to SemVer</h3>
+        <ul class="tight mid">
+          <li>Squash only</li>
+          <li><code>version-format: semver</code></li>
+          <li><code>initial-version</code> above the last <code>X.Y.Z</code>: after <code>v1.4.2.2087</code>, <code>1.4.3</code> or <code>1.5.0</code></li>
+        </ul>
+      </div>
+    </div>
+    <p class="muted">Shown, not demoed: <code>poc_echo_server_dotnet_legacy</code>'s tags, such as <code>v1.3.1.2019</code></p>
+    <aside class="notes">⏱ 1.5 min. Say up front: this matters only if your repo came from dynamo-config; everyone else can relax for a minute. Source: versioning-continuous.md, "When may a repository use the four-part format?" and "How does a module move to SemVer?". It's Continuous versioning's build-metadata format, kept for repositories migrating from dynamo-config. The standard says it's legacy, not recommended, and will be deprecated in the future; no date is set, so don't promise one. A new repository should not use it; one that does states why in its README. X.Y.Z moves only for feat, fix, perf and breaking changes; anything else gets a new N. Why 1.4.3 and not 1.4.2: SemVer ranks 1.4.2 below 1.4.2.2087, so the first SemVer build fails without an initial-version above it. Remove initial-version once that first tag exists, and remove run-number-offset once no module uses the four-part format. If time allows, open poc_echo_server_dotnet_legacy's tags page.</aside>
+  </section>
+
+  <!-- ============ 11. Decision flow, cheat sheet, where to read more ============ -->
+
+  <section class="slide">
+    <p class="kicker">Choosing</p>
+    <h2>Three questions pick the strategy</h2>
+    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules use shared code directly, not as a published package? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
+      <defs>
+        <marker id="decision-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- questions -->
+      <rect class="dg-box" x="10" y="20" width="210" height="110" rx="12"/>
+      <text class="dg-text" x="115" y="70" text-anchor="middle">Every merge a</text>
+      <text class="dg-text" x="115" y="94" text-anchor="middle">release candidate?</text>
+      <rect class="dg-box" x="270" y="20" width="250" height="110" rx="12"/>
+      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo whose modules</text>
+      <text class="dg-text" x="395" y="81" text-anchor="middle">use shared code directly,</text>
+      <text class="dg-text" x="395" y="104" text-anchor="middle">not as a package?</text>
+      <rect class="dg-box" x="570" y="20" width="420" height="110" rx="12"/>
+      <text class="dg-text" x="780" y="58" text-anchor="middle">Keep merging to main during</text>
+      <text class="dg-text" x="780" y="81" text-anchor="middle">regression, or hotfix production</text>
+      <text class="dg-text" x="780" y="104" text-anchor="middle">without shipping unreleased work, often?</text>
+      <!-- no: next question -->
+      <line class="dg-line" x1="220" y1="75" x2="268" y2="75" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="244" y="66" text-anchor="middle">no</text>
+      <line class="dg-line" x1="520" y1="75" x2="568" y2="75" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="544" y="66" text-anchor="middle">no</text>
+      <!-- answers -->
+      <line class="dg-line" x1="115" y1="130" x2="115" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="125" y="180">yes</text>
+      <line class="dg-line" x1="395" y1="130" x2="395" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="405" y="180">yes</text>
+      <line class="dg-line" x1="680" y1="130" x2="680" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="690" y="180">yes</text>
+      <line class="dg-line" x1="900" y1="130" x2="900" y2="218" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="910" y="180">no</text>
+      <!-- outcomes -->
+      <rect class="dg-box accent" x="10" y="220" width="510" height="80" rx="12"/>
+      <text class="dg-text" x="265" y="266" text-anchor="middle">Continuous versioning</text>
+      <rect class="dg-box accent" x="570" y="220" width="220" height="80" rx="12"/>
+      <text class="dg-text" x="680" y="255" text-anchor="middle">release-please with</text>
+      <text class="dg-text" x="680" y="279" text-anchor="middle">release branches</text>
+      <rect class="dg-box accent" x="810" y="220" width="180" height="80" rx="12"/>
+      <text class="dg-text" x="900" y="255" text-anchor="middle">plain</text>
+      <text class="dg-text" x="900" y="279" text-anchor="middle">release-please</text>
+    </svg>
+    <p class="callout">None is the default. It's your team's call: switching later is doable, but it's work, so choose on purpose.</p>
+    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules use shared code directly, from a folder in the repository rather than as a published package: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
+  </section>
+
+  <section class="slide cheat">
+    <p class="kicker">Cheat sheet</p>
+    <h2>Three strategies on one page</h2>
+    <div class="dense" style="font-size:.58em">
+      <table>
+        <thead><tr><th></th><th class="cv">Continuous versioning</th><th class="rp">Plain release-please</th><th class="rb">release-please with release branches</th></tr></thead>
+        <tbody>
+          <tr><th>Branches</th><td><code>main</code> only</td><td><code>main</code>; <code>hotfix/X.Y.x</code> only when needed</td><td><code>main</code>, plus <code>release/X.Y.x</code> per minor, created automatically</td></tr>
+          <tr><th>A version is cut</th><td>Every merge to <code>main</code> that builds</td><td>Merging the release PR</td><td>Merging a release PR, on <code>main</code> or a release branch</td></tr>
+          <tr><th><code>fix:</code> · <code>feat:</code> · <code>feat!:</code></th><td>patch · minor · major</td><td>patch · minor · major (minor with <code>always-bump-minor</code>)</td><td><code>main</code>: minor · minor · <code>Release-As</code>. Release branch: always a patch</td></tr>
+          <tr><th><code>chore:</code> · <code>docs:</code></th><td>patch, if the module changed</td><td>no release</td><td>no release</td></tr>
+          <tr><th>Image from <code>main</code></th><td>Tagged with its version, <code>1.4.0</code></td><td><code>main-412</code>, re-tagged <code>1.4.0</code> at release</td><td>As plain; <code>release-1.4.x-57</code> on the branch</td></tr>
+          <tr><th>Regression fails</th><td>Fix on <code>main</code></td><td>Fix on <code>main</code>, hold merges</td><td>Fix on <code>release/X.Y.x</code>, forward-port</td></tr>
+          <tr><th>Production hotfix</th><td>Ships with whatever <code>main</code> holds</td><td>Hotfix button, patch, forward-port</td><td>Fix on <code>release/X.Y.x</code>, patch, forward-port</td></tr>
+          <tr><th>Chosen by</th><td><code>version-config.json</code></td><td><code>app-release-please.yml</code></td><td><code>app-release-please-release-branches.yml</code></td></tr>
+        </tbody>
+      </table>
+      <p class="muted foot">Every strategy: squash merge, Conventional Commit PR titles, <code>vX.Y.Z</code> tags that never move, and cut is not released.</p>
+    </div>
+    <aside class="notes">⏱ 1 min. This slide prints as one page (Print → one slide per page): suggest leads print or screenshot it. Don't walk every cell; it repeats what we've covered. Point at the "Production hotfix" row once more, since it's the row most teams decide on.</aside>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">Read more</p>
+    <h2>Where to read more</h2>
+    <div class="two-col mid">
+      <div>
+        <h3><code>VectorLearning/cicd-standards</code></h3>
+        <ul class="tight">
+          <li><a href="https://github.com/VectorLearning/cicd-standards/blob/main/docs/ci/versioning.md"><code>docs/ci/versioning.md</code></a>: the three strategies, and choosing</li>
+          <li><a href="https://github.com/VectorLearning/cicd-standards/blob/main/docs/ci/versioning-continuous.md"><code>versioning-continuous.md</code></a> and <a href="https://github.com/VectorLearning/cicd-standards/blob/main/docs/ci/versioning-release-please.md"><code>versioning-release-please.md</code></a>: each strategy's rules</li>
+          <li><a href="https://github.com/VectorLearning/cicd-standards/blob/main/docs/how-to/release-please-fixes-and-hotfixes.md"><code>docs/how-to/release-please-fixes-and-hotfixes.md</code></a>: fixes, hotfixes, forward-ports, <code>Release-As</code></li>
+          <li><code>docs/reference/versioning-*-scenarios.md</code>: what happens in each situation, and who acts</li>
+        </ul>
+      </div>
+      <div>
+        <h3><code>VectorLearning/github-actions</code></h3>
+        <ul class="tight">
+          <li><a href="https://github.com/VectorLearning/github-actions/blob/main/.github/workflows/README.md"><code>.github/workflows/README.md</code></a>: the reusable workflows</li>
+        </ul>
+        <h3 style="margin-top:.8em">The demo repositories</h3>
+        <ul class="tight">
+          <li><code>poc_echo_server_dotnet</code></li>
+          <li><code>release-please-demo</code></li>
+          <li><code>release-please-branches-demo</code></li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">⏱ 0.75 min. cicd-standards is the source of truth; these standards are still marked Draft (on main, not yet binding). Setting a repository up isn't covered today: docs/how-to/set-up-continuous-versioning.md and set-up-release-please.md walk through it, with the templates in templates/. The scenario references list every situation with who acts and whether a live run has confirmed it. The demo repositories are there to look around in.</aside>
+  </section>
+
+  <section class="slide title-slide brand photo">
+    <h2 style="font-size:2.6em">Questions?</h2>
+    <p class="muted">Sources are listed in this presentation's README.md</p>
+    <aside class="notes">⏱ 5 min. Likely questions: Can we switch strategy later? (Between plain and release branches: yes, one PR, once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please: the tags are compatible by design, but no repository has done it yet.) Can a monorepo mix strategies? (No: one strategy for all modules.) What about packages? (Built at release from the tag, not re-tagged; the publish job is COREOPS-4658.) Lambdas and SPAs? (Out of scope here; their own session.)</aside>
+  </section>
+
+</main>
+<div class="counter"></div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const counter = document.querySelector('.counter');
+    let current = 0;
+
+    function show(i) {
+      current = Math.max(0, Math.min(slides.length - 1, i));
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+      counter.textContent = (current + 1) + ' / ' + slides.length;
+      document.body.classList.toggle('on-brand', slides[current].classList.contains('brand'));
+      history.replaceState(null, '', '#' + (current + 1));
+    }
+
+    // Click a slide's image to see it full size in a dialog; click or Esc closes it.
+    const zoom = document.createElement('dialog');
+    zoom.className = 'zoom';
+    zoom.appendChild(document.createElement('img'));
+    document.body.appendChild(zoom);
+    zoom.addEventListener('click', () => zoom.close());
+    document.querySelectorAll('.slide img').forEach((img) => {
+      img.addEventListener('click', () => {
+        zoom.firstChild.src = img.src;
+        zoom.firstChild.alt = img.alt;
+        zoom.showModal();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (zoom.open) return; // Esc closes the dialog; other keys don't move the deck under it
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key) {
+        case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+          e.preventDefault(); show(current + 1); break;
+        case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+          e.preventDefault(); show(current - 1); break;
+        case 'Home': show(0); break;
+        case 'End': show(slides.length - 1); break;
+        case 'f': case 'F':
+          if (document.fullscreenElement) document.exitFullscreen();
+          else document.documentElement.requestFullscreen();
+          break;
+        // Speaker notes overlay, for rehearsing with the time estimates.
+        case 'n': case 'N':
+          document.body.classList.toggle('show-notes'); break;
+      }
+    });
+
+    // Click right two-thirds of the screen to advance, left third to go back.
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('a, button, input, select, textarea, pre, .notes, .slide img, dialog')) return;
+      show(e.clientX > window.innerWidth / 3 ? current + 1 : current - 1);
+    });
+
+    const fromHash = parseInt(location.hash.slice(1), 10);
+    show(Number.isFinite(fromHash) ? fromHash - 1 : 0);
+  })();
+</script>
+</body>
+</html>
