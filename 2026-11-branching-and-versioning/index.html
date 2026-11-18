@@ -247,7 +247,7 @@
     <ol>
       <li><strong>Refresher:</strong> squash merge, PR titles, SemVer</li>
       <li><strong>The three strategies</strong>, each with a live demo: Continuous versioning, plain release-please, release-please with release branches</li>
-      <li><strong>Side by side:</strong> monorepos, three scenarios, and a decision flow; then rulesets, gotchas, the legacy format</li>
+      <li><strong>Side by side:</strong> monorepos, three scenarios, a decision flow, and integration branches; then rulesets, gotchas, the legacy format</li>
       <li><strong>Wrap-up:</strong> a one-page cheat sheet and where to read more</li>
     </ol>
     <aside class="notes">⏱ 0.5 min. The thread: by the end, each tech lead should be able to say which strategy fits their product, and why. None of the three is the default, so this is about informing the choice, not selling one.</aside>
@@ -410,7 +410,7 @@
       </div>
     </div>
     <p class="callout">A monorepo has one version line per module, tagged <code>&lt;component&gt;@v1.4.0</code>.</p>
-    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 39). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
+    <aside class="notes">⏱ 0.75 min. Source: versioning.md, "What do versions and version tags look like?". Starting from 1.4.0 in the examples. Tags are protected by rulesets so nobody can move or delete one (slide 40). Monorepo: under Continuous versioning, each module gets its own line, component@vX.Y.Z; under release-please, each package does, and a repository with several packages must use component tags. A single-module release-please repository uses plain vX.Y.Z by default, or may choose component tags: demo 2 uses echo@v…, demo 3 plain v…, so you'll see both.</aside>
   </section>
 
   <section class="slide">
@@ -970,7 +970,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
     <aside class="notes">⏱ 0 min (only if the live demo fails; it uses the demo's 5.5 minutes). From the rehearsal of 2026-11-17, one version earlier than live: release PR #7 cut v1.0.1 (live, #10 cuts v1.0.2; live port #11, main's release PR #4). Walk it in order. (1) Left column, what was open before the merge. #7, the release branch's release PR, base release/1.0.x, with fix #5 in its changelog. #6, the forward-port of fix #5 to main: same title, opened by the release App 17 seconds after #5 merged into release/1.0.x, long before anyone touched the release PR. Ports open when a change merges into a release branch, never when the release PR merges. The App also commented on #5, listing every target. #4, main's release PR, proposing 1.1.0 from feat #3. (2) Right column, after merging #7: the run started at +11 s; tag v1.0.1 and its GitHub Release at +19 s; the forward-port job ran and skipped the release PR itself; retag was done at +42 s, adding 1.0.1 to the images the release-1.0.x-11 build had tested; release-branch skipped, since only an X.Y.0 creates a branch. (3) main's release PR still proposed 1.1.0: main and the release line move separately, and port #6, once merged, joins 1.1.0. Captures: demo/captures/demo3-rehearsal-*.</aside>
   </section>
 
-  <!-- ============ 7. Side by side, monorepos, three scenarios, and the decision flow ============ -->
+  <!-- ============ 7. Side by side, monorepos, three scenarios, the decision flow, and integration branches ============ -->
 
   <section class="slide">
     <p class="kicker">Side by side</p>
@@ -1279,6 +1279,53 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
     <aside class="notes">⏱ 1.25 min. Walk the flow left to right. Step (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) the shape of the repository rules it out. Two boxes, not one question: a monorepo whose modules use shared code directly, from a folder in the repository, and deploy separately goes to Continuous versioning, because release-please releases a module only for changes inside its own folder, so a change to the shared code alone would release nothing. Everything else carries on to step 3: one module; a monorepo whose shared code is a published, versioned package; or a monorepo whose modules share code directly but deploy as one, one linked-versions group (slide 33). A team routed to Continuous versioning by step 2 gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
   </section>
 
+  <section class="slide">
+    <p class="kicker">Epics that ship together</p>
+    <h2>Integration branches: one commit per feature <span class="pill warn">direction</span></h2>
+    <svg class="diagram" viewBox="0 0 1000 290" role="img" aria-label="An integration branch, integration/PROJ-123, is cut from main. Feature PRs feat A, feat B and fix C are squash-merged into it, one commit each, and the branch is kept current by rebasing it on main, never merging main in. When the epic is ready, its PR into main is merged with Rebase and merge, so the three commits land on main one by one, and release-please's next release lists three changelog entries.">
+      <defs>
+        <marker id="integration-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+        <marker id="integration-flow-aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead accent" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- main -->
+      <text class="dg-mono" x="10" y="75">main</text>
+      <line class="dg-line" x1="70" y1="70" x2="985" y2="70" marker-end="url(#integration-flow-ah)"/>
+      <circle class="dg-dot" cx="110" cy="70" r="9"/>
+      <circle class="dg-dot" cx="170" cy="70" r="9"/>
+      <circle class="dg-dot" cx="420" cy="70" r="9"/>
+      <text class="dg-small" x="420" y="45" text-anchor="middle">other PRs</text>
+      <circle class="dg-dot" cx="620" cy="70" r="9"/>
+      <circle class="dg-dot" cx="680" cy="70" r="9"/>
+      <circle class="dg-dot" cx="740" cy="70" r="9"/>
+      <text class="dg-mono" x="620" y="45" text-anchor="middle">feat A</text>
+      <text class="dg-mono" x="680" y="25" text-anchor="middle">feat B</text>
+      <text class="dg-mono" x="740" y="45" text-anchor="middle">fix C</text>
+      <circle class="dg-dot accent" cx="890" cy="70" r="11"/>
+      <text class="dg-mono" x="890" y="30" text-anchor="middle">release PR</text>
+      <text class="dg-small" x="890" y="50" text-anchor="middle">3 changelog entries</text>
+      <!-- integration branch -->
+      <path class="dg-line accent" d="M170,81 C170,150 200,200 240,200 L460,200"/>
+      <text class="dg-mono" x="190" y="245">integration/PROJ-123</text>
+      <circle class="dg-dot" cx="280" cy="200" r="9"/>
+      <circle class="dg-dot" cx="340" cy="200" r="9"/>
+      <circle class="dg-dot" cx="400" cy="200" r="9"/>
+      <text class="dg-mono" x="280" y="180" text-anchor="middle">feat A</text>
+      <text class="dg-mono" x="340" y="180" text-anchor="middle">feat B</text>
+      <text class="dg-mono" x="400" y="180" text-anchor="middle">fix C</text>
+      <text class="dg-small" x="400" y="245">feature PRs squash-merged, one commit each</text>
+      <text class="dg-small" x="400" y="268">kept current by rebasing on main, never merging main in</text>
+      <!-- ship -->
+      <path class="dg-line accent dashed" d="M460,200 C540,200 600,150 616,84" marker-end="url(#integration-flow-aha)"/>
+      <text class="dg-small" x="612" y="150">Rebase and merge</text>
+    </svg>
+    <ul class="tight" style="font-size:.85em">
+      <li>For an epic whose features are incomplete without each other: they wait on <code>integration/&lt;EPIC&gt;</code>, not <code>main</code></li>
+      <li>Ships with <strong>Rebase and merge</strong>: each feature keeps its own Conventional Commit, version bump and changelog line</li>
+      <li>The only PR into <code>main</code> that isn't squash-merged; needs ruleset changes first</li>
+    </ul>
+    <aside class="notes">⏱ 0.75 min. Source: the presenter's draft, "Integration Branch Workflow" (not yet a standard). Say up front: this is the direction we're heading, not a rule yet. The problem: some teams work on several epics at once, and an epic's features are incomplete without each other, so they can't merge one by one to main (anything merged to main ships in the next version). Squashing the whole epic into main would collapse every feature into one commit: one changelog entry, one bump, lost history. The idea: integration/PROJ-123, cut from the latest main. Feature PRs target it and are squash-merged, each with a Conventional Commit title, so each feature is one commit. The branch is kept current by rebasing on main (Update branch → Update with rebase, or git rebase origin/main and git push --force-with-lease), never by merging main in, so its history stays linear. When the epic is ready: a final rebase, check the PR's commit list is one Conventional Commit per feature and no merge commits, then Rebase and merge, not squash; delete the branch. release-please then lists each feature separately and bumps by the highest. If someone squash-merges it by mistake, put a BEGIN_COMMIT_OVERRIDE … END_COMMIT_OVERRIDE block in the merged PR's description, one line per change, before the release PR merges: release-please uses those lines instead. Under Continuous versioning it works too, but gains less: the rebase-merge pushes the commits together, main builds once at the head and cuts one version, with the highest bump. What it needs before it's a standard: main allowing rebase merge (today every repository is squash-only, in the templates and the branch rulesets) and linear history; a ruleset for integration/** that is squash-only, linear, and allows force push for the rebase; and the PR-title check on PRs into integration/**. GitHub can't restrict a merge method to one PR, so once rebase is allowed on main, keeping it to integration PRs is discipline, or a required check that wants a rebase-merge label as a deliberate pause. Rebase and merge creates new commits, so rebuild from main; never promote an image built on the integration branch (build once, promote many still holds, from main). Not a release branch: a release branch stabilizes a version already cut; an integration branch holds work that hasn't reached main. Until this lands, the options are keeping the PRs unmerged or merging behind a feature flag that's off.</aside>
+  </section>
+
   <!-- ============ 8. Rulesets and squash merge ============ -->
 
   <section class="slide">
@@ -1288,7 +1335,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
       <li>Continuous versioning (SemVer format): a merge commit in a module's range fails the build</li>
       <li>release-please requires it, or <code>wip</code> and <code>fix typo</code> land in the changelog and can change the bump</li>
     </ul>
-    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 44). The templates also turn on "Automatically delete head branches".</aside>
+    <aside class="notes">⏱ 0.5 min. Sources: versioning-continuous.md, "What must a repository have?"; versioning-release-please.md, "Repository settings". How squash works was slide 4; this is why each strategy needs it. It's a repository setting, from templates/*/repository-settings.json: squash merging only, merge commits and rebase merging off, default commit message "Pull request title and description". The one exception is Continuous versioning's legacy four-part format, which may keep merge commits (slide 45). The templates also turn on "Automatically delete head branches".</aside>
   </section>
 
   <section class="slide">
@@ -1492,7 +1539,7 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
   <section class="slide title-slide brand photo">
     <h2 style="font-size:2.6em">Questions?</h2>
     <p class="muted">Sources are listed in this presentation's README.md</p>
-    <aside class="notes">⏱ 3.5 min. Likely questions: Can we switch strategy later? (Between plain and release branches: yes, one PR, once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please: the tags are compatible by design, but no repository has done it yet.) Can a monorepo mix strategies? (No: one strategy for all modules.) What about packages? (Built at release from the tag, not re-tagged; the publish job is COREOPS-4658.) Lambdas and SPAs? (Out of scope here; their own session.)</aside>
+    <aside class="notes">⏱ 2.75 min. Likely questions: Can we switch strategy later? (Between plain and release branches: yes, one PR, once live release or hotfix branches are finished or deleted. Between Continuous versioning and release-please: the tags are compatible by design, but no repository has done it yet.) Can a monorepo mix strategies? (No: one strategy for all modules.) What about packages? (Built at release from the tag, not re-tagged; the publish job is COREOPS-4658.) Lambdas and SPAs? (Out of scope here; their own session.)</aside>
   </section>
 
 </main>

@@ -26,13 +26,13 @@ in a live demo, with a backup slide.
 | 4 | Continuous versioning (opener), then demo 1 (+ backup) | 13–18 | 4 + 5.5 |
 | 5 | Plain release-please (opener), then demo 2 (+ backup) | 19–24 | 4 + 5.5 |
 | 6 | release-please with release branches (opener), then demo 3 (+ backup) | 25–31 | 4 + 5.5 |
-| 7 | Side by side, monorepos, three scenarios, and the decision flow | 32–37 | 7 |
-| 8 | Rulesets and squash merge | 38–40 | 2.75 |
-| 9 | Gotchas | 41–43 | 3.25 |
-| 10 | The legacy four-part format | 44 | 1.5 |
-| 11 | Cheat sheet, where to read more | 45–46 | 1.75 |
-| — | Questions | 47 | 3.5 |
-| | **Total** | **47** | **60** |
+| 7 | Side by side, monorepos, three scenarios, the decision flow, and integration branches (direction) | 32–38 | 7.75 |
+| 8 | Rulesets and squash merge | 39–41 | 2.75 |
+| 9 | Gotchas | 42–44 | 3.25 |
+| 10 | The legacy four-part format | 45 | 1.5 |
+| 11 | Cheat sheet, where to read more | 46–47 | 1.75 |
+| — | Questions | 48 | 2.75 |
+| | **Total** | **48** | **60** |
 
 The backup slides (18, 24, 31) carry 0 minutes: they are shown only if a live demo fails, in its
 5.5 minutes. The review (below) freed 2 minutes, given to the three demos (+0.5 each) and
@@ -48,6 +48,7 @@ Every source of information used in this presentation goes here.
 - Review, `tmp/2026-11-branching-and-versioning-review.md` (2026-11-17, not committed): 45 findings checked against cicd-standards; the applied ones are listed in its "Applied" section
 
 ### Internal (Confluence / Jira / repos)
+- "Integration Branch Workflow" (Noel Aguilar, draft, shared 2026-11-18): the integration-branch direction on slide 38; not yet a standard. Its departures from cicd-standards (rebase merge on `main`, a ruleset for `integration/**`) are in the slide's notes
 - [`VectorLearning/cicd-standards`](https://github.com/VectorLearning/cicd-standards) at `72b4b84`:
   - `docs/ci/versioning.md`: the three strategies, choosing between them, PR title types, cut versus released, build and version tags, monorepo fit
   - `docs/ci/versioning-continuous.md`: how Continuous versioning works, what moves the version, known limitations (no changelog, no hotfix while `main` has unreleased work, tag creation not restricted), the four-part format and moving to SemVer
