@@ -1198,49 +1198,53 @@ tagged noel/rpb-echo.api:1.0.1 on sha256:7ac642d6…</pre>
 
   <section class="slide">
     <p class="kicker">Choosing</p>
-    <h2>Three questions pick the strategy</h2>
-    <svg class="diagram" viewBox="0 0 1000 320" role="img" aria-label="Choosing a strategy. Is every merge a release candidate? Yes: Continuous versioning. No: is it a monorepo whose modules share code directly but release on their own schedules? Yes: Continuous versioning. No: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
+    <h2>Three steps pick the strategy</h2>
+    <svg class="diagram" viewBox="0 0 1000 360" role="img" aria-label="Choosing a strategy. Step 1: is every merge a release candidate? Yes: Continuous versioning. No: step 2, how the modules share code. A monorepo whose modules use shared code directly and deploy separately: Continuous versioning. One module, or a monorepo whose shared code is a published package or whose modules deploy as one: go on to step 3. Step 3: must you keep merging to main during regression, or hotfix production without shipping unreleased work, often? Yes: release-please with release branches. No: plain release-please.">
       <defs>
         <marker id="decision-flow-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="dg-arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
       </defs>
-      <!-- questions -->
-      <rect class="dg-box" x="10" y="20" width="210" height="110" rx="12"/>
-      <text class="dg-text" x="115" y="70" text-anchor="middle">Every merge a</text>
-      <text class="dg-text" x="115" y="94" text-anchor="middle">release candidate?</text>
-      <rect class="dg-box" x="270" y="20" width="250" height="110" rx="12"/>
-      <text class="dg-text" x="395" y="58" text-anchor="middle">Monorepo: modules share</text>
-      <text class="dg-text" x="395" y="81" text-anchor="middle">code directly, but release</text>
-      <text class="dg-text" x="395" y="104" text-anchor="middle">on their own schedules?</text>
-      <rect class="dg-box" x="570" y="20" width="420" height="110" rx="12"/>
-      <text class="dg-text" x="780" y="58" text-anchor="middle">Keep merging to main during</text>
-      <text class="dg-text" x="780" y="81" text-anchor="middle">regression, or hotfix production</text>
-      <text class="dg-text" x="780" y="104" text-anchor="middle">without shipping unreleased work, often?</text>
-      <!-- no: next question -->
-      <line class="dg-line" x1="220" y1="75" x2="268" y2="75" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="244" y="66" text-anchor="middle">no</text>
-      <line class="dg-line" x1="520" y1="75" x2="568" y2="75" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="544" y="66" text-anchor="middle">no</text>
+      <!-- step 1 -->
+      <rect class="dg-box" x="10" y="95" width="200" height="90" rx="12"/>
+      <text class="dg-text" x="110" y="134" text-anchor="middle">Every merge a</text>
+      <text class="dg-text" x="110" y="158" text-anchor="middle">release candidate?</text>
+      <!-- step 2: the two shapes a "no" can take -->
+      <path class="dg-line" d="M210,140 L235,140 L235,55 L256,55" marker-end="url(#decision-flow-ah)"/>
+      <path class="dg-line" d="M235,140 L235,215 L256,215" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="222" y="131" text-anchor="middle">no</text>
+      <rect class="dg-box" x="260" y="10" width="285" height="90" rx="12"/>
+      <text class="dg-text" x="402" y="39" text-anchor="middle">One module, or a monorepo</text>
+      <text class="dg-text" x="402" y="62" text-anchor="middle">whose shared code is a</text>
+      <text class="dg-text" x="402" y="85" text-anchor="middle">package, or deploys as one</text>
+      <rect class="dg-box" x="260" y="170" width="285" height="90" rx="12"/>
+      <text class="dg-text" x="402" y="199" text-anchor="middle">Monorepo: modules use</text>
+      <text class="dg-text" x="402" y="222" text-anchor="middle">shared code directly and</text>
+      <text class="dg-text" x="402" y="245" text-anchor="middle">deploy separately</text>
+      <!-- step 3 -->
+      <line class="dg-line" x1="545" y1="55" x2="583" y2="55" marker-end="url(#decision-flow-ah)"/>
+      <rect class="dg-box" x="585" y="5" width="405" height="100" rx="12"/>
+      <text class="dg-text" x="787" y="38" text-anchor="middle">Keep merging to main during</text>
+      <text class="dg-text" x="787" y="62" text-anchor="middle">regression, or hotfix production</text>
+      <text class="dg-text" x="787" y="86" text-anchor="middle">without shipping unreleased work, often?</text>
       <!-- answers -->
-      <line class="dg-line" x1="115" y1="130" x2="115" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="125" y="180">yes</text>
-      <line class="dg-line" x1="395" y1="130" x2="395" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="405" y="180">yes</text>
-      <line class="dg-line" x1="680" y1="130" x2="680" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="690" y="180">yes</text>
-      <line class="dg-line" x1="900" y1="130" x2="900" y2="218" marker-end="url(#decision-flow-ah)"/>
-      <text class="dg-small" x="910" y="180">no</text>
+      <line class="dg-line" x1="110" y1="185" x2="110" y2="288" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="120" y="242">yes</text>
+      <line class="dg-line" x1="402" y1="260" x2="402" y2="288" marker-end="url(#decision-flow-ah)"/>
+      <line class="dg-line" x1="685" y1="105" x2="685" y2="288" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="695" y="200">yes</text>
+      <line class="dg-line" x1="900" y1="105" x2="900" y2="288" marker-end="url(#decision-flow-ah)"/>
+      <text class="dg-small" x="910" y="200">no</text>
       <!-- outcomes -->
-      <rect class="dg-box accent" x="10" y="220" width="510" height="80" rx="12"/>
-      <text class="dg-text" x="265" y="266" text-anchor="middle">Continuous versioning</text>
-      <rect class="dg-box accent" x="570" y="220" width="220" height="80" rx="12"/>
-      <text class="dg-text" x="680" y="255" text-anchor="middle">release-please with</text>
-      <text class="dg-text" x="680" y="279" text-anchor="middle">release branches</text>
-      <rect class="dg-box accent" x="810" y="220" width="180" height="80" rx="12"/>
-      <text class="dg-text" x="900" y="255" text-anchor="middle">plain</text>
-      <text class="dg-text" x="900" y="279" text-anchor="middle">release-please</text>
+      <rect class="dg-box accent" x="10" y="290" width="535" height="60" rx="12"/>
+      <text class="dg-text" x="277" y="326" text-anchor="middle">Continuous versioning</text>
+      <rect class="dg-box accent" x="585" y="290" width="200" height="60" rx="12"/>
+      <text class="dg-text" x="685" y="315" text-anchor="middle">release-please with</text>
+      <text class="dg-text" x="685" y="338" text-anchor="middle">release branches</text>
+      <rect class="dg-box accent" x="810" y="290" width="180" height="60" rx="12"/>
+      <text class="dg-text" x="900" y="315" text-anchor="middle">plain</text>
+      <text class="dg-text" x="900" y="338" text-anchor="middle">release-please</text>
     </svg>
     <p class="callout">None is the default. It's your team's call: switching later is doable, but it's work, so choose on purpose.</p>
-    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) it is a monorepo whose modules share code directly, from a folder in the repository rather than as a published package, and must release on their own schedules: then Continuous versioning, because release-please only releases a module for changes inside its own folder, so a change to the shared code alone would release nothing. release-please supports monorepos too: modules that are self-contained, that consume shared code as a published, versioned package, or that share code inside one linked-versions group (they then share a version and release together). A team routed to Continuous versioning by this question gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
+    <aside class="notes">⏱ 1.25 min. Walk the flow left to right. Step (1) Is every merge a release candidate? Continuous versioning. If not, you collect features or epics and plan a release, so it is release-please, unless (2) the shape of the repository rules it out. Two boxes, not one question: a monorepo whose modules use shared code directly, from a folder in the repository, and deploy separately goes to Continuous versioning, because release-please releases a module only for changes inside its own folder, so a change to the shared code alone would release nothing. Everything else carries on to step 3: one module; a monorepo whose shared code is a published, versioned package; or a monorepo whose modules share code directly but deploy as one, one linked-versions group (slide 32). A team routed to Continuous versioning by step 2 gives up the hotfix path, so it keeps main releasable. (3) Must you keep merging to main while a version is in regression, or hotfix production without shipping unreleased work, often? Release branches; otherwise plain release-please. Ask the room: which box does your team land in? If a lead isn't sure between plain and release branches, the deciding question is how often the team needs to keep merging during regression. On switching: between plain and release branches it's one PR once live release or hotfix branches are finished; between Continuous versioning and release-please the tags are compatible by design, but no repository has made that move yet, so it's planned work, not a setting.</aside>
   </section>
 
   <!-- ============ 8. Rulesets and squash merge ============ -->
