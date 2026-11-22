@@ -1,0 +1,9 @@
+@noel-aguilar-vectorsolutions, this change merged into `release/1.0.x`, so it is forward-ported to every newer branch:
+
+- `main`: #6
+
+Merge each port, or close it with a comment saying why its target doesn't need the change.
+
+How do I [forward-port a fix to main](https://github.com/VectorLearning/cicd-standards/blob/main/docs/how-to/release-please-fixes-and-hotfixes.md#how-do-i-forward-port-a-fix-to-main)? Or [to a newer release branch](https://github.com/VectorLearning/cicd-standards/blob/main/docs/how-to/release-please-fixes-and-hotfixes.md#how-do-i-forward-port-a-fix-to-a-newer-release-branch)?
+
+<!-- forward-port:v1 {"source":"release/1.0.x","pr":5,"targets":{"main":{"outcome":"opened","port":6}},"complete":true} -->

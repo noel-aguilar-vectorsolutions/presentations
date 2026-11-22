@@ -1,0 +1,12 @@
+CI / Plan builds	success	2026-11-18T00:08:24Z	2026-11-18T00:08:33Z
+CI / Helm / Plan	success	2026-11-18T00:08:35Z	2026-11-18T00:08:40Z
+CI / echo / SCA Scan (Echo.BackgroundTasks)	success	2026-11-18T00:08:36Z	2026-11-18T00:09:01Z
+CI / echo / Build	success	2026-11-18T00:08:36Z	2026-11-18T00:10:07Z
+CI / echo / SCA Scan (Echo.Migrations)	success	2026-11-18T00:08:36Z	2026-11-18T00:09:03Z
+CI / echo / SCA Scan (Echo.Api)	success	2026-11-18T00:08:36Z	2026-11-18T00:09:37Z
+CI / Helm / Validate	skipped	2026-11-18T00:08:41Z	2026-11-18T00:08:41Z
+CI / echo / Unit Test	success	2026-11-18T00:10:09Z	2026-11-18T00:12:33Z
+CI / echo / Integration Test	success	2026-11-18T00:10:09Z	2026-11-18T00:12:42Z
+CI / echo / Publish images	success	2026-11-18T00:12:45Z	2026-11-18T00:13:11Z
+CI / echo / Tag release commit	success	2026-11-18T00:13:13Z	2026-11-18T00:13:20Z
+CI / CI result	success	2026-11-18T00:13:22Z	2026-11-18T00:13:26Z

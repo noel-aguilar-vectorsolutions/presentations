@@ -1,0 +1,6 @@
+release-please / forward-port	success	2026-11-18T00:24:09Z	2026-11-18T00:24:28Z
+release-please / release-please	success	2026-11-18T00:24:08Z	2026-11-18T00:24:24Z
+release-please / release-branch-change-type	skipped	2026-11-18T00:24:07Z	2026-11-18T00:24:06Z
+release-please / release-pr-version-check	skipped	2026-11-18T00:24:07Z	2026-11-18T00:24:06Z
+release-please / retag (., 1.0.1, v1.0.1, 798b97ecfb0475778cc3d484e0e886b0b9e1a925, 1, 0, 1)	success	2026-11-18T00:24:26Z	2026-11-18T00:24:43Z
+release-please / release-branch	skipped	2026-11-18T00:24:25Z	2026-11-18T00:24:24Z

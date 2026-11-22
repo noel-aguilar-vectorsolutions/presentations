@@ -1,0 +1,7 @@
+# demo 3, VectorLearning/release-please-branches-demo#7 merged at 2026-11-18T00:24:01Z as 798b97e
++11s  release-please.yml run started: https://github.com/VectorLearning/release-please-branches-demo/actions/runs/44207504858
++19s  tag v1.0.1
++19s  GitHub Release v1.0.1
++47s  release-please.yml run finished: success
+
+captures: /Users/noelaguilar/workspaces/cowork/presentations/2026-11-branching-and-versioning/demo/captures/demo3-rehearsal-*
