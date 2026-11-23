@@ -45,13 +45,25 @@ Estimates from the speaker notes. The target is 45 minutes, including questions.
   COREOPS-4759 (its unit on terragrunt-demo-infrastructure#19, open); no test environment or production on v2;
   the how-to waiting for approval, moving to cicd-standards `docs/how-to` (COREOPS-4543); infrastructure-standards
   #39 (*Create a site unit*), #43 (§16 certificates) and #44 (§17 DNS) open. Anything merged or moved since
-  changes its row; slides 9, 11 and 18 mention the same items.
-- **Demo prerequisite:** spa-example staging serves an older release than one already in its bucket, with develop
-  on a different one, so the demo shows only staging's key moving. On 2026-11-23: staging 1.0.2, develop 1.0.3,
-  and 1.0.3 already uploaded to staging's bucket. If they've moved, adjust the versions on slide 15. Staging is
-  promoted only by hand, so nothing moves it during the session. You need access to the Promotion Manager
-  (spa-example-appset, staging, including its Rollback), ArgoCD (`staging-spa-example`) and the cluster's
-  `staging` namespace for the Job log.
+  changes its row; slides 9, 11 and 18 mention the same items. Also re-check two figures: CORE nonprod's
+  CloudFront Functions count (13 on 2026-11-19, slide 11's caption and notes; `aws cloudfront list-functions`
+  lists each function twice, DEVELOPMENT and LIVE) and the store's keys on slide 18's caption (develop 1.0.3,
+  staging 1.0.2 on 2026-11-23 before rehearsal).
+- **Demo start state (a prerequisite):** spa-example staging on 1.0.2 with a newer version (1.0.3) available to
+  promote, and develop on a newer version (1.0.3), so the demo shows only staging's key moving. That was the
+  state on 2026-11-23 before rehearsal; later that day it was reversed (poc-rendered-k8s-manifests `894b129`
+  promoted 1.0.3 to staging, `b39f2ab` rolled develop back to 1.0.2), so check both footers first: open `/about`
+  on each host, or `curl -s https://spa-example.<env>.vsp-nonprod.com/ | grep -o 'release-version" content="[^"]*"'`
+  for `develop` and `staging`. To restore it, in the Promotion Manager (spa-example-appset): promote 1.0.3 to
+  develop, and roll staging back to its 1.0.2 promotion (or promote 1.0.2 to staging). If the versions differ,
+  use staging's current version and a newer one already built, and change the numbers on slides 15 and 18.
+  Staging is promoted only by hand, so nothing moves it during the session.
+- **The Rollback is for staging:** in step 4, choose the Rollback for the **staging** environment, not develop,
+  and check the environment the Promotion Manager shows before confirming (both the promotion and the
+  Rollback). At rehearsal, note where the UI shows which environment a Rollback applies to, in slide 15's notes.
+- **Access for the demo:** the Promotion Manager (spa-example-appset, staging, including its Rollback), ArgoCD
+  (`staging-spa-example`) and `kubectl --context core-nonprod-us-east-2` on the `staging` namespace for the Job
+  log. Run the log command after ArgoCD shows the new Job (each sync replaces it), and again for the rollback.
 - **Backup slide (16):** replace the two placeholders with screenshots from the rehearsal (the promotion and the
   rollback in the Promotion Manager, the Argo app and its Job).
 
@@ -68,11 +80,11 @@ Slides embed them with `<picture>`, so the dark variant follows `prefers-color-s
 |---|---|---|
 | `four-phases` | 5 | how-to, "The four phases" and "Who does what" (re-rendered 2026-11-23: the function unit) |
 | `release` | 7 | how-to, "What a release does" |
-| `request` | 8 | how-to, "How a request is served" |
-| `site-unit` | 11 | how-to, step 2, "What the two units create" (re-rendered 2026-11-23: function unit and site unit, the site's own certificate) |
+| `request` | 8 | how-to, "How a request is served" (re-rendered 2026-11-23: versions 1.0.3; the 404/503 tags moved to the slide's caption) |
+| `site-unit` | 11 | how-to, step 2, "What the two units create" (re-rendered 2026-11-23: function unit and site unit, the site's own certificate; the versioned-only parts folded into the CloudFront and SSM labels so the diagram is shorter and its text larger) |
 | `ci` | 13 | how-to, step 5 (re-rendered 2026-11-23: the ECR check after the build; skip on the same commit, fail on another) |
-| `cd` | 14 | how-to, phase 4 |
-| `shared-function` | 18 | how-to, step 8 and "Optional: test environments"; TRACKER "Live facts" (the store's two keys, 2026-11-23). Replaces `alias-hosts` |
+| `cd` | 14 | how-to, phase 4 (re-rendered 2026-11-23: the Job "runs on each sync" instead of "Sync hook") |
+| `shared-function` | 18 | how-to, step 8 and "Optional: test environments"; TRACKER "Live facts". Replaces `alias-hosts`; production is in the caption, not the diagram, to keep its text larger |
 
 To rebuild one, from the repo root (needs Node 18+, Google Chrome and the archify skill):
 
@@ -143,7 +155,8 @@ Every source of information used in this presentation goes here.
   `viewer-request-versioned.js` (slide 8); `modules/site` `variables.tf` at `site-v2.0.0` (`function`,
   `dns_zones`, `retention`). `site-v1.0.0` (SDS) and `site-v1.1.0` (mfe-example) are v1 and not presented
 - vector-shared-helm-charts `charts/site-release/README.md` on `main`; tags up to `site-release@v0.4.1`: exactly one
-  of `site:` and `inPlace:`, pin an exact version
+  of `site:` and `inPlace:`, pin an exact version; `templates/_release.tpl`: the Job is a hook with
+  `hook-delete-policy: BeforeHookCreation`, so each sync replaces it (slide 15's notes)
 - spa-example `main` at `2470067`: `helm/spa-example` (`Chart.yaml` on `site-release` 0.4.1,
   `envs/values-develop.yaml`, `envs/values-staging.yaml`, slide 12), `.github/workflows/ci.yml` (slide 13),
   `src/App.tsx` and `src/pages/About.tsx` (the footer and the About page, slides 15–16); tags `v1.0.0`–`v1.0.3`
@@ -151,7 +164,8 @@ Every source of information used in this presentation goes here.
   (PRs #20 and #21, merged 2026-11-22), the names on slide 4; #19 (mfe-example's unit, open, `site-v1.1.0`)
 - poc-rendered-k8s-manifests commit `818f695` (2026-11-23): `chore(rollback): revert
   app-manifests/spa-example-appset/core-nonprod-east/staging/manifests.yaml to 1.0.2`, the Promotion Manager
-  rollback (slide 17)
+  rollback (slide 17); `894b129` and `b39f2ab` (2026-11-23, after it): staging promoted to 1.0.3 and develop rolled
+  back to 1.0.2, its render restored with `site-release-0.4.0` (slide 17's notes; the demo prerequisite)
 - SDS, the in-place example: sds-infrastructure `application/sds-site` (`unit_tf/main.tf`: `modules/site`
   `site-v1.0.0`, `routing = "in-place"`; `environments/test1` its only leaf; PRs #4 and #6, merged), and sds
   `main`: `src/helm/sds-site` (`Chart.yaml` on `site-release` 0.3.0, `values.yaml`, `envs/values-test1.yaml`,
@@ -192,7 +206,8 @@ Every source of information used in this presentation goes here.
   (slide 16). Replaces `demo-mfe-example-1.9.0.png`
 - Live checks on 2026-11-23: spa-example served 1.0.3 on develop and 1.0.2 on staging
   (`<meta name="release-version">`), staging's `/config/spa-example-config.json` names staging; mfe-example develop
-  served 1.9.3; https://test1.vectorsds-nonprod.com/ served 200
+  served 1.9.3; https://test1.vectorsds-nonprod.com/ served 200; after 19:27Z the same day, develop served 1.0.2 and staging 1.0.3 (see
+  the demo start state above)
 
 ### Design
 - `~/OneDrive - Vector Solutions/Documents/presentations/offsites/2026-08-nj-rubric-update.pptx` (Noel Aguilar, 2026-08 offsite deck): the brand colors, the rounded-diamond outline motif and the title background
@@ -200,9 +215,10 @@ Every source of information used in this presentation goes here.
 
 ## Notes
 
-- Diagram text is smaller than slide text: at 1600×900, node labels are about 16px and edge labels about 11px.
-  The diagrams are kept within the guide's 46% height limit (38% on slide 11, which also has a snippet); click
-  one to see it full screen.
+- Diagram text is smaller than slide text. At 1600×900 the workflow diagrams (`four-phases`, `release`, `ci`,
+  `cd`) show node labels at about 17px and sublabels about 13px; the architecture diagrams (`request`,
+  `site-unit`, `shared-function`) at about 15px and 11–12px; edge labels are smaller in both. The diagrams are
+  kept within the guide's 46% height limit; click one to see it full screen.
 - The site-unit names for SDS differ from the pattern (its only site, so app = product, and a product domain), and
   SDS has no function unit while it's on v1; the speaker notes on slide 4 say so.
 - vs-skills is no longer an example: it uses neither the module nor the chart (the how-to dropped it on 2026-11-23).

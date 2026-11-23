@@ -236,11 +236,12 @@ chart block, examples (SDS on v1; spa-example on v2).
 - Callout: **choose once**; switching means a new site with the other method.
 
 ### 11. Phase 1, infrastructure
-- Diagram (b): the function unit (function, store) and the site unit (DNS, CloudFront with its own
-  certificate, bucket, SSM, publisher; versioned-only `/config/*` and SSM).
-- Snippet: the function unit's `routing` with `site-function-v1.0.1`; the site leaf's `function` from
-  the dependency and `dns_zones`, with `site-v2.0.0`.
-- Caption: why one function per account (100 by default, 13 in use, five per site otherwise).
+- Diagram (b) at full height: the function unit (function, store) and the site unit (DNS, CloudFront
+  with its own certificate, bucket, SSM, publisher; versioned-only parts named in the labels).
+- Captions: which module and tag each unit uses; why one function per account (100 by default, 13 in
+  CORE nonprod on 2026-11-19, five per site otherwise); the check (`503` / `404`).
+- The config lines, file by file (`unit_tf/main.tf` `source … ?ref=`, the leaves' `routing`,
+  `function`, `alias_hosts`, `dns_zones`), are in the speaker notes, so the diagram stays readable.
 
 ### 12. Phase 2, the app repository
 - No environment values in the image; browser config in `files:`, public.
@@ -258,14 +259,18 @@ Diagram (f). Register once (ApplicationSet with `retry.limit: 2` + promotion con
 first release by hand; each higher environment adds a site leaf, values and a promotion entry.
 
 ### 15. Live: promote forward, then roll back
-On spa-example staging (staging 1.0.2, develop 1.0.3 on 2026-11-23; the version is in the footer):
+On spa-example staging. Start state, a prerequisite checked and restored before the session: staging
+on 1.0.2 with 1.0.3 available, develop on 1.0.3 (true on 2026-11-23 before rehearsal; reversed later
+that day). The version is in the footer.
 promote 1.0.3 to staging (one key write, the folder already there), then the Promotion Manager's
-Rollback to 1.0.2; develop's footer stays on 1.0.3. Speaker notes carry the click path, the expected
-wait and the fallback.
+Rollback for the staging environment to 1.0.2; develop's footer stays on 1.0.3. Speaker notes carry
+the start state and how to restore it, the click path (check the environment before confirming; run
+the Job log after ArgoCD shows the new Job), the expected wait and the fallback.
 
 ### 16. Backup
-Staging's About page on 1.0.2 (2026-11-23), the how-to's staging rollback log, and two placeholders
-for rehearsal screenshots (the Promotion Manager, the Argo app and its Job).
+Staging's About page on 1.0.2 (2026-11-23), the how-to's staging rollback log, the store's keys after
+it (develop untouched), and two placeholders for rehearsal screenshots (the Promotion Manager, the
+Argo app and its Job).
 
 ### 17. Rollback and failed releases
 - **Rollback**: the Promotion Manager's Rollback; versioned only moves that environment's key;
@@ -274,8 +279,9 @@ for rehearsal screenshots (the Promotion Manager, the Argo app and its Job).
 - **Both**: ArgoCD retries twice, about 12 minutes at most.
 
 ### 18. Each environment is its own distribution
-Diagram (g): spa-example's develop and staging distributions on one function and store, keys
-develop 1.0.3 and staging 1.0.2; prod separate and not yet covered. A test environment is one more
+Diagram (g): spa-example's develop and staging distributions on one function and store, a key per
+host. The caption names production (its own function and store, not yet covered) and the keys as on
+2026-11-23 before rehearsal. A test environment is one more
 site leaf. Alternative, versioned only: test hostnames as alias hosts on develop's distribution.
 
 ### 19. An API through the site
