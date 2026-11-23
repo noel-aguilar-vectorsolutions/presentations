@@ -1,0 +1,26 @@
+19:02:51  opened https://github.com/VectorLearning/release-please-branches-demo/pull/3
+19:02:51  waiting for the checks of VectorLearning/release-please-branches-demo#3: PR / Lint PR title CI / CI result release-please / release-pr-version-check
+19:08:07  VectorLearning/release-please-branches-demo#3: required checks passed after 316s
+19:08:08  VectorLearning/release-please-branches-demo#3 is CLEAN
+19:08:12  merged VectorLearning/release-please-branches-demo#3 as 0ee7d39
+19:08:18  watching ci.yml run 44205303122 (https://github.com/VectorLearning/release-please-branches-demo/actions/runs/44205303122)
+19:13:01  watching release-please.yml run 44205302246 (https://github.com/VectorLearning/release-please-branches-demo/actions/runs/44205302246)
+19:13:03  newest release branch: release/1.0.x
+19:13:07  opened https://github.com/VectorLearning/release-please-branches-demo/pull/5
+19:13:07  waiting for the checks of VectorLearning/release-please-branches-demo#5: PR / Lint PR title CI / CI result release-please / release-pr-version-check
+19:18:02  VectorLearning/release-please-branches-demo#5: required checks passed after 295s
+19:18:03  VectorLearning/release-please-branches-demo#5 is CLEAN
+19:18:07  merged VectorLearning/release-please-branches-demo#5 as 3d98aed
+19:18:13  watching ci.yml run 44206694329 (https://github.com/VectorLearning/release-please-branches-demo/actions/runs/44206694329)
+19:23:19  watching release-please.yml run 44206693732 (https://github.com/VectorLearning/release-please-branches-demo/actions/runs/44206693732)
+19:23:20  waiting for the checks of VectorLearning/release-please-branches-demo#7: PR / Lint PR title CI / CI result release-please / release-pr-version-check
+19:23:22  VectorLearning/release-please-branches-demo#7: required checks passed after 2s
+19:23:22  VectorLearning/release-please-branches-demo#7 is CLEAN
+
+Demo 3 staged (VectorLearning/release-please-branches-demo)
+  Release PR to merge live: https://github.com/VectorLearning/release-please-branches-demo/pull/7  (chore(release/1.0.x): release 1.0.1)
+  Expected live:            v1.0.1 (tag, GitHub Release, re-tag of noel/rpb-echo.api's release-1.0.x image)
+  Fix merged to release/1.0.x:  https://github.com/VectorLearning/release-please-branches-demo/pull/5
+  Its forward-port to main: https://github.com/VectorLearning/release-please-branches-demo/pull/6 (opened about 320s after the fix PR was merged)
+  main's release PR:        https://github.com/VectorLearning/release-please-branches-demo/pull/4  (chore(main): release 1.1.0)
+                            (its release-pr-version-check fails while the port is open: the missing-ports rule)

@@ -1,0 +1,22 @@
+19:02:20  last release: echo@v4.5.0
+19:02:24  opened https://github.com/VectorLearning/release-please-demo/pull/246
+19:02:24  waiting for the checks of VectorLearning/release-please-demo#246: PR / Lint PR title CI / CI result release-please / release-pr-version-check
+19:07:18  VectorLearning/release-please-demo#246: required checks passed after 294s
+19:07:19  VectorLearning/release-please-demo#246 is CLEAN
+19:07:23  merged VectorLearning/release-please-demo#246 as af943d6
+19:07:29  watching ci.yml run 44205186729 (https://github.com/VectorLearning/release-please-demo/actions/runs/44205186729)
+19:11:53  opened https://github.com/VectorLearning/release-please-demo/pull/248
+19:11:53  waiting for the checks of VectorLearning/release-please-demo#248: PR / Lint PR title CI / CI result release-please / release-pr-version-check
+19:17:31  VectorLearning/release-please-demo#248: required checks passed after 338s
+19:17:32  VectorLearning/release-please-demo#248 is CLEAN
+19:17:37  merged VectorLearning/release-please-demo#248 as 790c91d
+19:17:44  watching ci.yml run 44206627790 (https://github.com/VectorLearning/release-please-demo/actions/runs/44206627790)
+19:23:09  watching release-please.yml run 44206627428 (https://github.com/VectorLearning/release-please-demo/actions/runs/44206627428)
+19:23:10  waiting for the checks of VectorLearning/release-please-demo#247: PR / Lint PR title CI / CI result release-please / release-pr-version-check
+19:23:12  VectorLearning/release-please-demo#247: required checks passed after 2s
+19:23:13  VectorLearning/release-please-demo#247 is CLEAN
+
+Demo 2 staged (VectorLearning/release-please-demo)
+  Release PR to merge live: https://github.com/VectorLearning/release-please-demo/pull/247  (chore(main): release echo 4.6.0)
+  Last release:             echo@v4.5.0
+  Expected live:            echo@v4.6.0 (tag, GitHub Release, re-tag of noel/echo.api)

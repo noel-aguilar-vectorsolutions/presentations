@@ -1,0 +1,36 @@
+# release-please-branches-demo: first release v1.0.0 (D1 setup, 2026-11-17)
+
+Seed d29c57a; PR #1 feat(echo) with Release-As: 1.0.0 merged as bb47c81; release PR #2 merged 23:57:24Z as 1bb3744.
+
+## Release run 44203797463 jobs
+release-please / release-please	success	2026-11-17T23:57:28Z	2026-11-17T23:57:41Z
+release-please / release-branch-change-type	skipped	2026-11-17T23:57:27Z	2026-11-17T23:57:27Z
+release-please / release-pr-version-check	skipped	2026-11-17T23:57:34Z	2026-11-17T23:57:27Z
+release-please / forward-port	skipped	2026-11-17T23:57:36Z	2026-11-17T23:57:27Z
+release-please / release-branch	success	2026-11-17T23:57:43Z	2026-11-17T23:57:53Z
+release-please / retag (., 1.0.0, v1.0.0, 1bb37449603b291c9ea39b0cee085bd7fa412b59, 1, 0, 0)	success	2026-11-17T23:57:43Z	2026-11-18T00:02:04Z
+
+## Retag notices
+module '.' was built at bb47c81ebc0a3a9c34c427f8a14db7d26e2fb0d9, 1 commit(s) before the release commit 1bb37449603b291c9ea39b0cee085bd7fa412b59.
+module '.' pushed 3 image(s) under noel at bb47c81ebc0a3a9c34c427f8a14db7d26e2fb0d9.
+build run https://github.com/VectorLearning/release-please-branches-demo/actions/runs/44203656663 (run number 3) succeeded; its images are tagged main-3.
+tagged noel/rpb-echo.api:1.0.0 on sha256:0e64d783b82401e298c0d5c04785bf38499dca95cb1ea2d393b88a1c27ad920d.
+tagged noel/rpb-echo.backgroundtasks:1.0.0 on sha256:01f3b1d4057c33987aadaf25f7575bef2cde1ee6ceaae239634e4cfa26dfca15.
+tagged noel/rpb-echo.migrations:1.0.0 on sha256:933663cb77bb4d290f75e984cb821313c83be7ea5c81bed2001361f5c3e03399.
+
+## Refs
+1bb37449603b291c9ea39b0cee085bd7fa412b59	refs/heads/main
+8937d21d9c392bad2b88e30912b42bb328aec6ea	refs/heads/release/1.0.x
+1bb37449603b291c9ea39b0cee085bd7fa412b59	refs/tags/v1.0.0
+
+## Releases
+v1.0.0	Latest	v1.0.0	2026-11-17T23:57:35Z
+
+## Rulesets
+27506677	Branch deletion
+27506679	Hotfix branch creation
+27506682	Release branch creation
+27506683	Required checks
+27506684	Version tag creation
+27506685	release-please: main, release and hotfix branches
+27506686	release-please: version tags

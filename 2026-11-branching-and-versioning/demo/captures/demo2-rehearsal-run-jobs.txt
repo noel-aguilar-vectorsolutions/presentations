@@ -1,0 +1,5 @@
+release-please / release-please	success	2026-11-18T00:24:03Z	2026-11-18T00:24:24Z
+release-please / release-pr-version-check	skipped	2026-11-18T00:24:01Z	2026-11-18T00:24:01Z
+release-please / hotfix-branch	skipped	2026-11-18T00:24:01Z	2026-11-18T00:24:01Z
+release-please / forward-port	skipped	2026-11-18T00:24:01Z	2026-11-18T00:24:01Z
+release-please / retag (., echo, 4.6.0, echo@v4.6.0, b36db717495f149b77ac5574f328259c6daed9ea, 4, 6, 0)	success	2026-11-18T00:24:26Z	2026-11-18T00:24:43Z
