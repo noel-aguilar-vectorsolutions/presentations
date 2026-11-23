@@ -252,19 +252,19 @@ siteRelease:
 
 ---
 
-## 15. Roll back, then forward, on develop
+## 15. Forward, then roll back, on staging
 
 *Demo · live*
 
-1. The footer shows the current version
-2. Promotion Manager: promote **1.9.0** to develop
-3. ArgoCD runs `develop-mfe-example-site-release`
-4. The Job finds the folder, moves the key, and checks: `serves 1.9.0`
-5. Reload: the footer shows 1.9.0. Then promote the newer version again.
+1. The footer shows staging on 1.0.2; develop is on 1.0.3
+2. Promotion Manager: promote **1.0.3** to staging
+3. ArgoCD runs `staging-spa-example-site-release`: the folder is there, one key write, `serves 1.0.3`
+4. Promotion Manager: **Rollback** staging to 1.0.2
+5. Reload: staging is on 1.0.2 again, and develop's footer still says 1.0.3
 
-mfe-example.develop.vsp-nonprod.com
+spa-example.staging.vsp-nonprod.com · spa-example.develop.vsp-nonprod.com
 
-**Speaker notes:** ⏱ 5 min. Before the session: a release newer than 1.9.0 must be live on develop (any merge to mfe-example main auto-deploys one), because 1.9.0 is the first release with the version in the footer. Tabs open: the site, the Promotion Manager, ArgoCD on develop-mfe-example, and a terminal with: kubectl --namespace develop logs job/develop-mfe-example-site-release -c release -f. Click path: (1) show the footer on the newer version. (2) Promotion Manager, mfe-example-appset, develop: promote 1.9.0. (3) ArgoCD: develop-mfe-example syncs and runs the Job. (4) Job log: the upload is skipped because the folder is already there, the key changes, "still waiting" every 15 seconds while the edge catches up, then "serves 1.9.0"; the key takes 30–40 s to reach the edge. (5) Reload the site: footer 1.9.0. That was the rollback: one key write. (6) Promote the newer version again and show the footer move forward. If anything stalls: go to the next slide. If a sync hangs, terminate the operation on develop-mfe-example in ArgoCD.
+**Speaker notes:** ⏱ 5 min. Before the session: staging serves 1.0.2 and develop 1.0.3, as on 2026-11-23 (check both footers; if they've moved, use staging's current version and one already in its bucket). Staging is promoted only by hand, so nothing else moves it during the demo. Tabs open: staging's /about, develop's /about, the Promotion Manager on spa-example-appset, ArgoCD on staging-spa-example, and a terminal with: kubectl --namespace staging logs job/staging-spa-example-site-release -c release -f. Click path: (1) show staging's footer, "staging · release 1.0.2", and develop's, 1.0.3. (2) Promotion Manager, spa-example-appset, staging: promote 1.0.3. (3) ArgoCD: staging-spa-example syncs and runs the Job. Job log: "releases/spa-example/1.0.3 is already uploaded", then "spa-example.staging.vsp-nonprod.com: 1.0.2 -> 1.0.3", "still waiting" every 15 seconds while the edge catches up, then "serves 1.0.3 at edge …"; spa-example's took 6 to 31 seconds at the Job's edge. Reload staging: 1.0.3. (4) Promotion Manager, staging: Rollback to the 1.0.2 promotion. It commits chore(rollback) to the manifests repo, and ArgoCD runs the Job again: one key write, 1.0.3 -> 1.0.2. (5) Reload staging: 1.0.2. Reload develop: still 1.0.3. That's the shared store at work: one function and one store for both environments, and each promotion or rollback moved only its own environment's key. If anything stalls: go to the next slide. If a sync hangs, terminate the operation on staging-spa-example in ArgoCD.
 
 ---
 
@@ -272,30 +272,30 @@ mfe-example.develop.vsp-nonprod.com
 
 *Demo · backup*
 
-*The site's footer names its release*
+*The site names its release*
 
-![The bottom of the mfe-example home page on develop: the end of the Getting started card, with Version 1.9.0 under it](assets/demo-mfe-example-1.9.0.png)
+![The spa-example About page on staging: This page is release 1.0.2, each release an immutable folder and each hostname pointed at one release by a single KeyValueStore key; the footer reads staging · release 1.0.2](assets/demo-spa-example-staging-1.0.2.png)
 
-*The Job's log, a versioned release*
+*The Job's log, the rollback to 1.0.2 on staging*
 
 ```
-[site-release] publishing …/examples/mfe-example-site:1.5.0 …
-[site-release] mfe-example.develop.vsp-nonprod.com: still waiting,
-               HTTP 200, the page loads 1.4.1 (15s)
-[site-release] mfe-example.develop.vsp-nonprod.com serves 1.5.0
-               (30s after the key changed)
-[site-release] retention: candidates for deletion []
+[site-release] releases/spa-example/1.0.2 is already uploaded
+[site-release] spa-example.staging.vsp-nonprod.com: 1.0.3 -> 1.0.2
+[site-release] spa-example.staging.vsp-nonprod.com: still waiting,
+               HTTP 200, the page loads 1.0.3 (15s)
+[site-release] spa-example.staging.vsp-nonprod.com serves 1.0.2
+               (31s after the key changed)
 ```
 
-*The promotion*
+*The promotion and the rollback*
 
-*[Placeholder: Promotion Manager: promote 1.9.0 to develop (screenshot from rehearsal)]*
+*[Placeholder: Promotion Manager: promote 1.0.3 to staging, then Rollback to 1.0.2 (screenshot from rehearsal)]*
 
 *The sync*
 
-*[Placeholder: ArgoCD: develop-mfe-example, the site-release Job (screenshot from rehearsal)]*
+*[Placeholder: ArgoCD: staging-spa-example, the site-release Job (screenshot from rehearsal)]*
 
-**Speaker notes:** ⏱ 0 min (only if the live demo fails; it replaces the previous slide). Click a screenshot to show it full size. The footer shot is develop on 1.9.0, taken 2026-11-17. The log lines are from the how-to's example, a release of 1.5.0 on 2026-11-11 (timestamps trimmed): "still waiting" while the edge still serves the old page, then "serves" 30 seconds after the key changed, then retention, which only logs while deletion is off. The two placeholders are for screenshots from the rehearsal: the promotion in the Promotion Manager, and the Argo app with its Job.
+**Speaker notes:** ⏱ 0 min (only if the live demo fails; it replaces the previous slide). Click a screenshot to show it full size. The shot is staging's About page on 1.0.2, taken 2026-11-23. The log lines are the how-to's example, the Promotion Manager rollback of staging from 1.0.3 to 1.0.2 on 2026-11-23 (timestamps and edge names trimmed): the folder was already uploaded, so only the key changed; "still waiting" while the edge still served 1.0.3, then "serves" 31 seconds after the key changed. Develop stayed on 1.0.3 throughout. The two placeholders are for screenshots from the rehearsal: the promotion and the rollback in the Promotion Manager, and the Argo app with its Job.
 
 ---
 
