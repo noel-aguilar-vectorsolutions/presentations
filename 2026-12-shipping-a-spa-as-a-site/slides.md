@@ -78,7 +78,7 @@ December 2026*
 
 *The four phases*
 
-![Four phases in two lanes, Product team and DevOps. Phase 1, infrastructure: the product team's site unit creates the site, DevOps approves it; DevOps creates the ECR repository. Phase 2, app repository: build and chart, helm/app, fed by the unit's outputs. Phase 3, CI: builds one release image into the ECR repository. Phase 4, CD: DevOps registers the site with ArgoCD and the Promotion Manager once; each promotion passes the image tag to the Promotion Manager, and ArgoCD's sync runs the publisher Job, which publishes the site.](assets/diagrams/four-phases-light.svg)
+![Four phases in two lanes, Product team and DevOps. Phase 1, infrastructure: the product team's function unit, once per account, passes the function to the site unit, one per environment, which creates the site; DevOps approves both units, and creates the ECR repository. Phase 2, app repository: build and chart, helm/app, fed by the unit's outputs. Phase 3, CI: builds one release image into the ECR repository. Phase 4, CD: DevOps registers the site with ArgoCD and the Promotion Manager once; each promotion passes the image tag to the Promotion Manager, and ArgoCD's sync runs the publisher Job, which publishes the site.](assets/diagrams/four-phases-light.svg)
 
 The image is never run as a service: it holds the built files, and the Job copies them out.
 
@@ -168,7 +168,7 @@ In both, a path whose last segment has no `.` is a client-side route and gets th
 
 *Phase 1 · Infrastructure*
 
-![What the site unit creates per environment. Both methods: DNS records, A and AAAA per hostname, pointing at CloudFront with its viewer-request function, which reads the site bucket; SSM parameters bucket and distribution_id; the publisher identity, an IRSA role and the app-site-publisher ServiceAccount, which writes the bucket and, in-place, invalidates the distribution. Versioned only: the KeyValueStore mapping host to version, which the function looks up and the publisher writes; the /config/* behavior for per-host files; SSM kvs_arn and retention.](assets/diagrams/site-unit-light.svg)
+![What the two units create. The site unit, per environment: DNS records, A and AAAA per hostname, pointing at CloudFront with the site's own certificate, which reads the site bucket and attaches the function; SSM parameters bucket and distribution_id; the publisher identity, an IRSA role and the app-site-publisher ServiceAccount, which writes the bucket and, in-place, invalidates the distribution; versioned only, the /config/* behavior for per-host files and SSM kvs_arn and retention. The function unit, once per account: the viewer-request function with the routing, API prefixes and redirects, which looks up the host in the KeyValueStore; versioned, a key per host, written by the publisher.](assets/diagrams/site-unit-light.svg)
 
 ```
 source  = "…//modules/site?ref=site-v1.1.0"
@@ -224,7 +224,7 @@ siteRelease:
 
 *Phase 3 · CI*
 
-![CI on main: push to main, compute the version X.Y.Z, check whether the tag is already in ECR; if yes, skip and never push over a release; if no, build (versioned with RELEASE_VERSION), check the build's entry files name the release folder, and push the image to product/app-site.](assets/diagrams/ci-light.svg)
+![CI on main: push to main and compute the version X.Y.Z; build (versioned with RELEASE_VERSION); check the build's entry files name the release folder; docker build with the files under /release; then ask whether the tag is already in ECR. No: push the image to product/app-site. Yes, from the same commit: skip the push, a re-run. Yes, from another commit: fail the run, never push over a release.](assets/diagrams/ci-light.svg)
 
 - Every environment releases the same image; nothing is rebuilt per environment.
 - **Versioned** takes only `X.Y.Z`, so a branch image can never be released. **In-place** takes any tag: SDS releases a build tag such as `main-<run>`, or a release version.

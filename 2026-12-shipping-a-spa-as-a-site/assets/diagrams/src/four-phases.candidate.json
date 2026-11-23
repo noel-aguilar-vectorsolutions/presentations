@@ -13,22 +13,24 @@
     { "id": "devops", "label": "DevOps" }
   ],
   "phases": [
-    { "id": "p1", "label": "1 · Infrastructure", "fromCol": 0, "toCol": 0 },
-    { "id": "p2", "label": "2 · App repository", "fromCol": 1, "toCol": 1 },
-    { "id": "p3", "label": "3 · CI", "fromCol": 2, "toCol": 2 },
-    { "id": "p4", "label": "4 · CD", "fromCol": 3, "toCol": 4, "variant": "emphasis" }
+    { "id": "p1", "label": "1 · Infrastructure", "fromCol": 0, "toCol": 1 },
+    { "id": "p2", "label": "2 · App repository", "fromCol": 2, "toCol": 2 },
+    { "id": "p3", "label": "3 · CI", "fromCol": 3, "toCol": 3 },
+    { "id": "p4", "label": "4 · CD", "fromCol": 4, "toCol": 5, "variant": "emphasis" }
   ],
-  "mainPath": ["unit", "chart", "ci", "promote", "job"],
+  "mainPath": ["fnunit", "unit", "chart", "ci", "promote", "job"],
   "nodes": [
-    { "id": "unit", "lane": "product", "col": 0, "type": "cloud", "label": "Site unit", "sublabel": "creates the site", "tag": "DevOps approves" },
-    { "id": "ecr", "lane": "devops", "col": 0, "type": "database", "label": "ECR repository", "sublabel": "<product>/<app>-site" },
-    { "id": "chart", "lane": "product", "col": 1, "type": "frontend", "label": "Build + chart", "sublabel": "helm/<app>" },
-    { "id": "ci", "lane": "product", "col": 2, "type": "backend", "label": "CI", "sublabel": "one release image" },
-    { "id": "reg", "lane": "devops", "col": 3, "type": "messagebus", "label": "Register", "sublabel": "ArgoCD + promotion" },
-    { "id": "promote", "lane": "product", "col": 3, "type": "messagebus", "label": "Promote", "sublabel": "Promotion Manager" },
-    { "id": "job", "lane": "product", "col": 4, "type": "messagebus", "label": "Publisher Job", "sublabel": "publishes the site" }
+    { "id": "fnunit", "lane": "product", "col": 0, "type": "cloud", "label": "Function unit", "sublabel": "once per account", "tag": "DevOps approves" },
+    { "id": "unit", "lane": "product", "col": 1, "type": "cloud", "label": "Site unit", "sublabel": "per environment", "tag": "DevOps approves" },
+    { "id": "ecr", "lane": "devops", "col": 1, "type": "database", "label": "ECR repository", "sublabel": "<product>/<app>-site" },
+    { "id": "chart", "lane": "product", "col": 2, "type": "frontend", "label": "Build + chart", "sublabel": "helm/<app>" },
+    { "id": "ci", "lane": "product", "col": 3, "type": "backend", "label": "CI", "sublabel": "one release image" },
+    { "id": "reg", "lane": "devops", "col": 4, "type": "messagebus", "label": "Register", "sublabel": "ArgoCD + promotion" },
+    { "id": "promote", "lane": "product", "col": 4, "type": "messagebus", "label": "Promote", "sublabel": "Promotion Manager" },
+    { "id": "job", "lane": "product", "col": 5, "type": "messagebus", "label": "Publisher Job", "sublabel": "publishes the site" }
   ],
   "edges": [
+    { "id": "fn-unit", "from": "fnunit", "to": "unit", "label": "function", "variant": "emphasis" },
     { "id": "unit-outputs", "from": "unit", "to": "chart", "label": "outputs", "variant": "emphasis" },
     { "id": "chart-build", "from": "chart", "to": "ci", "variant": "emphasis" },
     { "id": "ci-tag", "from": "ci", "to": "promote", "label": "image tag", "variant": "emphasis" },

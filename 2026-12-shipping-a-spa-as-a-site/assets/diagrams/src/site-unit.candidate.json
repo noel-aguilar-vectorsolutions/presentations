@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "What the site unit creates, per environment",
+    "title": "What the two units create: the function once per account, the site per environment",
     "locale": "en",
     "output": "tmp/archify/site-unit.html",
     "quality_profile": "showcase",
@@ -29,13 +29,13 @@
       "id": "dist",
       "type": "cloud",
       "label": "CloudFront",
-      "sublabel": "+ viewer-request function",
+      "sublabel": "+ the site's own certificate",
       "pos": [
         220,
         60
       ],
       "size": [
-        170,
+        190,
         58
       ]
     },
@@ -45,7 +45,7 @@
       "label": "Site bucket",
       "sublabel": "S3",
       "pos": [
-        460,
+        470,
         60
       ],
       "size": [
@@ -63,7 +63,7 @@
         190
       ],
       "size": [
-        150,
+        160,
         58
       ]
     },
@@ -73,25 +73,11 @@
       "label": "Publisher identity",
       "sublabel": "IRSA role + <app>-site-publisher",
       "pos": [
-        430,
+        410,
         190
       ],
       "size": [
-        200,
-        58
-      ]
-    },
-    {
-      "id": "kvs",
-      "type": "database",
-      "label": "KeyValueStore",
-      "sublabel": "host → version",
-      "pos": [
-        700,
-        60
-      ],
-      "size": [
-        150,
+        220,
         58
       ]
     },
@@ -101,11 +87,11 @@
       "label": "/config/* behavior",
       "sublabel": "per-host files",
       "pos": [
-        880,
-        60
+        220,
+        330
       ],
       "size": [
-        150,
+        160,
         58
       ]
     },
@@ -115,11 +101,39 @@
       "label": "SSM, versioned",
       "sublabel": "kvs_arn, retention",
       "pos": [
-        880,
+        420,
+        330
+      ],
+      "size": [
+        160,
+        58
+      ]
+    },
+    {
+      "id": "fn",
+      "type": "cloud",
+      "label": "Viewer-request function",
+      "sublabel": "routing, API prefixes, redirects",
+      "pos": [
+        780,
+        60
+      ],
+      "size": [
+        210,
+        58
+      ]
+    },
+    {
+      "id": "kvs",
+      "type": "database",
+      "label": "KeyValueStore",
+      "sublabel": "versioned: a key per host",
+      "pos": [
+        780,
         190
       ],
       "size": [
-        150,
+        210,
         58
       ]
     }
@@ -127,7 +141,7 @@
   "boundaries": [
     {
       "kind": "region",
-      "label": "Both methods",
+      "label": "Site unit \u00b7 per environment",
       "wraps": [
         "dns",
         "dist",
@@ -138,12 +152,20 @@
     },
     {
       "kind": "security-group",
-      "label": "Versioned only",
+      "label": "Site unit \u00b7 versioned only",
       "wraps": [
-        "kvs",
         "cfg",
         "ssm2"
       ]
+    },
+    {
+      "kind": "region",
+      "label": "Function unit \u00b7 once per account",
+      "wraps": [
+        "fn",
+        "kvs"
+      ],
+      "pad": 12
     }
   ],
   "connections": [
@@ -161,12 +183,21 @@
       "variant": "emphasis"
     },
     {
-      "id": "dist-kvs",
+      "id": "dist-fn",
       "from": "dist",
+      "to": "fn",
+      "label": "attaches",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "fn-kvs",
+      "from": "fn",
       "to": "kvs",
       "label": "looks up the host",
       "variant": "dashed",
-      "fromSide": "top",
+      "fromSide": "bottom",
       "toSide": "top"
     },
     {
@@ -193,7 +224,7 @@
       "label": "versioned: keys",
       "variant": "dashed",
       "fromSide": "right",
-      "toSide": "bottom"
+      "toSide": "left"
     }
   ]
 }

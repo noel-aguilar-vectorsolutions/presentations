@@ -6,28 +6,149 @@
     "locale": "en",
     "output": "tmp/archify/ci.html",
     "quality_profile": "showcase",
-    "legend": { "mode": "hidden" }
+    "legend": {
+      "mode": "hidden"
+    }
   },
   "lanes": [
-    { "id": "build", "label": "On main" },
-    { "id": "skip", "label": "Already released", "variant": "exception" }
+    {
+      "id": "build",
+      "label": "On main"
+    },
+    {
+      "id": "taken",
+      "label": "Tag already in ECR",
+      "variant": "exception"
+    }
   ],
-  "mainPath": ["push", "version", "exists", "compile", "verify", "image"],
+  "mainPath": [
+    "push",
+    "compile",
+    "verify",
+    "image",
+    "exists",
+    "publish"
+  ],
   "nodes": [
-    { "id": "push", "lane": "build", "col": 0, "type": "external", "label": "Push to main", "icon": "start" },
-    { "id": "version", "lane": "build", "col": 1, "type": "backend", "label": "Version", "sublabel": "X.Y.Z" },
-    { "id": "exists", "lane": "build", "col": 2, "type": "security", "label": "Tag in ECR?", "icon": "decision" },
-    { "id": "compile", "lane": "build", "col": 3, "type": "backend", "label": "Build", "sublabel": "versioned: RELEASE_VERSION" },
-    { "id": "verify", "lane": "build", "col": 4, "type": "security", "label": "Check the build", "sublabel": "entry files name the folder" },
-    { "id": "image", "lane": "build", "col": 5, "type": "database", "label": "Push the image", "sublabel": "<product>/<app>-site" },
-    { "id": "skipped", "lane": "skip", "col": 2, "type": "external", "label": "Skip", "sublabel": "never push over a release", "icon": "stop" }
+    {
+      "id": "push",
+      "lane": "build",
+      "col": 0,
+      "type": "external",
+      "label": "Push to main",
+      "icon": "start",
+      "sublabel": "compute the version X.Y.Z"
+    },
+    {
+      "id": "compile",
+      "lane": "build",
+      "col": 1,
+      "type": "backend",
+      "label": "Build",
+      "sublabel": "versioned: RELEASE_VERSION"
+    },
+    {
+      "id": "verify",
+      "lane": "build",
+      "col": 2,
+      "type": "security",
+      "label": "Check the build",
+      "sublabel": "entry files name the folder"
+    },
+    {
+      "id": "image",
+      "lane": "build",
+      "col": 3,
+      "type": "backend",
+      "label": "docker build",
+      "sublabel": "files under /release"
+    },
+    {
+      "id": "exists",
+      "lane": "build",
+      "col": 4,
+      "type": "security",
+      "label": "Tag in ECR?",
+      "icon": "decision"
+    },
+    {
+      "id": "publish",
+      "lane": "build",
+      "col": 5,
+      "type": "database",
+      "label": "Push the image",
+      "sublabel": "<product>/<app>-site"
+    },
+    {
+      "id": "skipped",
+      "lane": "taken",
+      "col": 3,
+      "type": "external",
+      "label": "Skip the push",
+      "sublabel": "same commit: a re-run",
+      "icon": "stop"
+    },
+    {
+      "id": "failed",
+      "lane": "taken",
+      "col": 5,
+      "type": "external",
+      "label": "Fail the run",
+      "sublabel": "never push over a release",
+      "icon": "stop"
+    }
   ],
   "edges": [
-    { "id": "e1", "from": "push", "to": "version", "variant": "emphasis" },
-    { "id": "e2", "from": "version", "to": "exists", "variant": "emphasis" },
-    { "id": "e3", "from": "exists", "to": "compile", "label": "no", "variant": "emphasis" },
-    { "id": "e4", "from": "compile", "to": "verify", "variant": "emphasis" },
-    { "id": "e5", "from": "verify", "to": "image", "variant": "emphasis" },
-    { "id": "e-skip", "from": "exists", "to": "skipped", "label": "yes", "variant": "dashed", "role": "branch" }
+    {
+      "id": "e2",
+      "from": "push",
+      "to": "compile",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e3",
+      "from": "compile",
+      "to": "verify",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e4",
+      "from": "verify",
+      "to": "image",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e5",
+      "from": "image",
+      "to": "exists",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e6",
+      "from": "exists",
+      "to": "publish",
+      "label": "no",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-skip",
+      "from": "exists",
+      "to": "skipped",
+      "label": "same commit",
+      "variant": "dashed",
+      "role": "branch",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "e-fail",
+      "from": "exists",
+      "to": "failed",
+      "label": "another commit",
+      "variant": "dashed",
+      "role": "branch",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
   ]
 }
