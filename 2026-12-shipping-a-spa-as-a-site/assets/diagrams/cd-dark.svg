@@ -649,15 +649,15 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
           <text x="506.8" y="131" class="t-muted" font-size="8" text-anchor="middle">syncs &lt;env&gt;-&lt;app&gt;</text>
         </g>
 
-        <g id="node-job" data-node-id="job" data-node-label="Publisher Job" tabindex="0" role="button" aria-label="Focus Publisher Job, Sync hook, Each promotion" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Sync hook" data-node-context="Each promotion">
-          <title>Publisher Job · Sync hook · Each promotion</title>
+        <g id="node-job" data-node-id="job" data-node-label="Publisher Job" tabindex="0" role="button" aria-label="Focus Publisher Job, runs on each sync, Each promotion" aria-pressed="false" data-node-kind="backend" data-node-sublabel="runs on each sync" data-node-context="Each promotion">
+          <title>Publisher Job · runs on each sync · Each promotion</title>
           <rect x="590.8" y="93" width="92" height="52" rx="8" class="c-mask"/>
           <rect x="590.8" y="93" width="92" height="52" rx="8" class="c-backend" data-animate="node" style="--step: 4; --flow-node-name: archify-relay-node-4;" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(596.8 99) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" x="636.8" y="124.9" class="t-primary" font-size="10.7" font-weight="600" text-anchor="middle">Publisher Job</text>
-          <text x="636.8" y="139.8" class="t-muted" font-size="8" text-anchor="middle">Sync hook</text>
+          <text x="636.8" y="139.8" class="t-muted" font-size="8" text-anchor="middle">runs on each sync</text>
         </g>
 
         <g id="node-site" data-node-id="site" data-node-label="The site" tabindex="0" role="button" aria-label="Focus The site, in-place or versioned, Each promotion" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="in-place or versioned" data-node-context="Each promotion">

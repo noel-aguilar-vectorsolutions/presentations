@@ -609,8 +609,8 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
         <text x="375" y="93" class="t-muted" font-size="9" text-anchor="middle">a route → /index.html</text>
         </g>
 
-        <g id="node-ip_s3" data-node-id="ip_s3" data-node-label="Bucket root" tabindex="0" role="button" aria-label="Focus Bucket root, /index.html, In-place" aria-pressed="false" data-node-kind="database" data-node-sublabel="/index.html" data-node-tag="empty: 404" data-node-context="In-place">
-          <title>Bucket root · /index.html · In-place · empty: 404</title>
+        <g id="node-ip_s3" data-node-id="ip_s3" data-node-label="Bucket root" tabindex="0" role="button" aria-label="Focus Bucket root, /index.html, In-place" aria-pressed="false" data-node-kind="database" data-node-sublabel="/index.html" data-node-context="In-place">
+          <title>Bucket root · /index.html · In-place</title>
           <rect x="540" y="50" width="160" height="58" rx="8" class="c-mask"/>
           <rect x="540" y="50" width="160" height="58" rx="8" class="c-database" data-animate="node" style="--step: 3; --flow-node-name: archify-relay-node-3;" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(546 56) scale(0.6875)">
@@ -619,7 +619,6 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
           </g>
           <text data-node-label="" x="620" y="77" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Bucket root</text>
         <text x="620" y="93" class="t-muted" font-size="9" text-anchor="middle">/index.html</text>
-        <text x="620" y="100" class="t-database" font-size="7" text-anchor="middle">empty: 404</text>
         </g>
 
         <g id="node-v_fn" data-node-id="v_fn" data-node-label="Function" tabindex="0" role="button" aria-label="Focus Function, looks up the Host, Versioned" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="looks up the Host" data-node-context="Versioned">
@@ -633,8 +632,8 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
         <text x="375" y="253" class="t-muted" font-size="9" text-anchor="middle">looks up the Host</text>
         </g>
 
-        <g id="node-v_kvs" data-node-id="v_kvs" data-node-label="KeyValueStore" tabindex="0" role="button" aria-label="Focus KeyValueStore, app.develop… → 1.9.0, Versioned" aria-pressed="false" data-node-kind="database" data-node-sublabel="app.develop… → 1.9.0" data-node-tag="no key: 503" data-node-context="Versioned">
-          <title>KeyValueStore · app.develop… → 1.9.0 · Versioned · no key: 503</title>
+        <g id="node-v_kvs" data-node-id="v_kvs" data-node-label="KeyValueStore" tabindex="0" role="button" aria-label="Focus KeyValueStore, app.develop… → 1.0.3, Versioned" aria-pressed="false" data-node-kind="database" data-node-sublabel="app.develop… → 1.0.3" data-node-context="Versioned">
+          <title>KeyValueStore · app.develop… → 1.0.3 · Versioned</title>
           <rect x="540" y="210" width="160" height="58" rx="8" class="c-mask"/>
           <rect x="540" y="210" width="160" height="58" rx="8" class="c-database" data-animate="node" style="--step: 4; --flow-node-name: archify-relay-node-4;" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(546 216) scale(0.6875)">
@@ -642,12 +641,11 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-node-label="" x="620" y="237" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">KeyValueStore</text>
-        <text x="620" y="253" class="t-muted" font-size="9" text-anchor="middle">app.develop… → 1.9.0</text>
-        <text x="620" y="260" class="t-database" font-size="7" text-anchor="middle">no key: 503</text>
+        <text x="620" y="253" class="t-muted" font-size="9" text-anchor="middle">app.develop… → 1.0.3</text>
         </g>
 
-        <g id="node-v_s3" data-node-id="v_s3" data-node-label="Bucket" tabindex="0" role="button" aria-label="Focus Bucket, /releases/app/1.9.0/index.html, Versioned" aria-pressed="false" data-node-kind="database" data-node-sublabel="/releases/app/1.9.0/index.html" data-node-context="Versioned">
-          <title>Bucket · /releases/app/1.9.0/index.html · Versioned</title>
+        <g id="node-v_s3" data-node-id="v_s3" data-node-label="Bucket" tabindex="0" role="button" aria-label="Focus Bucket, /releases/app/1.0.3/index.html, Versioned" aria-pressed="false" data-node-kind="database" data-node-sublabel="/releases/app/1.0.3/index.html" data-node-context="Versioned">
+          <title>Bucket · /releases/app/1.0.3/index.html · Versioned</title>
           <rect x="780" y="210" width="210" height="58" rx="8" class="c-mask"/>
           <rect x="780" y="210" width="210" height="58" rx="8" class="c-database" data-animate="node" style="--step: 5; --flow-node-name: archify-relay-node-5;" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(786 216) scale(0.6875)">
@@ -655,7 +653,7 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-node-label="" x="885" y="237" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Bucket</text>
-        <text x="885" y="253" class="t-muted" font-size="9" text-anchor="middle">/releases/app/1.9.0/index.html</text>
+        <text x="885" y="253" class="t-muted" font-size="9" text-anchor="middle">/releases/app/1.0.3/index.html</text>
         </g>
 
         <!-- Connection labels -->

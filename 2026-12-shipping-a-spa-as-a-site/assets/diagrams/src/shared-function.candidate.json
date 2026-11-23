@@ -6,22 +6,104 @@
     "locale": "en",
     "output": "tmp/archify/shared-function.html",
     "quality_profile": "showcase",
-    "legend": { "mode": "hidden" }
+    "legend": {
+      "mode": "hidden"
+    }
   },
   "components": [
-    { "id": "d_dev", "type": "cloud", "label": "develop's distribution", "sublabel": "own bucket and certificate", "pos": [40, 40], "size": [210, 58] },
-    { "id": "d_stg", "type": "cloud", "label": "staging's distribution", "sublabel": "own bucket and certificate", "pos": [40, 190], "size": [210, 58] },
-    { "id": "fn", "type": "cloud", "label": "One viewer-request function", "sublabel": "the site's, for the account", "pos": [370, 115], "size": [230, 58] },
-    { "id": "kvs", "type": "database", "label": "One KeyValueStore", "sublabel": "develop → 1.0.3 · staging → 1.0.2", "pos": [700, 115], "size": [250, 58] },
-    { "id": "prod", "type": "cloud", "label": "Its own function and store", "sublabel": "production: not yet covered", "pos": [370, 330], "size": [230, 58] }
+    {
+      "id": "d_dev",
+      "type": "cloud",
+      "label": "develop's distribution",
+      "sublabel": "own bucket and certificate",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        210,
+        58
+      ]
+    },
+    {
+      "id": "d_stg",
+      "type": "cloud",
+      "label": "staging's distribution",
+      "sublabel": "own bucket and certificate",
+      "pos": [
+        40,
+        190
+      ],
+      "size": [
+        210,
+        58
+      ]
+    },
+    {
+      "id": "fn",
+      "type": "cloud",
+      "label": "One viewer-request function",
+      "sublabel": "the site's, for the account",
+      "pos": [
+        340,
+        115
+      ],
+      "size": [
+        230,
+        58
+      ]
+    },
+    {
+      "id": "kvs",
+      "type": "database",
+      "label": "One KeyValueStore",
+      "sublabel": "a key per host: develop, staging",
+      "pos": [
+        700,
+        115
+      ],
+      "size": [
+        250,
+        58
+      ]
+    }
   ],
   "boundaries": [
-    { "kind": "region", "label": "CORE nonprod", "wraps": ["d_dev", "d_stg", "fn", "kvs"] },
-    { "kind": "security-group", "label": "CORE prod", "wraps": ["prod"] }
+    {
+      "kind": "region",
+      "label": "CORE nonprod",
+      "wraps": [
+        "d_dev",
+        "d_stg",
+        "fn",
+        "kvs"
+      ]
+    }
   ],
   "connections": [
-    { "id": "dev-fn", "from": "d_dev", "to": "fn", "label": "attaches", "variant": "emphasis" },
-    { "id": "stg-fn", "from": "d_stg", "to": "fn", "label": "attaches", "variant": "emphasis" },
-    { "id": "fn-kvs", "from": "fn", "to": "kvs", "label": "looks up the host", "variant": "emphasis" }
+    {
+      "id": "dev-fn",
+      "from": "d_dev",
+      "to": "fn",
+      "label": "attaches",
+      "variant": "emphasis"
+    },
+    {
+      "id": "stg-fn",
+      "from": "d_stg",
+      "to": "fn",
+      "label": "attaches",
+      "variant": "emphasis"
+    },
+    {
+      "id": "fn-kvs",
+      "from": "fn",
+      "to": "kvs",
+      "label": "looks up the host",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight"
+    }
   ]
 }

@@ -6,28 +6,131 @@
     "locale": "en",
     "output": "tmp/archify/cd.html",
     "quality_profile": "showcase",
-    "legend": { "mode": "hidden" }
+    "legend": {
+      "mode": "hidden"
+    }
   },
   "lanes": [
-    { "id": "deliver", "label": "Each promotion" },
-    { "id": "failure", "label": "If the Job fails", "variant": "exception" }
+    {
+      "id": "deliver",
+      "label": "Each promotion"
+    },
+    {
+      "id": "failure",
+      "label": "If the Job fails",
+      "variant": "exception"
+    }
   ],
-  "mainPath": ["promote", "render", "commit", "sync", "job", "site"],
+  "mainPath": [
+    "promote",
+    "render",
+    "commit",
+    "sync",
+    "job",
+    "site"
+  ],
   "nodes": [
-    { "id": "promote", "lane": "deliver", "col": 0, "type": "external", "label": "Promote", "sublabel": "auto on the lowest env", "icon": "person" },
-    { "id": "render", "lane": "deliver", "col": 1, "type": "messagebus", "label": "Promotion Manager", "sublabel": "renders helm/<app>" },
-    { "id": "commit", "lane": "deliver", "col": 2, "type": "database", "label": "Manifests repo", "sublabel": "ConfigMap + Job" },
-    { "id": "sync", "lane": "deliver", "col": 3, "type": "messagebus", "label": "ArgoCD", "sublabel": "syncs <env>-<app>" },
-    { "id": "job", "lane": "deliver", "col": 4, "type": "backend", "label": "Publisher Job", "sublabel": "Sync hook" },
-    { "id": "site", "lane": "deliver", "col": 5, "type": "cloud", "label": "The site", "sublabel": "in-place or versioned" },
-    { "id": "retry", "lane": "failure", "col": 4, "type": "security", "label": "ArgoCD retries", "sublabel": "twice, ~12 min at most", "icon": "failure" }
+    {
+      "id": "promote",
+      "lane": "deliver",
+      "col": 0,
+      "type": "external",
+      "label": "Promote",
+      "sublabel": "auto on the lowest env",
+      "icon": "person"
+    },
+    {
+      "id": "render",
+      "lane": "deliver",
+      "col": 1,
+      "type": "messagebus",
+      "label": "Promotion Manager",
+      "sublabel": "renders helm/<app>"
+    },
+    {
+      "id": "commit",
+      "lane": "deliver",
+      "col": 2,
+      "type": "database",
+      "label": "Manifests repo",
+      "sublabel": "ConfigMap + Job"
+    },
+    {
+      "id": "sync",
+      "lane": "deliver",
+      "col": 3,
+      "type": "messagebus",
+      "label": "ArgoCD",
+      "sublabel": "syncs <env>-<app>"
+    },
+    {
+      "id": "job",
+      "lane": "deliver",
+      "col": 4,
+      "type": "backend",
+      "label": "Publisher Job",
+      "sublabel": "runs on each sync"
+    },
+    {
+      "id": "site",
+      "lane": "deliver",
+      "col": 5,
+      "type": "cloud",
+      "label": "The site",
+      "sublabel": "in-place or versioned"
+    },
+    {
+      "id": "retry",
+      "lane": "failure",
+      "col": 4,
+      "type": "security",
+      "label": "ArgoCD retries",
+      "sublabel": "twice, ~12 min at most",
+      "icon": "failure"
+    }
   ],
   "edges": [
-    { "id": "c1", "from": "promote", "to": "render", "label": "tag", "variant": "emphasis" },
-    { "id": "c2", "from": "render", "to": "commit", "label": "commit", "variant": "emphasis" },
-    { "id": "c3", "from": "commit", "to": "sync", "variant": "emphasis" },
-    { "id": "c4", "from": "sync", "to": "job", "label": "runs", "variant": "emphasis" },
-    { "id": "c5", "from": "job", "to": "site", "label": "publishes", "variant": "emphasis" },
-    { "id": "c-fail", "from": "job", "to": "retry", "label": "fails", "variant": "security", "role": "error" }
+    {
+      "id": "c1",
+      "from": "promote",
+      "to": "render",
+      "label": "tag",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "render",
+      "to": "commit",
+      "label": "commit",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c3",
+      "from": "commit",
+      "to": "sync",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c4",
+      "from": "sync",
+      "to": "job",
+      "label": "runs",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c5",
+      "from": "job",
+      "to": "site",
+      "label": "publishes",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c-fail",
+      "from": "job",
+      "to": "retry",
+      "label": "fails",
+      "variant": "security",
+      "role": "error"
+    }
   ]
 }

@@ -29,13 +29,13 @@
       "id": "dist",
       "type": "cloud",
       "label": "CloudFront",
-      "sublabel": "+ the site's own certificate",
+      "sublabel": "own certificate \u00b7 versioned: /config/*",
       "pos": [
         220,
         60
       ],
       "size": [
-        190,
+        200,
         58
       ]
     },
@@ -45,7 +45,7 @@
       "label": "Site bucket",
       "sublabel": "S3",
       "pos": [
-        470,
+        480,
         60
       ],
       "size": [
@@ -57,13 +57,13 @@
       "id": "ssm",
       "type": "backend",
       "label": "SSM parameters",
-      "sublabel": "bucket, distribution_id",
+      "sublabel": "bucket, distribution_id (+ kvs_arn, retention)",
       "pos": [
         40,
         190
       ],
       "size": [
-        160,
+        230,
         58
       ]
     },
@@ -71,41 +71,13 @@
       "id": "role",
       "type": "security",
       "label": "Publisher identity",
-      "sublabel": "IRSA role + <app>-site-publisher",
+      "sublabel": "IAM role + <app>-site-publisher",
       "pos": [
-        410,
+        420,
         190
       ],
       "size": [
         220,
-        58
-      ]
-    },
-    {
-      "id": "cfg",
-      "type": "cloud",
-      "label": "/config/* behavior",
-      "sublabel": "per-host files",
-      "pos": [
-        220,
-        330
-      ],
-      "size": [
-        160,
-        58
-      ]
-    },
-    {
-      "id": "ssm2",
-      "type": "backend",
-      "label": "SSM, versioned",
-      "sublabel": "kvs_arn, retention",
-      "pos": [
-        420,
-        330
-      ],
-      "size": [
-        160,
         58
       ]
     },
@@ -115,7 +87,7 @@
       "label": "Viewer-request function",
       "sublabel": "routing, API prefixes, redirects",
       "pos": [
-        780,
+        760,
         60
       ],
       "size": [
@@ -129,7 +101,7 @@
       "label": "KeyValueStore",
       "sublabel": "versioned: a key per host",
       "pos": [
-        780,
+        760,
         190
       ],
       "size": [
@@ -148,14 +120,6 @@
         "bucket",
         "ssm",
         "role"
-      ]
-    },
-    {
-      "kind": "security-group",
-      "label": "Site unit \u00b7 versioned only",
-      "wraps": [
-        "cfg",
-        "ssm2"
       ]
     },
     {

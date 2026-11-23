@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 6 1012 412" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14" style="--flow-cycle: 4.840s; width: 1012px; height: 412px; min-width: 0px;" width="1012" height="412" xmlns="http://www.w3.org/2000/svg" data-theme="dark"><style>
+<svg viewBox="0 6 992 272" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14" style="--flow-cycle: 4.840s; width: 992px; height: 272px; min-width: 0px;" width="992" height="272" xmlns="http://www.w3.org/2000/svg" data-theme="dark"><style>
 /*
 JetBrains Mono variable WOFF2 subsets from Google Fonts service revision v24.
 These fixed bytes are shared by the viewer and its SVG/raster exports.
@@ -459,24 +459,24 @@ svg[data-preset="editorial"] { --flow-halo-peak: 0.07; --flow-glow-peak: 0.28; -
 @keyframes archify-relay-comet-5 { 
   0% { stroke-dashoffset: calc(var(--flow-len, 0px) + var(--flow-shift, 0px)); opacity: 0; animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
   2.479% { opacity: var(--flow-peak, 0.9); }
-  14.24% { stroke-dashoffset: var(--flow-shift, 0px); opacity: var(--flow-peak, 0.9); }
-  17.546%, 100% { stroke-dashoffset: var(--flow-shift, 0px); opacity: 0; }
+  14.609% { stroke-dashoffset: var(--flow-shift, 0px); opacity: var(--flow-peak, 0.9); }
+  17.915%, 100% { stroke-dashoffset: var(--flow-shift, 0px); opacity: 0; }
 }
 @keyframes archify-relay-wake-5 { 
-  0%, 4.272% { opacity: 0; }
-  14.24% { opacity: var(--flow-peak, 0.3); }
-  32.835%, 100% { stroke-dashoffset: 0px; opacity: 0; }
+  0%, 4.383% { opacity: 0; }
+  14.609% { opacity: var(--flow-peak, 0.3); }
+  33.204%, 100% { stroke-dashoffset: 0px; opacity: 0; }
 }
 @keyframes archify-relay-comet-6 { 
   0% { stroke-dashoffset: calc(var(--flow-len, 0px) + var(--flow-shift, 0px)); opacity: 0; animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
-  2.214% { opacity: var(--flow-peak, 0.9); }
-  11.068% { stroke-dashoffset: var(--flow-shift, 0px); opacity: var(--flow-peak, 0.9); }
-  14.374%, 100% { stroke-dashoffset: var(--flow-shift, 0px); opacity: 0; }
+  1.771% { opacity: var(--flow-peak, 0.9); }
+  8.855% { stroke-dashoffset: var(--flow-shift, 0px); opacity: var(--flow-peak, 0.9); }
+  12.161%, 100% { stroke-dashoffset: var(--flow-shift, 0px); opacity: 0; }
 }
 @keyframes archify-relay-wake-6 { 
-  0%, 3.321% { opacity: 0; }
-  11.068% { opacity: var(--flow-peak, 0.3); }
-  29.664%, 100% { stroke-dashoffset: 0px; opacity: 0; }
+  0%, 2.656% { opacity: 0; }
+  8.855% { opacity: var(--flow-peak, 0.3); }
+  27.45%, 100% { stroke-dashoffset: 0px; opacity: 0; }
 }
 @keyframes archify-relay-node-0 { 
   0%, 100% { filter: var(--ambient-node-base-filter, none); }
@@ -504,9 +504,9 @@ svg[data-preset="editorial"] { --flow-halo-peak: 0.07; --flow-glow-peak: 0.28; -
 }
 @keyframes archify-relay-node-4 { 
   0%, 100% { filter: var(--ambient-node-base-filter, none); }
-  11.068% { filter: var(--ambient-node-base-filter, none); }
-  13.548%, 19.746% { filter: var(--ambient-node-base-filter,) drop-shadow(0 0 10px var(--arrow-emphasis)); }
-  35.862% { filter: var(--ambient-node-base-filter, none); }
+  8.855% { filter: var(--ambient-node-base-filter, none); }
+  11.334%, 17.532% { filter: var(--ambient-node-base-filter,) drop-shadow(0 0 10px var(--arrow-emphasis)); }
+  33.648% { filter: var(--ambient-node-base-filter, none); }
 }
 @keyframes archify-relay-node-5 { 
   0%, 100% { filter: var(--ambient-node-base-filter, none); }
@@ -581,11 +581,9 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
         
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Site unit · per environment" x="10" y="30" width="650" height="238" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Site unit · per environment" x="10" y="30" width="660" height="238" rx="12" class="c-region" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="1" data-composition-frame-label="Site unit · versioned only" x="190" y="300" width="420" height="108" rx="8" class="c-security-group" stroke-width="1"/>
-
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" data-composition-frame-label="Function unit · once per account" x="768" y="36" width="234" height="232" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Function unit · once per account" x="748" y="36" width="234" height="232" rx="12" class="c-region" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
         <g data-graph-role="automatic-crossover" style="--step:0">
@@ -593,28 +591,28 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
           <path data-edge-from="dns" data-edge-to="dist" data-edge-key="0" data-edge-id="dns-dist" data-composition-points="180,89;220,89" data-composition-crossover="halo" data-composition-independent="true" d="M 180 89 L 220 89" class="a-emphasis" data-animate="edge" style="--step: 0;" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:1">
-          <path data-graph-role="automatic-crossover-underlay" d="M 410 89 L 470 89" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="dist" data-edge-to="bucket" data-edge-label="reads" data-edge-key="1" data-edge-id="dist-bucket" data-composition-points="410,89;470,89" data-composition-crossover="halo" data-composition-independent="true" d="M 410 89 L 470 89" class="a-emphasis" data-animate="edge" style="--step: 1;" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 420 89 L 480 89" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="dist" data-edge-to="bucket" data-edge-label="reads" data-edge-key="1" data-edge-id="dist-bucket" data-composition-points="420,89;480,89" data-composition-crossover="halo" data-composition-independent="true" d="M 420 89 L 480 89" class="a-emphasis" data-animate="edge" style="--step: 1;" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:2">
-          <path data-graph-role="automatic-crossover-underlay" d="M 315 60 L 315 44 Q 315 36 323 36 L 748 36 Q 756 36 756 44 L 756 81 Q 756 89 764 89 L 780 89" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="dist" data-edge-to="fn" data-edge-label="attaches" data-edge-key="2" data-edge-id="dist-fn" data-composition-points="315,60;315,36;756,36;756,89;780,89" data-composition-crossover="halo" data-composition-independent="true" d="M 315 60 L 315 44 Q 315 36 323 36 L 748 36 Q 756 36 756 44 L 756 81 Q 756 89 764 89 L 780 89" class="a-emphasis" data-animate="edge" style="--step: 2;" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 320 60 L 320 44 Q 320 36 328 36 L 728 36 Q 736 36 736 44 L 736 81 Q 736 89 744 89 L 760 89" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="dist" data-edge-to="fn" data-edge-label="attaches" data-edge-key="2" data-edge-id="dist-fn" data-composition-points="320,60;320,36;736,36;736,89;760,89" data-composition-crossover="halo" data-composition-independent="true" d="M 320 60 L 320 44 Q 320 36 328 36 L 728 36 Q 736 36 736 44 L 736 81 Q 736 89 744 89 L 760 89" class="a-emphasis" data-animate="edge" style="--step: 2;" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 885 118 L 885 190" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="fn" data-edge-to="kvs" data-edge-label="looks up the host" data-edge-key="3" data-edge-id="fn-kvs" data-composition-points="885,118;885,190" data-composition-crossover="halo" data-composition-independent="true" d="M 885 118 L 885 190" class="a-dashed" data-animate="edge" style="--step: 3;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 865 118 L 865 190" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="fn" data-edge-to="kvs" data-edge-label="looks up the host" data-edge-key="3" data-edge-id="fn-kvs" data-composition-points="865,118;865,190" data-composition-crossover="halo" data-composition-independent="true" d="M 865 118 L 865 190" class="a-dashed" data-animate="edge" style="--step: 3;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 520 190 L 520 118" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="role" data-edge-to="bucket" data-edge-label="writes" data-edge-key="4" data-edge-id="role-bucket" data-composition-points="520,190;520,118" data-composition-crossover="halo" data-composition-independent="true" d="M 520 190 L 520 118" class="a-default" data-animate="edge" style="--step: 4;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 530 190 L 530 118" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="role" data-edge-to="bucket" data-edge-label="writes" data-edge-key="4" data-edge-id="role-bucket" data-composition-points="530,190;530,118" data-composition-crossover="halo" data-composition-independent="true" d="M 530 190 L 530 118" class="a-default" data-animate="edge" style="--step: 4;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
-          <path data-graph-role="automatic-crossover-underlay" d="M 410 219 L 323 219 Q 315 219 315 211 L 315 118" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="role" data-edge-to="dist" data-edge-label="in-place: invalidate" data-edge-key="5" data-edge-id="role-dist" data-composition-points="410,219;315,219;315,118" data-composition-crossover="halo" data-composition-independent="true" d="M 410 219 L 323 219 Q 315 219 315 211 L 315 118" class="a-dashed" data-animate="edge" style="--step: 5;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 420 219 L 328 219 Q 320 219 320 211 L 320 118" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="role" data-edge-to="dist" data-edge-label="in-place: invalidate" data-edge-key="5" data-edge-id="role-dist" data-composition-points="420,219;320,219;320,118" data-composition-crossover="halo" data-composition-independent="true" d="M 420 219 L 328 219 Q 320 219 320 211 L 320 118" class="a-dashed" data-animate="edge" style="--step: 5;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:6">
-          <path data-graph-role="automatic-crossover-underlay" d="M 630 219 L 780 219" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="role" data-edge-to="kvs" data-edge-label="versioned: keys" data-edge-key="6" data-edge-id="role-kvs" data-composition-points="630,219;780,219" data-composition-crossover="halo" data-composition-independent="true" d="M 630 219 L 780 219" class="a-dashed" data-animate="edge" style="--step: 6;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 640 219 L 760 219" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="role" data-edge-to="kvs" data-edge-label="versioned: keys" data-edge-key="6" data-edge-id="role-kvs" data-composition-points="640,219;760,219" data-composition-crossover="halo" data-composition-independent="true" d="M 640 219 L 760 219" class="a-dashed" data-animate="edge" style="--step: 6;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
 
         <!-- Components -->
@@ -629,122 +627,100 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
         <text x="110" y="103" class="t-muted" font-size="9" text-anchor="middle">A/AAAA per hostname</text>
         </g>
 
-        <g id="node-dist" data-node-id="dist" data-node-label="CloudFront" tabindex="0" role="button" aria-label="Focus CloudFront, + the site's own certificate, Site unit · per environment" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="+ the site's own certificate" data-node-context="Site unit · per environment">
-          <title>CloudFront · + the site's own certificate · Site unit · per environment</title>
-          <rect x="220" y="60" width="190" height="58" rx="8" class="c-mask"/>
-          <rect x="220" y="60" width="190" height="58" rx="8" class="c-cloud" data-animate="node" style="--step: 1; --flow-node-name: archify-relay-node-2;" stroke-width="1.5"/>
+        <g id="node-dist" data-node-id="dist" data-node-label="CloudFront" tabindex="0" role="button" aria-label="Focus CloudFront, own certificate · versioned: /config/*, Site unit · per environment" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="own certificate · versioned: /config/*" data-node-context="Site unit · per environment">
+          <title>CloudFront · own certificate · versioned: /config/* · Site unit · per environment</title>
+          <rect x="220" y="60" width="200" height="58" rx="8" class="c-mask"/>
+          <rect x="220" y="60" width="200" height="58" rx="8" class="c-cloud" data-animate="node" style="--step: 1; --flow-node-name: archify-relay-node-2;" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(226 66) scale(0.6875)">
             <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
           </g>
-          <text data-node-label="" x="315" y="87" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CloudFront</text>
-        <text x="315" y="103" class="t-muted" font-size="9" text-anchor="middle">+ the site's own certificate</text>
+          <text data-node-label="" x="320" y="87" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CloudFront</text>
+        <text x="320" y="103" class="t-muted" font-size="8.4" text-anchor="middle">own certificate · versioned: /config/*</text>
         </g>
 
         <g id="node-bucket" data-node-id="bucket" data-node-label="Site bucket" tabindex="0" role="button" aria-label="Focus Site bucket, S3, Site unit · per environment" aria-pressed="false" data-node-kind="database" data-node-sublabel="S3" data-node-context="Site unit · per environment">
           <title>Site bucket · S3 · Site unit · per environment</title>
-          <rect x="470" y="60" width="140" height="58" rx="8" class="c-mask"/>
-          <rect x="470" y="60" width="140" height="58" rx="8" class="c-database" data-animate="node" style="--step: 2; --flow-node-name: archify-relay-node-3;" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(476 66) scale(0.6875)">
+          <rect x="480" y="60" width="140" height="58" rx="8" class="c-mask"/>
+          <rect x="480" y="60" width="140" height="58" rx="8" class="c-database" data-animate="node" style="--step: 2; --flow-node-name: archify-relay-node-3;" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(486 66) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" x="540" y="87" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Site bucket</text>
-        <text x="540" y="103" class="t-muted" font-size="9" text-anchor="middle">S3</text>
+          <text data-node-label="" x="550" y="87" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Site bucket</text>
+        <text x="550" y="103" class="t-muted" font-size="9" text-anchor="middle">S3</text>
         </g>
 
-        <g id="node-ssm" data-node-id="ssm" data-node-label="SSM parameters" tabindex="0" role="button" aria-label="Focus SSM parameters, bucket, distribution_id, Site unit · per environment" aria-pressed="false" data-node-kind="backend" data-node-sublabel="bucket, distribution_id" data-node-context="Site unit · per environment">
-          <title>SSM parameters · bucket, distribution_id · Site unit · per environment</title>
-          <rect x="40" y="190" width="160" height="58" rx="8" class="c-mask"/>
-          <rect x="40" y="190" width="160" height="58" rx="8" class="c-backend" data-animate="node" style="--step: 3;" stroke-width="1.5"/>
+        <g id="node-ssm" data-node-id="ssm" data-node-label="SSM parameters" tabindex="0" role="button" aria-label="Focus SSM parameters, bucket, distribution_id (+ kvs_arn, retention), Site unit · per environment" aria-pressed="false" data-node-kind="backend" data-node-sublabel="bucket, distribution_id (+ kvs_arn, retention)" data-node-context="Site unit · per environment">
+          <title>SSM parameters · bucket, distribution_id (+ kvs_arn, retention) · Site unit · per environment</title>
+          <rect x="40" y="190" width="230" height="58" rx="8" class="c-mask"/>
+          <rect x="40" y="190" width="230" height="58" rx="8" class="c-backend" data-animate="node" style="--step: 3;" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(46 196) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" x="120" y="217" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SSM parameters</text>
-        <text x="120" y="233" class="t-muted" font-size="9" text-anchor="middle">bucket, distribution_id</text>
+          <text data-node-label="" x="155" y="217" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SSM parameters</text>
+        <text x="155" y="233" class="t-muted" font-size="8" text-anchor="middle">bucket, distribution_id (+ kvs_arn, retention)</text>
         </g>
 
-        <g id="node-role" data-node-id="role" data-node-label="Publisher identity" tabindex="0" role="button" aria-label="Focus Publisher identity, IRSA role + &lt;app&gt;-site-publisher, Site unit · per environment" aria-pressed="false" data-node-kind="security" data-node-sublabel="IRSA role + &lt;app&gt;-site-publisher" data-node-context="Site unit · per environment">
-          <title>Publisher identity · IRSA role + &lt;app&gt;-site-publisher · Site unit · per environment</title>
-          <rect x="410" y="190" width="220" height="58" rx="8" class="c-mask"/>
-          <rect x="410" y="190" width="220" height="58" rx="8" class="c-security" data-animate="node" style="--step: 4; --flow-node-name: archify-relay-node-1;" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(416 196) scale(0.6875)">
+        <g id="node-role" data-node-id="role" data-node-label="Publisher identity" tabindex="0" role="button" aria-label="Focus Publisher identity, IAM role + &lt;app&gt;-site-publisher, Site unit · per environment" aria-pressed="false" data-node-kind="security" data-node-sublabel="IAM role + &lt;app&gt;-site-publisher" data-node-context="Site unit · per environment">
+          <title>Publisher identity · IAM role + &lt;app&gt;-site-publisher · Site unit · per environment</title>
+          <rect x="420" y="190" width="220" height="58" rx="8" class="c-mask"/>
+          <rect x="420" y="190" width="220" height="58" rx="8" class="c-security" data-animate="node" style="--step: 4; --flow-node-name: archify-relay-node-1;" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(426 196) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" x="520" y="217" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Publisher identity</text>
-        <text x="520" y="233" class="t-muted" font-size="9" text-anchor="middle">IRSA role + &lt;app&gt;-site-publisher</text>
-        </g>
-
-        <g id="node-cfg" data-node-id="cfg" data-node-label="/config/* behavior" tabindex="0" role="button" aria-label="Focus /config/* behavior, per-host files, Site unit · versioned only" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="per-host files" data-node-context="Site unit · versioned only">
-          <title>/config/* behavior · per-host files · Site unit · versioned only</title>
-          <rect x="220" y="330" width="160" height="58" rx="8" class="c-mask"/>
-          <rect x="220" y="330" width="160" height="58" rx="8" class="c-cloud" data-animate="node" style="--step: 5;" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(226 336) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" x="300" y="357" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">/config/* behavior</text>
-        <text x="300" y="373" class="t-muted" font-size="9" text-anchor="middle">per-host files</text>
-        </g>
-
-        <g id="node-ssm2" data-node-id="ssm2" data-node-label="SSM, versioned" tabindex="0" role="button" aria-label="Focus SSM, versioned, kvs_arn, retention, Site unit · versioned only" aria-pressed="false" data-node-kind="backend" data-node-sublabel="kvs_arn, retention" data-node-context="Site unit · versioned only">
-          <title>SSM, versioned · kvs_arn, retention · Site unit · versioned only</title>
-          <rect x="420" y="330" width="160" height="58" rx="8" class="c-mask"/>
-          <rect x="420" y="330" width="160" height="58" rx="8" class="c-backend" data-animate="node" style="--step: 6;" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(426 336) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-node-label="" x="500" y="357" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SSM, versioned</text>
-        <text x="500" y="373" class="t-muted" font-size="9" text-anchor="middle">kvs_arn, retention</text>
+          <text data-node-label="" x="530" y="217" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Publisher identity</text>
+        <text x="530" y="233" class="t-muted" font-size="9" text-anchor="middle">IAM role + &lt;app&gt;-site-publisher</text>
         </g>
 
         <g id="node-fn" data-node-id="fn" data-node-label="Viewer-request function" tabindex="0" role="button" aria-label="Focus Viewer-request function, routing, API prefixes, redirects, Function unit · once per account" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="routing, API prefixes, redirects" data-node-context="Function unit · once per account">
           <title>Viewer-request function · routing, API prefixes, redirects · Function unit · once per account</title>
-          <rect x="780" y="60" width="210" height="58" rx="8" class="c-mask"/>
-          <rect x="780" y="60" width="210" height="58" rx="8" class="c-cloud" data-animate="node" style="--step: 3; --flow-node-name: archify-relay-node-5;" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(786 66) scale(0.6875)">
+          <rect x="760" y="60" width="210" height="58" rx="8" class="c-mask"/>
+          <rect x="760" y="60" width="210" height="58" rx="8" class="c-cloud" data-animate="node" style="--step: 3; --flow-node-name: archify-relay-node-5;" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(766 66) scale(0.6875)">
             <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
           </g>
-          <text data-node-label="" x="885" y="87" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Viewer-request function</text>
-        <text x="885" y="103" class="t-muted" font-size="9" text-anchor="middle">routing, API prefixes, redirects</text>
+          <text data-node-label="" x="865" y="87" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Viewer-request function</text>
+        <text x="865" y="103" class="t-muted" font-size="9" text-anchor="middle">routing, API prefixes, redirects</text>
         </g>
 
         <g id="node-kvs" data-node-id="kvs" data-node-label="KeyValueStore" tabindex="0" role="button" aria-label="Focus KeyValueStore, versioned: a key per host, Function unit · once per account" aria-pressed="false" data-node-kind="database" data-node-sublabel="versioned: a key per host" data-node-context="Function unit · once per account">
           <title>KeyValueStore · versioned: a key per host · Function unit · once per account</title>
-          <rect x="780" y="190" width="210" height="58" rx="8" class="c-mask"/>
-          <rect x="780" y="190" width="210" height="58" rx="8" class="c-database" data-animate="node" style="--step: 4; --flow-node-name: archify-relay-node-4;" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(786 196) scale(0.6875)">
+          <rect x="760" y="190" width="210" height="58" rx="8" class="c-mask"/>
+          <rect x="760" y="190" width="210" height="58" rx="8" class="c-database" data-animate="node" style="--step: 4; --flow-node-name: archify-relay-node-4;" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(766 196) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" x="885" y="217" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">KeyValueStore</text>
-        <text x="885" y="233" class="t-muted" font-size="9" text-anchor="middle">versioned: a key per host</text>
+          <text data-node-label="" x="865" y="217" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">KeyValueStore</text>
+        <text x="865" y="233" class="t-muted" font-size="9" text-anchor="middle">versioned: a key per host</text>
         </g>
 
         <!-- Connection labels -->
 
         <g data-edge-from="dist" data-edge-to="bucket" data-edge-label="reads" data-edge-key="1" data-edge-id="dist-bucket">
-          <rect x="423" y="69" width="34" height="14" rx="3" class="c-mask"/>
-          <text x="440" y="79" class="t-edge-emphasis" font-size="8" text-anchor="middle">reads</text>
+          <rect x="433" y="69" width="34" height="14" rx="3" class="c-mask"/>
+          <text x="450" y="79" class="t-edge-emphasis" font-size="8" text-anchor="middle">reads</text>
         </g>
         <g data-edge-from="dist" data-edge-to="fn" data-edge-label="attaches" data-edge-key="2" data-edge-id="dist-fn">
-          <rect x="511.3" y="16" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="535.5" y="26" class="t-edge-emphasis" font-size="8" text-anchor="middle">attaches</text>
+          <rect x="503.8" y="16" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="528" y="26" class="t-edge-emphasis" font-size="8" text-anchor="middle">attaches</text>
         </g>
         <g data-edge-from="fn" data-edge-to="kvs" data-edge-label="looks up the host" data-edge-key="3" data-edge-id="fn-kvs">
-          <rect x="787.4000000000001" y="147" width="91.6" height="14" rx="3" class="c-mask"/>
-          <text x="833.2" y="157" class="t-edge-dashed" font-size="8" text-anchor="middle">looks up the host</text>
+          <rect x="767.4000000000001" y="147" width="91.6" height="14" rx="3" class="c-mask"/>
+          <text x="813.2" y="157" class="t-edge-dashed" font-size="8" text-anchor="middle">looks up the host</text>
         </g>
         <g data-edge-from="role" data-edge-to="bucket" data-edge-label="writes" data-edge-key="4" data-edge-id="role-bucket">
-          <rect x="500.6" y="170" width="38.8" height="14" rx="3" class="c-mask"/>
-          <text x="520" y="180" class="t-edge-default" font-size="8" text-anchor="middle">writes</text>
+          <rect x="510.6" y="170" width="38.8" height="14" rx="3" class="c-mask"/>
+          <text x="530" y="180" class="t-edge-default" font-size="8" text-anchor="middle">writes</text>
         </g>
         <g data-edge-from="role" data-edge-to="dist" data-edge-label="in-place: invalidate" data-edge-key="5" data-edge-id="role-dist">
-          <rect x="262" y="148.5" width="106" height="14" rx="3" class="c-mask"/>
-          <text x="315" y="158.5" class="t-edge-dashed" font-size="8" text-anchor="middle">in-place: invalidate</text>
+          <rect x="267" y="148.5" width="106" height="14" rx="3" class="c-mask"/>
+          <text x="320" y="158.5" class="t-edge-dashed" font-size="8" text-anchor="middle">in-place: invalidate</text>
         </g>
         <g data-edge-from="role" data-edge-to="kvs" data-edge-label="versioned: keys" data-edge-key="6" data-edge-id="role-kvs">
-          <rect x="664" y="199" width="82" height="14" rx="3" class="c-mask"/>
-          <text x="705" y="209" class="t-edge-dashed" font-size="8" text-anchor="middle">versioned: keys</text>
+          <rect x="659" y="199" width="82" height="14" rx="3" class="c-mask"/>
+          <text x="700" y="209" class="t-edge-dashed" font-size="8" text-anchor="middle">versioned: keys</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
@@ -753,14 +729,9 @@ svg[data-node-ui][data-preset="editorial"] :is([data-graph-role="structural-fram
           <text data-boundary-label="" x="18" y="53" class="t-cloud" font-size="9" font-weight="600">Site unit · per environment</text>
         </g>
 
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="security-group" data-composition-frame-label="Site unit · versioned only">
-          <rect data-graph-role="structural-frame-label-mask" x="194" y="310" width="150.4" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="198" y="323" class="t-security" font-size="9" font-weight="600">Site unit · versioned only</text>
-        </g>
-
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="region" data-composition-frame-label="Function unit · once per account">
-          <rect data-graph-role="structural-frame-label-mask" x="772" y="40" width="182.79999999999998" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="776" y="53" class="t-cloud" font-size="9" font-weight="600">Function unit · once per account</text>
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Function unit · once per account">
+          <rect data-graph-role="structural-frame-label-mask" x="752" y="40" width="182.79999999999998" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="756" y="53" class="t-cloud" font-size="9" font-weight="600">Function unit · once per account</text>
         </g>
 
         <!-- Legend -->
