@@ -13,8 +13,8 @@ viewer-request function (and, for versioned, its KeyValueStore), created by `mod
 by every environment's distribution. It covers the four phases in order (infrastructure → app repository → CI →
 CD), what each produces and who owns it, and the two release methods, **in-place** and **versioned**: what a
 release does, how a request is served, how they differ and which to choose (once per site; versioned is
-preferred). spa-example (develop and staging, on v2) is the worked example for versioned and SDS (test1, still
-on v1) for in-place. It ends with rollback through the Promotion Manager and failed releases, each environment as
+preferred). spa-example (develop and staging, on v2) is the only worked example; where in-place differs, the deck
+shows spa-example's names in place as an illustration, since no site runs in-place on v2 yet. It ends with rollback through the Promotion Manager and failed releases, each environment as
 its own distribution on one shared function, an API through the site, the top gotchas, what's ready versus being
 finalized or not yet covered, and independently released MFEs on the shared CDN as *coming*.
 
@@ -41,7 +41,7 @@ Estimates from the speaker notes. The target is 45 minutes, including questions.
 
 - **Re-check the status slide (21)** and its speaker notes. As of 2026-11-23: `site-v2.0.0` and
   `site-function-v1.0.1` tagged; `site-release@v0.4.1` the latest chart; spa-example live on develop (1.0.3) and
-  staging (1.0.2); SDS on `site-v1.0.0` until COREOPS-4776, so in-place hasn't run on v2; mfe-example on v1 until
+  staging (1.0.2); no site in-place on v2 yet; mfe-example on v1 until
   COREOPS-4759 (its unit on terragrunt-demo-infrastructure#19, open); no test environment or production on v2;
   the how-to waiting for approval, moving to cicd-standards `docs/how-to` (COREOPS-4543); infrastructure-standards
   #39 (*Create a site unit*), #43 (§16 certificates) and #44 (§17 DNS) open. Anything merged or moved since
@@ -105,7 +105,7 @@ Every source of information used in this presentation goes here.
 ### Documents & links
 - `~/workspaces/cowork/site-platform-strategy/deployment/docs/how-to-deliver-a-spa-as-a-site.md` (draft,
   rewritten and verified 2026-11-23, commit `53194a4`; read 2026-11-23): the deck's spine. The two modules and
-  the function unit; spa-example as the versioned example, SDS on v1 as the in-place one; the four phases and what
+  the function unit; spa-example as the worked example; the four phases and what
   flows between them; who does what; the names; the differences that matter, what a release does, how a request
   is served, the side-by-side table and which to choose; every step's details (the function unit and site unit,
   the module-issued certificate and `dns_zones`, the hostname check, build contract, values blocks and the
@@ -113,7 +113,7 @@ Every source of information used in this presentation goes here.
   promote to staging); rollback through the Promotion Manager (the staging rollback log on slide 16), failed
   releases, `current.json`, retention; the optional API and test-environment sections; production and vanity
   names not yet covered; retiring the old deploy; the troubleshooting rows on slide 20. Its Mermaid diagrams are
-  the specs for the archify diagrams. Its SDS example uses `/sds/test1/site` (corrected 2026-11-23)
+  the specs for the archify diagrams
 - `~/workspaces/cowork/site-platform-strategy/deployment/docs/plan-site-v2-and-site-example.md` §1–§2 (read
   2026-11-23): the decisions behind v2 (one distribution per environment; the CloudFront Functions quota; one
   function per site per account; the accepted trade-offs; the function unit in `platform/`) (slides 11 and 18)
@@ -147,13 +147,13 @@ Every source of information used in this presentation goes here.
 ### Internal (Confluence / Jira / repos)
 - [COREOPS-4535](https://lmsportal.atlassian.net/browse/COREOPS-4535) (epic),
   [COREOPS-4543](https://lmsportal.atlassian.net/browse/COREOPS-4543) (the how-to, to cicd-standards),
-  [COREOPS-4759](https://lmsportal.atlassian.net/browse/COREOPS-4759) (mfe-example to v2) and
-  [COREOPS-4776](https://lmsportal.atlassian.net/browse/COREOPS-4776) (SDS to v2): cited on slides 3, 4, 9 and 21.
+  and [COREOPS-4759](https://lmsportal.atlassian.net/browse/COREOPS-4759) (mfe-example to v2): cited on slides 3 and
+  21.
   COREOPS-4783 and 4784 (the library's site build) in slide 13's notes
 - vector-shared-terraform-modules: tags `site-v2.0.0` (#46, 2026-11-22) and `site-function-v1.0.1` (#47,
   2026-11-21), checked with `git` on 2026-11-23; `modules/site-function/functions/viewer-request-in-place.js` and
   `viewer-request-versioned.js` (slide 8); `modules/site` `variables.tf` at `site-v2.0.0` (`function`,
-  `dns_zones`, `retention`). `site-v1.0.0` (SDS) and `site-v1.1.0` (mfe-example) are v1 and not presented
+  `dns_zones`, `retention`). `site-v1.0.0` and `site-v1.1.0` are v1 and not presented
 - vector-shared-helm-charts `charts/site-release/README.md` on `main`; tags up to `site-release@v0.4.1`: exactly one
   of `site:` and `inPlace:`, pin an exact version; `templates/_release.tpl`: the Job is a hook with
   `hook-delete-policy: BeforeHookCreation`, so each sync replaces it (slide 15's notes)
@@ -166,10 +166,9 @@ Every source of information used in this presentation goes here.
   app-manifests/spa-example-appset/core-nonprod-east/staging/manifests.yaml to 1.0.2`, the Promotion Manager
   rollback (slide 17); `894b129` and `b39f2ab` (2026-11-23, after it): staging promoted to 1.0.3 and develop rolled
   back to 1.0.2, its render restored with `site-release-0.4.0` (slide 17's notes; the demo prerequisite)
-- SDS, the in-place example: sds-infrastructure `application/sds-site` (`unit_tf/main.tf`: `modules/site`
-  `site-v1.0.0`, `routing = "in-place"`; `environments/test1` its only leaf; PRs #4 and #6, merged), and sds
-  `main`: `src/helm/sds-site` (`Chart.yaml` on `site-release` 0.3.0, `values.yaml`, `envs/values-test1.yaml`,
-  slide 12; the image tag comment on slide 13) and `.github/workflows/ci.yml`
+- vector-shared-helm-charts `charts/site-release/templates/_helpers.tpl` and `tests/fixture/envs/values-in-place.yaml`
+  at `site-release@v0.4.1`: the keys an `inPlace:` block accepts (`target`, `ssmPrefix`, `bucket`, `invalidate`,
+  `invalidationTimeoutSeconds`, `sourcePath`, `hook`, `noCache`), for slide 12's in-place illustration
 - mfe-example `main` at `7d71044`: the MFE shell on v1 (slide 3), #44 retired CircleCI (slide 21's notes)
 - infrastructure-standards #39 (*Create a site unit*), #43 (§16 certificates), #44 (§17 DNS), all open on
   2026-11-23: slides 11 and 21
@@ -184,7 +183,7 @@ Every source of information used in this presentation goes here.
 ### People consulted
 - Noel Aguilar, DevOps (presenter), 2026-11-17: audience, 45 minutes, December 2026; one "coming next" slide
   for MFEs on the shared CDN; a live demo; a few short snippets only; rollback and failures, test environments,
-  the API and gotchas included; teams start themselves in their own infrastructure repo; SDS for in-place;
+  the API and gotchas included; teams start themselves in their own infrastructure repo;
   keystone-cx-tools left out; independently released MFEs are supported, on the shared CDN rather than as sites
   (slide 3)
 - Noel Aguilar, 2026-11-23: spa-example (v2, develop and staging) is the versioned example, and mfe-example is
@@ -195,6 +194,8 @@ Every source of information used in this presentation goes here.
   per account; the Promotion Manager's rollback is the recommended rollback. (Replaces the 2026-11-17 choices of
   mfe-example, a demo on mfe-example develop, and versioned preferred because alias hosts kept the function count
   down)
+- Noel, 2026-11-23: spa-example is the only worked example; the earlier in-place example app is not referenced, and
+  in-place is shown only as an illustration with spa-example's names
 
 ### Data & assets
 - `assets/brand-title.jpg`: the title and Questions background, taken unchanged from `ppt/media/image1.jpeg` in `2026-08-nj-rubric-update.pptx`
@@ -206,7 +207,7 @@ Every source of information used in this presentation goes here.
   (slide 16). Replaces `demo-mfe-example-1.9.0.png`
 - Live checks on 2026-11-23: spa-example served 1.0.3 on develop and 1.0.2 on staging
   (`<meta name="release-version">`), staging's `/config/spa-example-config.json` names staging; mfe-example develop
-  served 1.9.3; https://test1.vectorsds-nonprod.com/ served 200; after 19:27Z the same day, develop served 1.0.2 and staging 1.0.3 (see
+  served 1.9.3; after 19:27Z the same day, develop served 1.0.2 and staging 1.0.3 (see
   the demo start state above)
 
 ### Design
@@ -219,6 +220,6 @@ Every source of information used in this presentation goes here.
   `cd`) show node labels at about 17px and sublabels about 13px; the architecture diagrams (`request`,
   `site-unit`, `shared-function`) at about 15px and 11–12px; edge labels are smaller in both. The diagrams are
   kept within the guide's 46% height limit; click one to see it full screen.
-- The site-unit names for SDS differ from the pattern (its only site, so app = product, and a product domain), and
-  SDS has no function unit while it's on v1; the speaker notes on slide 4 say so.
+- In-place appears only as an illustration with spa-example's names (slides 9 and 12): spa-example is versioned,
+  and no site runs in-place on v2 yet.
 - vs-skills is no longer an example: it uses neither the module nor the chart (the how-to dropped it on 2026-11-23).

@@ -29,7 +29,7 @@ December 2026*
 
 - **Where the details live**: The how-to has every step; this deck is the map.
 
-**Speaker notes:** ⏱ 1 min. Set expectations: this isn't the how-to read aloud. It's the order, the owners, the choice, and the few lines of config where the choice shows. Everything else is in the how-to, which we point to at the end. Two worked examples run through the deck: spa-example for versioned, on modules/site v2 in develop and staging, and SDS for in-place, on test1 and still on modules/site v1. Both are live.
+**Speaker notes:** ⏱ 1 min. Set expectations: this isn't the how-to read aloud. It's the order, the owners, the choice, and the few lines of config where the choice shows. Everything else is in the how-to, which we point to at the end. One worked example runs through the deck: spa-example, versioned, on modules/site v2 in develop and staging, and live. Where in-place differs, the deck shows what spa-example's values would be in place, as an illustration: no site runs in-place on v2 yet.
 
 ---
 
@@ -61,19 +61,19 @@ A viewer-request function is a CloudFront Function: a few lines of JavaScript Cl
 
 *What a site is*
 
-| What | Pattern | spa-example (versioned, develop) | SDS (in-place, test1) |
-|---|---|---|---|
-| ECR repository | `<product>/<app>-site` | `examples/spa-example-site` | `sds/sds-site` |
-| Function unit | `platform/<app>-site-function` | `platform/spa-example-site-function` | none yet (v1) |
-| Site unit | `application/<app>-site` | `application/spa-example-site` | `application/sds-site` |
-| Hostname | `<app>.<env>.vsp-<account>.com` | `spa-example.develop.vsp-nonprod.com` | `test1.vectorsds-nonprod.com` |
-| SSM prefix | `/<product>/<env>/site[/<app>]` | `/terragrunt-demo/dev/site/spa-example` | `/sds/test1/site` |
-| Publisher ServiceAccount | `<app>-site-publisher` | `spa-example-site-publisher` | `sds-site-publisher` |
-| Site chart | `helm/<app>` | `helm/spa-example` | `src/helm/sds-site` |
+| What | Pattern | spa-example (develop) |
+|---|---|---|
+| ECR repository | `<product>/<app>-site` | `examples/spa-example-site` |
+| Function unit | `platform/<app>-site-function` | `platform/spa-example-site-function` |
+| Site unit | `application/<app>-site` | `application/spa-example-site` |
+| Hostname | `<app>.<env>.vsp-<account>.com` | `spa-example.develop.vsp-nonprod.com` |
+| SSM prefix | `/<product>/<env>/site[/<app>]` | `/terragrunt-demo/dev/site/spa-example` |
+| Publisher ServiceAccount | `<app>-site-publisher` | `spa-example-site-publisher` |
+| Site chart | `helm/<app>` | `helm/spa-example` |
 
 > `-site` means a data-only image: **published, never run**.
 
-**Speaker notes:** ⏱ 1.5 min. The point: one noun, site, all the way through, so the same name always means the same thing. Walk the spa-example column; it follows the pattern. Two things to know: the ECR product (examples) and the Terraform product (terragrunt-demo) differ for spa-example, and the SSM prefix uses the Terraform environment (dev) where everything else uses the namespace (develop). The function unit lives in platform/, so DevOps approves every change to it; its function and store are named \<product>[-\<app>]-\<account-env>-site, terragrunt-demo-spa-example-nonprod-site for spa-example: the account (nonprod), not an environment, because every environment in the account shares them. staging has the same names with its own host and /terragrunt-demo/staging/site/spa-example. SDS differs, and that's expected, not the rule: it's the product's only site, so app and product are the same name and its SSM prefix has no app level; its hostname is on SDS's own product domain; and it's still on modules/site v1, so it has no function unit yet (it moves under COREOPS-4776). The -site suffix on an ECR repository tells you the image holds files and is never run: no server, no port, no Deployment. A frontend that runs as a pod doesn't carry -site. Also: the ApplicationSet is \<app>-appset and the Argo app \<env>-\<app>, e.g. develop-spa-example. Sources: how-to "Names"; SDS's sds-infrastructure and src/helm/sds-site.
+**Speaker notes:** ⏱ 1.5 min. The point: one noun, site, all the way through, so the same name always means the same thing. Walk the spa-example column; it follows the pattern. Two things to know: the ECR product (examples) and the Terraform product (terragrunt-demo) differ for spa-example, and the SSM prefix uses the Terraform environment (dev) where everything else uses the namespace (develop). The function unit lives in platform/, so DevOps approves every change to it; its function and store are named \<product>[-\<app>]-\<account-env>-site, terragrunt-demo-spa-example-nonprod-site for spa-example: the account (nonprod), not an environment, because every environment in the account shares them. staging has the same names with its own host and /terragrunt-demo/staging/site/spa-example. The names are the same for both methods; only routing and the chart's block differ. The \<app> level in the SSM prefix is there when the product has more than one site. The -site suffix on an ECR repository tells you the image holds files and is never run: no server, no port, no Deployment. A frontend that runs as a pod doesn't carry -site. Also: the ApplicationSet is \<app>-appset and the Argo app \<env>-\<app>, e.g. develop-spa-example. Sources: how-to "Names"; terragrunt-demo-infrastructure platform/spa-example-site-function and application/spa-example-site.
 
 ---
 
@@ -145,9 +145,9 @@ In both, a path whose last segment has no `.` is a client-side route and gets th
 | Old releases | Only the current build | Kept; retention keeps at least 10 |
 | Before the first release | `404` | `503 site not released` |
 | Function unit · chart block | `routing = "in-place"` · `inPlace:` | `routing = "versioned"` · `site:` |
-| Example | SDS (`modules/site` v1) | spa-example (v2) |
+| Example on v2 | None yet | spa-example |
 
-**Speaker notes:** ⏱ 1.5 min. Don't read the table; pick three rows. Rolling back: a full release for in-place, one key write for versioned. Build and tag: in-place takes any build and any tag, even a branch build to the lowest environment; versioned needs the build to put the version in its own URLs and to be tagged X.Y.Z. Old releases: in-place keeps only the current build, with replaced files kept 90 days as S3 object versions; versioned keeps old release folders, never deletes a live one, keeps at least the last 10, and deletion is off by default. The method is routing on the function unit (modules/site-function), and the chart's block must match it. Both methods are on modules/site site-v2.0.0 with modules/site-function site-function-v1.0.1, but in-place hasn't been run on v2 yet: SDS, the in-place example, is still on v1 and moves under COREOPS-4776. Source: how-to introduction, "Side by side"; proposed-standards 7.6.
+**Speaker notes:** ⏱ 1.5 min. Don't read the table; pick three rows. Rolling back: a full release for in-place, one key write for versioned. Build and tag: in-place takes any build and any tag, even a branch build to the lowest environment; versioned needs the build to put the version in its own URLs and to be tagged X.Y.Z. Old releases: in-place keeps only the current build, with replaced files kept 90 days as S3 object versions; versioned keeps old release folders, never deletes a live one, keeps at least the last 10, and deletion is off by default. The method is routing on the function unit (modules/site-function), and the chart's block must match it. Both methods are on modules/site site-v2.0.0 with modules/site-function site-function-v1.0.1, but in-place hasn't been run on v2 yet: no site runs in-place on v2, so the deck shows in-place with spa-example's names as an illustration. Source: how-to introduction, "Side by side"; proposed-standards 7.6.
 
 ---
 
@@ -203,21 +203,21 @@ siteRelease:
     ssmPrefix: /terragrunt-demo/dev/site/spa-example
 ```
 
-#### In-place · SDS
+#### In-place · illustration
 
 ```
 siteRelease:
-  serviceAccountName: sds-site-publisher
+  serviceAccountName: spa-example-site-publisher
   files:
-    config.json: { apiBase: "", … }
+    config.json: { apiBaseUrl: /api, … }
   inPlace:
     target: "."
-    sourcePath: /release/site
-    ssmPrefix: /sds/test1/site
-    noCache: [sw.js]
+    ssmPrefix: /terragrunt-demo/dev/site/spa-example
 ```
 
-**Speaker notes:** ⏱ 3 min. The release image is the contract between the app and the publisher. One rule for both: no environment value in the image; anything the browser reads at run time, like an API URL, goes in the chart's files:, which the Job writes and serves. spa-example's file is served at /config/spa-example-config.json (environment and apiBaseUrl); SDS's at /config.json, no-cache. Versioned asks more of the build: URLs to the site's own files are host-relative, /releases/\<pkg>/\<version>/…, written by the build from RELEASE_VERSION (webpack publicPath or the import map, Vite base); app code never derives URLs from its own version. In-place takes a plain build with index.html at the top of sourcePath; SDS's is /release/site, and noCache lists its service worker, which has a fixed name. The values have exactly one block, site: or inPlace:, matching routing; the render fails with neither, both, or a key the block doesn't know. Both are merged values.yaml plus envs/values-\<namespace>.yaml, trimmed. spa-example's values-staging.yaml is the same shape with staging's host and /terragrunt-demo/staging/site/spa-example. The hosts rule matters because the KeyValueStore is shared by all of the site's environments in the account, and its IAM can only name the whole store: develop's publisher could move staging's key, and what stops it is that develop's values list only develop's host. spa-example pins site-release 0.4.1; SDS pins 0.3.0. Source: how-to steps 3–4; proposed-standards 4.13; spa-example helm/spa-example; sds src/helm/sds-site.
+The in-place block is an illustration: spa-example is versioned, and these would be its values in place. No site runs in-place on v2 yet.
+
+**Speaker notes:** ⏱ 3 min. The release image is the contract between the app and the publisher. One rule for both: no environment value in the image; anything the browser reads at run time, like an API URL, goes in the chart's files:, which the Job writes and serves. spa-example's file is served at /config/spa-example-config.json (environment and apiBaseUrl). The in-place column is an illustration: spa-example is versioned, and this is what its develop values would be in place, with only keys site-release 0.4.1 accepts; no site runs in-place on v2 yet. In place, files: entries are written next to the build, so config.json is served at /config.json, no-cache. Versioned asks more of the build: URLs to the site's own files are host-relative, /releases/\<pkg>/\<version>/…, written by the build from RELEASE_VERSION (webpack publicPath or the import map, Vite base); app code never derives URLs from its own version. In-place takes a plain build with index.html at the top of sourcePath (default /release/dist); a fixed-name file such as a service worker goes in noCache. The values have exactly one block, site: or inPlace:, matching routing; the render fails with neither, both, or a key the block doesn't know. Both are merged values.yaml plus envs/values-\<namespace>.yaml, trimmed. spa-example's values-staging.yaml is the same shape with staging's host and /terragrunt-demo/staging/site/spa-example. The hosts rule matters because the KeyValueStore is shared by all of the site's environments in the account, and its IAM can only name the whole store: develop's publisher could move staging's key, and what stops it is that develop's values list only develop's host. spa-example pins site-release 0.4.1. Source: how-to steps 3–4; proposed-standards 4.13; spa-example helm/spa-example; site-release 0.4.1's accepted inPlace keys (templates/_helpers.tpl).
 
 ---
 
@@ -228,9 +228,9 @@ siteRelease:
 ![CI on main: push to main and compute the version X.Y.Z; build (versioned with RELEASE_VERSION); check the build's entry files name the release folder; docker build with the files under /release; then ask whether the tag is already in ECR. No: push the image to product/app-site. Yes, from the same commit: skip the push, a re-run. Yes, from another commit: fail the run, never push over a release.](assets/diagrams/ci-light.svg)
 
 - Every environment releases the same image; nothing is rebuilt per environment.
-- **Versioned** takes only `X.Y.Z`, so a branch image can never be released. **In-place** takes any tag: SDS releases a build tag such as `main-<run>`, or a release version.
+- **Versioned** takes only `X.Y.Z`, so a branch image can never be released. **In-place** takes any tag, a branch build included.
 
-**Speaker notes:** ⏱ 1.5 min. Build once, on main. CI builds and checks the image first; only the publish step asks ECR whether the version is already there. ECR tags are mutable, so CI must never push over a release: the same tag from the same commit is a re-run, so skip the push; from another commit, fail the run. For versioned, RELEASE_VERSION is set for the release build only, so the build writes dist/\<version>/ with versioned URLs; local builds and previews are unchanged. The base image needs sh, mkdir, cp, find, sort, sha256sum and cut, because the Job runs it as an init container that copies the files out: spa-example uses busybox 1.38.0, pinned by digest. References: spa-example's ci.yml for versioned (jobs Plan release, Build release image, Publish image, Tag release commit; it's an exception to cicd-standards' two CI paths until the library's site build can do this, COREOPS-4783 and 4784); SDS's ci.yml for in-place. Source: how-to step 5.
+**Speaker notes:** ⏱ 1.5 min. Build once, on main. CI builds and checks the image first; only the publish step asks ECR whether the version is already there. ECR tags are mutable, so CI must never push over a release: the same tag from the same commit is a re-run, so skip the push; from another commit, fail the run. For versioned, RELEASE_VERSION is set for the release build only, so the build writes dist/\<version>/ with versioned URLs; local builds and previews are unchanged. The base image needs sh, mkdir, cp, find, sort, sha256sum and cut, because the Job runs it as an init container that copies the files out: spa-example uses busybox 1.38.0, pinned by digest. References: spa-example's ci.yml for versioned (jobs Plan release, Build release image, Publish image, Tag release commit; it's an exception to cicd-standards' two CI paths until the library's site build can do this, COREOPS-4783 and 4784). There's no in-place reference on v2 yet. Source: how-to step 5.
 
 ---
 
@@ -333,7 +333,7 @@ A test environment (test1–3) is one more site leaf: a distribution, not a func
 
 **Alternative, versioned only:** test hostnames as alias hosts on develop's distribution, each with its own key. For testing releases, never infrastructure.
 
-**Speaker notes:** ⏱ 1.5 min. The default is one distribution per environment, test environments included. spa-example has develop and staging: two distributions, each with its own bucket and certificate, on one function and one store, with a key per host. On 2026-11-22/23, promoting 1.0.3 to staging and rolling it back to 1.0.2 changed only staging's key; develop stayed on 1.0.3. The versions in the caption are as of 2026-11-23 before rehearsal; they move with every promotion. A test environment is the same again: a site leaf with the same dependency on the function unit's nonprod leaf, its own values listing only its hostname, its own Argo app and promotion entry. It costs a distribution, not a function. spa-example has no test environments yet; SDS's test1 is its own distribution. What's shared, and accepted: every environment's publisher can write every one of the site's keys (the chart's hosts list is the guard), and a function change reaches every nonprod environment of the site at once. Production has its own function and store, and isn't covered yet. The alternative, versioned only: test hostnames on develop's distribution, each with its own key, so no extra distribution or bucket. It isn't the default: in-place can't do it, the test names become names on develop's leaf and certificate, and a test environment on develop's distribution can't try infrastructure changes or have its own WAF, headers or logs. Source: how-to step 8, "Optional: test environments"; strategy §4.4.2–4.4.3; TRACKER 2026-11-22/23.
+**Speaker notes:** ⏱ 1.5 min. The default is one distribution per environment, test environments included. spa-example has develop and staging: two distributions, each with its own bucket and certificate, on one function and one store, with a key per host. On 2026-11-22/23, promoting 1.0.3 to staging and rolling it back to 1.0.2 changed only staging's key; develop stayed on 1.0.3. The versions in the caption are as of 2026-11-23 before rehearsal; they move with every promotion. A test environment is the same again: a site leaf with the same dependency on the function unit's nonprod leaf, its own values listing only its hostname, its own Argo app and promotion entry. It costs a distribution, not a function. spa-example has no test environments yet. What's shared, and accepted: every environment's publisher can write every one of the site's keys (the chart's hosts list is the guard), and a function change reaches every nonprod environment of the site at once. Production has its own function and store, and isn't covered yet. The alternative, versioned only: test hostnames on develop's distribution, each with its own key, so no extra distribution or bucket. It isn't the default: in-place can't do it, the test names become names on develop's leaf and certificate, and a test environment on develop's distribution can't try infrastructure changes or have its own WAF, headers or logs. Source: how-to step 8, "Optional: test environments"; strategy §4.4.2–4.4.3; TRACKER 2026-11-22/23.
 
 ---
 
@@ -349,9 +349,9 @@ A test environment (test1–3) is one more site leaf: a distribution, not a func
 4. **Promote the API**, so its chart renders the new VirtualService
 5. **The site's config** sets the API's base URL to `/api`
 
-spa-example's `/api/hello` reaches the echo server in its own environment, on develop and staging; SDS sends `/api` and `/admin` to its API on test1.
+spa-example's `/api/hello` reaches the echo server in its own environment, on develop and staging.
 
-**Speaker notes:** ⏱ 1 min. Optional; some apps need it, not all. The plan fails if the function unit has the prefix and a site leaf has no api, or the other way round. spa-example leaves origin_verify out on purpose, because its API is the echo server, which only shows the headers it gets; a real API must not copy that. The VirtualService matches only /api/ and lists that environment's site hostnames; poc_echo_server_node's templates/virtualservice-site.yaml is the example. The origin-verify check means the API refuses requests that didn't come through the site's CloudFront. A chart-only change builds no image, so re-promote the current version. Check it: /api/anything returns 200 with Host set to the site hostname, and x-cache is never a Hit. If /api/… returns 404 with server: istio-envoy, the API's site VirtualService isn't deployed: promote the API. Source: how-to "Optional: route an API through the site"; spa-example envs/values-*.yaml (apiBaseUrl /api); SDS test1 values (apiBase "" sends /api and /admin to the API).
+**Speaker notes:** ⏱ 1 min. Optional; some apps need it, not all. The plan fails if the function unit has the prefix and a site leaf has no api, or the other way round. spa-example leaves origin_verify out on purpose, because its API is the echo server, which only shows the headers it gets; a real API must not copy that. The VirtualService matches only /api/ and lists that environment's site hostnames; poc_echo_server_node's templates/virtualservice-site.yaml is the example. The origin-verify check means the API refuses requests that didn't come through the site's CloudFront. A chart-only change builds no image, so re-promote the current version. Check it: /api/anything returns 200 with Host set to the site hostname, and x-cache is never a Hit. If /api/… returns 404 with server: istio-envoy, the API's site VirtualService isn't deployed: promote the API. Source: how-to "Optional: route an API through the site"; spa-example envs/values-*.yaml (apiBaseUrl /api).
 
 ---
 
@@ -381,7 +381,6 @@ spa-example's `/api/hello` reaches the echo server in its own environment, on de
 |---|---|
 | `site-release` chart 0.4.1 | [available] |
 | spa-example, versioned on develop and staging (v2) | [live] |
-| SDS, in-place on test1 (v1; v2 under COREOPS-4776) | [live] |
 | In-place on v2; test environments on v2 | [not yet run] |
 | The how-to; *Create a site unit* | [being finalized] |
 | Production; vanity names | [not yet covered] |
@@ -391,13 +390,13 @@ spa-example's `/api/hello` reaches the echo server in its own environment, on de
 - **The how-to**, *Deliver a SPA as a site*: every step and a checklist. Moving to cicd-standards `docs/how-to`.
 - **Create a site unit**, in infrastructure-standards, with §16 certificates and §17 DNS
 - **The `site-release` README**, in vector-shared-helm-charts: every value
-- Jira: COREOPS-4535, 4543, 4759, 4776
+- Jira: COREOPS-4535, 4543, 4759
 
 #### How to start
 
 Pick the method, then write the function unit and the site unit in your own infrastructure repo; DevOps approves. Ask DevOps for the ECR repository and, once you have a chart, the ArgoCD registration. Moving an app? Retire the old deploy once the site serves the same environment.
 
-**Speaker notes:** ⏱ 2 min. Re-check every line before presenting; written as of 2026-11-23. Then: site-v2.0.0 (2026-11-22) and site-function-v1.0.1 (2026-11-21) were tagged; site-release@v0.4.1 was the latest chart. On 2026-11-23, before rehearsal, spa-example served 1.0.3 on develop and 1.0.2 on staging (later that day develop was rolled back to 1.0.2 and staging promoted to 1.0.3). SDS was still on site-v1.0.0 and site-release 0.3.0; COREOPS-4776 moves it to v2, which is when in-place first runs on v2. mfe-example, the MFE shell, was still on modules/site v1 (its unit on terragrunt-demo-infrastructure#19, open); COREOPS-4759 moves it. No site had a test environment or production on v2, and vanity names aren't covered (modules/product-domains isn't built). The how-to was refreshed and waiting for approval in site-platform-strategy, moving to cicd-standards docs/how-to (COREOPS-4543); Create a site unit was infrastructure-standards#39, open, with §16 certificates (#43) and §17 DNS (#44), also open. If any of these has merged or moved, change the row. Until the proposed site standards are published, the rules behind the how-to are in site-platform-strategy's proposed-standards.md; the infrastructure rules are infrastructure-standards §15–§17. Moving an app that deploys another way, such as CircleCI copying to S3 or the shared CDN: keep the old path until the site serves the same environment, then remove it so there's one way to deploy, as mfe-example#44 did; clean up the old uploads by hand once nothing reads them. Teams do this themselves: the units live in your own infra repo, with DevOps approving through code owners.
+**Speaker notes:** ⏱ 2 min. Re-check every line before presenting; written as of 2026-11-23. Then: site-v2.0.0 (2026-11-22) and site-function-v1.0.1 (2026-11-21) were tagged; site-release@v0.4.1 was the latest chart. On 2026-11-23, before rehearsal, spa-example served 1.0.3 on develop and 1.0.2 on staging (later that day develop was rolled back to 1.0.2 and staging promoted to 1.0.3). No site ran in-place on v2 yet. mfe-example, the MFE shell, was still on modules/site v1 (its unit on terragrunt-demo-infrastructure#19, open); COREOPS-4759 moves it. No site had a test environment or production on v2, and vanity names aren't covered (modules/product-domains isn't built). The how-to was refreshed and waiting for approval in site-platform-strategy, moving to cicd-standards docs/how-to (COREOPS-4543); Create a site unit was infrastructure-standards#39, open, with §16 certificates (#43) and §17 DNS (#44), also open. If any of these has merged or moved, change the row. Until the proposed site standards are published, the rules behind the how-to are in site-platform-strategy's proposed-standards.md; the infrastructure rules are infrastructure-standards §15–§17. Moving an app that deploys another way, such as CircleCI copying to S3 or the shared CDN: keep the old path until the site serves the same environment, then remove it so there's one way to deploy, as mfe-example#44 did; clean up the old uploads by hand once nothing reads them. Teams do this themselves: the units live in your own infra repo, with DevOps approving through code owners.
 
 ---
 

@@ -95,13 +95,12 @@ After the session, someone in the room should know:
 | `modules/site` v2.0.0 + `modules/site-function` v1.0.1 | Tagged `site-v2.0.0` (#46, 2026-11-22) and `site-function-v1.0.1` (#47, 2026-11-21) | Available, both methods |
 | `site-release` chart | `site-release@v0.4.1` | Available |
 | spa-example on versioned, develop and staging (v2) | develop 1.0.3, staging 1.0.2, one function and store; staging promotion and Promotion Manager rollback verified, develop untouched | Live |
-| SDS on in-place, test1 | `application/sds-site` on `site-v1.0.0` (test1 its only leaf); `src/helm/sds-site` on site-release 0.3.0; v2 under COREOPS-4776 | Live (v1) |
 | In-place on v2; test environments on v2 | Not run yet | Not yet run |
 | mfe-example (the MFE shell) | On `modules/site` v1 (`site-v1.1.0`, terragrunt-demo-infrastructure#19 open); v2 under COREOPS-4759 | Named once, on slide 3; notes only otherwise |
 | The how-to | Refreshed 2026-11-23, waiting for approval; moves to cicd-standards `docs/how-to` (COREOPS-4543) | Being finalized |
 | infrastructure-standards #39 (*Create a site unit*), #43 (§16), #44 (§17) | Open | Being finalized |
 | Production; vanity names | Not covered by the how-to | Not yet covered |
-| Jira | Epic COREOPS-4535; COREOPS-4543, 4759, 4776 | Cited on the status slide |
+| Jira | Epic COREOPS-4535; COREOPS-4543, 4759 | Cited on the status slide |
 
 ## Facts the deck must state exactly
 
@@ -129,13 +128,14 @@ From the how-to, `modules/site` `site-v2.0.0`, `modules/site-function` `site-fun
   least 10 non-live versions, never a live one; deletion is off by default. Each environment's
   `site.hosts` lists only its own hostnames (4.13).
 - **In-place**: any tag; copy, then the `no-cache` entry files, then invalidate and wait, then sweep;
-  `404` before the first release (not yet confirmed on v2). Reference app: SDS, on v1.
-- **Worked examples** (presenter, 2026-11-23): **spa-example for versioned, SDS for in-place.** Every
-  versioned value quoted on a slide comes from spa-example; every in-place one from SDS. vs-skills is
-  not an example.
+  `404` before the first release (not yet confirmed on v2). No site runs in-place on v2 yet.
+- **Worked example** (presenter, 2026-11-23): **spa-example is the only one.** Every value quoted on a
+  slide comes from spa-example. In-place is shown with spa-example's names as a labelled illustration
+  (spa-example is versioned; no site runs in-place on v2 yet), using only keys site-release 0.4.1
+  accepts. No other product's site is referenced.
 - **Rollback**: the Promotion Manager's Rollback (presenter, 2026-11-23), which restores that
   promotion's rendered manifests, `files:` included.
-- **`site-release` 0.4.1** (spa-example; SDS 0.3.0), pinned exactly, with `Chart.lock` committed,
+- **`site-release` 0.4.1** (spa-example), pinned exactly, with `Chart.lock` committed,
   from `oci://…/tooling/helm`.
 - **Environments**: one distribution per environment, test environments included; they share the
   site's function and store in the account. Test hostnames as alias hosts on develop's distribution
@@ -152,7 +152,7 @@ From the how-to, `modules/site` `site-v2.0.0`, `modules/site-function` `site-fun
 | 1 | Opening | Title | 0.5 |
 | 2 | | What you'll leave with: the order of the work, who owns it, which method, where the how-to is | 1 |
 | 3 | What a site is | **A site is a hostname-rooted static origin**: the two modules; what's delivered as one, what isn't | 2 |
-| 4 | | **The names**: one noun all the way through, with spa-example's and SDS's real values | 1.5 |
+| 4 | | **The names**: one noun all the way through, with spa-example's real values | 1.5 |
 | 5 | The four phases | **Four phases, in order**: diagram (a) | 2 |
 | 6 | | **Who does what**: each phase's output, owner and repo | 1.5 |
 | 7 | Two methods | **What a release does**: diagram (c), in-place vs versioned | 2.5 |
@@ -196,10 +196,10 @@ About 23 slides. Section dividers are optional; if used, their time comes out of
 - Vocabulary in one line each: *frontend*, *SPA*, *MFE*, *site*.
 
 ### 4. The names
-Table: the pattern, then spa-example's value (versioned, develop) and SDS's (in-place, test1), for the
-ECR repository, function unit, site unit, hostname, SSM prefix, publisher ServiceAccount and chart.
-SDS has no function unit while on v1. Speaker notes: the function and store name, the ECR vs
-Terraform product, `dev` vs `develop`, SDS's differences. Callout: **`-site` means a data-only image,
+Table: the pattern, then spa-example's value (develop), for the ECR repository, function unit, site
+unit, hostname, SSM prefix, publisher ServiceAccount and chart; the names are the same for both
+methods. Speaker notes: the function and store name, the ECR vs Terraform product, `dev` vs
+`develop`. Callout: **`-site` means a data-only image,
 published and never run**.
 
 ### 5. Four phases, in order
@@ -227,7 +227,7 @@ store serve every environment.
 ### 9. Side by side
 `.dense` table: going live, rolling back (Promotion Manager rollback), release check, hostnames,
 runtime config, build and tag, old releases, before the first release, function unit `routing` and
-chart block, examples (SDS on v1; spa-example on v2).
+chart block, example on v2 (in-place: none yet; versioned: spa-example).
 
 ### 10. Which to choose, once
 - **In-place**: a plain build; no instant rollback needed.
@@ -248,7 +248,8 @@ chart block, examples (SDS on v1; spa-example on v2).
 - Versioned: `/releases/<pkg>/<version>/` from `RELEASE_VERSION`. In-place: a plain build.
 - The chart pins `site-release` exactly, `Chart.lock` committed.
 - Versioned: `site.hosts` lists only the environment's own hostnames.
-- Snippets: spa-example's develop `site:` block and SDS's test1 `inPlace:` block.
+- Snippets: spa-example's develop `site:` block, and an `inPlace:` block with spa-example's names, labelled
+  as an illustration.
 
 ### 13. Phase 3, CI
 Diagram (e): push to `main`, version → build → check → `docker build` → tag in ECR? No: push; yes,
@@ -287,7 +288,7 @@ site leaf. Alternative, versioned only: test hostnames as alias hosts on develop
 ### 19. An API through the site
 The `/api` prefix in the function unit, `api` in each site leaf; the API's site VirtualService; the
 origin-verify check (R206.1); promote the API; the config's base URL `/api`. spa-example on develop
-and staging; SDS on test1.
+and staging.
 
 ### 20. Top gotchas
 Version range; the values block; branch images; `503` before the first release; the function unit
@@ -295,8 +296,8 @@ not applied; a values file listing another environment's host; retries.
 
 ### 21. Status, and where the how-to and rules live
 The status table above, in the deck's words. Where to go: the how-to (moving to cicd-standards),
-*Create a site unit* with §16 and §17, the `site-release` README; Jira COREOPS-4535, 4543, 4759,
-4776. **How to start**: write the function unit and the site unit in your own infrastructure repo;
+*Create a site unit* with §16 and §17, the `site-release` README; Jira COREOPS-4535, 4543, 4759.
+**How to start**: write the function unit and the site unit in your own infrastructure repo;
 DevOps approves, creates the ECR repository and registers with ArgoCD; retire an old deploy once the
 site serves the same environment.
 
@@ -342,7 +343,7 @@ The deck README's Sources section is the complete list. The main ones:
 - vector-shared-terraform-modules tags `site-v2.0.0`, `site-function-v1.0.1`; vector-shared-helm-charts
   `site-release@v0.4.1`
 - spa-example `main`; terragrunt-demo-infrastructure #20 and #21; poc-rendered-k8s-manifests `818f695`
-- SDS: sds-infrastructure `application/sds-site` and sds `src/helm/sds-site`
+- vector-shared-helm-charts `site-release@v0.4.1` `templates/_helpers.tpl`: the keys an `inPlace:` block accepts
 - infrastructure-standards #39, #43, #44
 - Live checks and `gh` states on 2026-11-23
 
@@ -358,8 +359,8 @@ The deck README's Sources section is the complete list. The main ones:
 2026-11-23 (replacing the 2026-11-17 choices of mfe-example as the versioned example, a demo on
 mfe-example develop, and "versioned preferred because alias hosts keep the function count down"):
 
-5. **Worked examples**: spa-example (v2, develop and staging) for versioned, SDS for in-place;
-   mfe-example named once, as an MFE shell, on v1 until COREOPS-4759.
+5. **Worked example**: spa-example (v2, develop and staging) only; in-place shown with its names as an
+   illustration; no other product's site referenced; mfe-example named once, as an MFE shell, on v1 until COREOPS-4759.
 6. **Demo**: on spa-example staging, promote 1.0.3, then the Promotion Manager's Rollback to 1.0.2;
    show develop unchanged.
 7. **Versioned stays preferred**, for rollback, the self-reverting check, releases per hostname, old
