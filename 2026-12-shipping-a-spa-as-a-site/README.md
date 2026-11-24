@@ -2,7 +2,7 @@
 
 **Created:** 2026-11-17
 **Audience:** product dev teams and leads who build SPAs and MFE host shells, plus DevOps engineers. They know CI/CD, ArgoCD and AWS; they don't yet know `modules/site`, `modules/site-function`, the `site-release` chart, KeyValueStore routing or the new names
-**Status:** Draft, for the presenter's review. Built 2026-11-17; brought up to date on 2026-11-23 with content as of that date (`modules/site` v2, spa-example); to be presented in December 2026. Not yet rehearsed; the status slide (21) must be re-checked before presenting
+**Status:** Draft, for the presenter's review. Built 2026-11-17; brought up to date on 2026-11-23 (`modules/site` v2, spa-example) and on 2026-11-24 (site-release 0.5.0 and `cacheFor`, spa-example 1.0.4, the how-to split in two), with content as of 2026-11-24; to be presented in December 2026. Not yet rehearsed; the status slide (21) must be re-checked before presenting
 **Design:** [`docs/superpowers/specs/2026-11-17-shipping-a-spa-as-a-site-design.md`](../docs/superpowers/specs/2026-11-17-shipping-a-spa-as-a-site-design.md)
 
 ## Summary
@@ -31,41 +31,51 @@ Estimates from the speaker notes. The target is 45 minutes, including questions.
 | The four phases: the flow, who does what | 5–6 | 3.5 |
 | Two methods: what a release does, how a request is served, side by side, which to choose | 7–10 | 7 |
 | Phase by phase: infrastructure, app repository, CI, CD | 11–14 | 9 |
-| Demo: promote forward, then roll back, on spa-example staging (slide 16 is the backup, used only if the demo fails) | 15–16 | 5 |
+| Demo: promote forward, check the cache headers, then roll back, on spa-example staging (slide 16 is the backup, used only if the demo fails) | 15–16 | 5.5 |
 | After the first release: rollback and failures, environments, an API through the site, gotchas | 17–20 | 6 |
 | Where things stand: status and where to look; MFEs on the shared CDN (coming) | 21–22 | 3 |
-| Questions | 23 | 6.5 |
+| Questions | 23 | 6 |
 | **Total** | | **45** |
 
 ## Before presenting
 
-- **Re-check the status slide (21)** and its speaker notes. As of 2026-11-23: `site-v2.0.0` and
-  `site-function-v1.0.1` tagged; `site-release@v0.4.1` the latest chart; spa-example live on develop (1.0.3) and
-  staging (1.0.2); no site in-place on v2 yet; mfe-example on v1 until
-  COREOPS-4759 (its unit on terragrunt-demo-infrastructure#19, open); no test environment or production on v2;
-  the how-to waiting for approval, moving to cicd-standards `docs/how-to` (COREOPS-4543); infrastructure-standards
-  #39 (*Create a site unit*), #43 (§16 certificates) and #44 (§17 DNS) open. Anything merged or moved since
-  changes its row; slides 9, 11 and 18 mention the same items. Also re-check two figures: CORE nonprod's
+- **Re-check the status slide (21)** and its speaker notes. As of 2026-11-24: `site-v2.0.0` and
+  `site-function-v1.0.1` tagged (`site-v2.0.1` since, CHANGELOG only); `site-release@v0.5.0` the latest chart,
+  with `cacheFor`; spa-example on site-release 0.5.0 from 1.0.4, live on develop (1.0.4) and staging (1.0.2); no
+  site in-place on v2 yet; mfe-example on v1 until COREOPS-4759 (its unit on terragrunt-demo-infrastructure#19,
+  open); no test environment or production on v2; the how-to split in two: *Create a site unit*
+  (infrastructure-standards `docs/how-to/site-unit.md`, with §15.2.1, in review on #39) and *Deliver a SPA as a
+  site* (moving to cicd-standards `docs/how-to/deliver-a-spa-as-a-site.md` after #39 merges, COREOPS-4543); #43
+  (§16 certificates) and #44 (§17 DNS) open. Anything merged or moved since changes its row; slides 2, 9, 11, 18
+  and 23 mention the same items. Also re-check two figures: CORE nonprod's
   CloudFront Functions count (13 on 2026-11-19, slide 11's caption and notes; `aws cloudfront list-functions`
-  lists each function twice, DEVELOPMENT and LIVE) and the store's keys on slide 18's caption (develop 1.0.3,
-  staging 1.0.2 on 2026-11-23 before rehearsal).
-- **Demo start state (a prerequisite):** spa-example staging on 1.0.2 with a newer version (1.0.3) available to
-  promote, and develop on a newer version (1.0.3), so the demo shows only staging's key moving. That was the
-  state on 2026-11-23 before rehearsal; later that day it was reversed (poc-rendered-k8s-manifests `894b129`
-  promoted 1.0.3 to staging, `b39f2ab` rolled develop back to 1.0.2), so check both footers first: open `/about`
+  lists each function twice, DEVELOPMENT and LIVE) and the versions on slide 18's caption (develop 1.0.4,
+  staging 1.0.2 on 2026-11-24).
+- **Demo start state (a prerequisite):** spa-example staging on 1.0.2 with a newer version (1.0.4) available to
+  promote, and develop on 1.0.4, so the demo shows only staging's key moving. That is the state as of
+  2026-11-24: the Promotion Manager auto-deployed 1.0.4 to develop (poc-rendered-k8s-manifests `120d807`,
+  00:40Z), and staging is on 1.0.2 after its rollback on 2026-11-23. Check both footers first: open `/about`
   on each host, or `curl -s https://spa-example.<env>.vsp-nonprod.com/ | grep -o 'release-version" content="[^"]*"'`
-  for `develop` and `staging`. To restore it, in the Promotion Manager (spa-example-appset): promote 1.0.3 to
-  develop, and roll staging back to its 1.0.2 promotion (or promote 1.0.2 to staging). If the versions differ,
-  use staging's current version and a newer one already built, and change the numbers on slides 15 and 18.
-  Staging is promoted only by hand, so nothing moves it during the session.
+  for `develop` and `staging`. Develop gets every release from main, so it may be newer by then. To restore
+  staging, in the Promotion Manager (spa-example-appset): roll staging back to its 1.0.2 promotion (or promote
+  1.0.2 to staging). If the versions differ, use staging's current version and a newer one already built on
+  site-release 0.5.0 or later (1.0.4 is the first), and change the numbers on slides 15, 16 and 18. Staging is
+  promoted only by hand, so nothing moves it during the session.
+- **The cache beat (step 4):** after the promotion, `curl -sI` staging's `/favicon.svg` (expect
+  `no-cache, max-age=0, must-revalidate`) and one `/releases/spa-example/1.0.4/assets/…` file (expect
+  `public, max-age=31536000, immutable`). Do it before the Rollback: 1.0.2's files keep the headers their
+  pre-0.5.0 upload gave them. Not yet tried on staging; confirm at rehearsal.
 - **The Rollback is for staging:** in step 4, choose the Rollback for the **staging** environment, not develop,
   and check the environment the Promotion Manager shows before confirming (both the promotion and the
   Rollback). At rehearsal, note where the UI shows which environment a Rollback applies to, in slide 15's notes.
 - **Access for the demo:** the Promotion Manager (spa-example-appset, staging, including its Rollback), ArgoCD
   (`staging-spa-example`) and `kubectl --context core-nonprod-us-east-2` on the `staging` namespace for the Job
   log. Run the log command after ArgoCD shows the new Job (each sync replaces it), and again for the rollback.
-- **Backup slide (16):** replace the two placeholders with screenshots from the rehearsal (the promotion and the
-  rollback in the Promotion Manager, the Argo app and its Job).
+- **Backup slide (16):** its About-page screenshot, Job log and store listing are from the 2026-11-23 run
+  (1.0.3 → 1.0.2, develop on 1.0.3) and are labelled so. Replace the placeholders with captures from the
+  rehearsal: the promotion of 1.0.4 and the Rollback in the Promotion Manager; the Argo app and its Job; and that
+  run's Job log (the `cache:` line, `1.0.2 -> 1.0.4`, `serves`) with the `curl -I` headers, which replace the
+  2026-11-23 log and store listing.
 
 ## Diagrams
 
@@ -78,7 +88,7 @@ Slides embed them with `<picture>`, so the dark variant follows `prefers-color-s
 
 | Diagram | Slide | Source |
 |---|---|---|
-| `four-phases` | 5 | how-to, "The four phases" and "Who does what" (re-rendered 2026-11-23: the function unit) |
+| `four-phases` | 5 | how-to, "The four phases" and "Who does what" (re-rendered 2026-11-23: the function unit; 2026-11-24: the site unit's tag is "code owner approves", only the function unit needs DevOps) |
 | `release` | 7 | how-to, "What a release does" |
 | `request` | 8 | how-to, "How a request is served" (re-rendered 2026-11-23: versions 1.0.3; the 404/503 tags moved to the slide's caption) |
 | `site-unit` | 11 | how-to, step 2, "What the two units create" (re-rendered 2026-11-23: function unit and site unit, the site's own certificate; the versioned-only parts folded into the CloudFront and SSM labels so the diagram is shorter and its text larger) |
@@ -114,6 +124,12 @@ Every source of information used in this presentation goes here.
   releases, `current.json`, retention; the optional API and test-environment sections; production and vanity
   names not yet covered; retiring the old deploy; the troubleshooting rows on slide 20. Its Mermaid diagrams are
   the specs for the archify diagrams
+- The same draft at `881f45a` (read 2026-11-24), now the CI/CD half of a split how-to, moving to cicd-standards
+  `docs/how-to/deliver-a-spa-as-a-site.md` after infrastructure-standards #39 merges: the link to *Create a site
+  unit* for phase 1; "Who does what" (DevOps approves the function unit, a CODEOWNER, product team or DevOps, the
+  site leaves; slides 2, 5, 6, 14, 21, 23); step 3's `cacheFor` table, wildcards, the always-`no-cache` files,
+  `vendor/` and §15.2.1 (slides 11, 12, 15); step 4's `cacheFor` and the deprecated `inPlace.noCache` (slide 12);
+  "Updating the site-release chart" and the troubleshooting rows for `cacheFor` (slides 20 and 23)
 - `~/workspaces/cowork/site-platform-strategy/deployment/docs/plan-site-v2-and-site-example.md` §1–§2 (read
   2026-11-23): the decisions behind v2 (one distribution per environment; the CloudFront Functions quota; one
   function per site per account; the accepted trade-offs; the function unit in `platform/`) (slides 11 and 18)
@@ -147,8 +163,8 @@ Every source of information used in this presentation goes here.
 ### Internal (Confluence / Jira / repos)
 - [COREOPS-4535](https://lmsportal.atlassian.net/browse/COREOPS-4535) (epic),
   [COREOPS-4543](https://lmsportal.atlassian.net/browse/COREOPS-4543) (the how-to, to cicd-standards),
-  and [COREOPS-4759](https://lmsportal.atlassian.net/browse/COREOPS-4759) (mfe-example to v2): cited on slides 3 and
-  21.
+  [COREOPS-4759](https://lmsportal.atlassian.net/browse/COREOPS-4759) (mfe-example to v2) and
+  [COREOPS-4789](https://lmsportal.atlassian.net/browse/COREOPS-4789) (`cacheFor`): cited on slides 3 and 21.
   COREOPS-4783 and 4784 (the library's site build) in slide 13's notes
 - vector-shared-terraform-modules: tags `site-v2.0.0` (#46, 2026-11-22) and `site-function-v1.0.1` (#47,
   2026-11-21), checked with `git` on 2026-11-23; `modules/site-function/functions/viewer-request-in-place.js` and
@@ -173,6 +189,26 @@ Every source of information used in this presentation goes here.
 - infrastructure-standards #39 (*Create a site unit*), #43 (§16 certificates), #44 (§17 DNS), all open on
   2026-11-23: slides 11 and 21
 - PR and tag states checked with `gh` and `git` on 2026-11-23
+- vector-shared-helm-charts #8 (`feat(site-release): cacheFor decides each file's Cache-Control (COREOPS-4789)`,
+  merged 2026-11-24 00:29Z as `4d2815e`), tag `site-release@v0.5.0`: `templates/_helpers.tpl` (`cacheFor`
+  required, its durations and refused globs, the accepted keys; `inPlace.noCache` still accepted) and
+  `templates/_script.tpl` (the `Cache-Control` per duration, the `cache:` log line and the unmatched-glob line,
+  the deprecation warning, `vendor/` a year, the upload only when the release folder isn't there), read
+  2026-11-24: slides 12, 15, 20, 21
+- spa-example #7 (`chore(spa-example): site-release 0.5.0, cacheFor gives a year only to assets/*`, merged
+  2026-11-24 00:39Z), tag `v1.0.4`: `helm/spa-example/Chart.yaml` (site-release 0.5.0), `values.yaml`
+  (`cacheFor: { "assets/*": 1y }`, the same in every environment; favicon.svg and favicon.ico no-cache) and
+  `envs/values-develop.yaml`, read 2026-11-24 (slides 12, 15, 21)
+- poc-rendered-k8s-manifests commit `120d807` (2026-11-24 00:40Z): `chore: promote
+  app-manifests/spa-example-appset/core-nonprod-east/develop/manifests.yaml (image tag: 1.0.4)`, the Promotion
+  Manager's auto-deploy of 1.0.4 to develop (slides 15, 18, 21)
+- infrastructure-standards #39 (open), branch `docs/cloudfront-standard`, read 2026-11-24:
+  `docs/how-to/site-unit.md` (*Create a site unit*: the ECR repository, both units, §8 every environment's leaf,
+  the API, the publisher's IAM, §10 plan failures, "Order of the work, and who approves") and
+  `docs/15-cloudfront.md` §15.2.1, a site's cache policies' minimum TTL (0 for `/config/*`, 1 second or less for
+  the default behavior; the module's defaults meet both): slides 6, 11, 18, 20, 21
+- vector-shared-terraform-modules #48 (merged), tag `site-v2.0.1`: a CHANGELOG-only fix (slide 21's notes)
+- PR and tag states (#39, #43, #44 open; #8, #7, #48 merged) checked with `gh` on 2026-11-24
 
 ### Review
 - `tmp/2026-12-shipping-a-spa-as-a-site-review.md` (not committed), 2026-11-17: repetition, cuts, order and
@@ -197,11 +233,19 @@ Every source of information used in this presentation goes here.
 - Noel, 2026-11-23: spa-example is the only worked example; the earlier in-place example app is not referenced, and
   in-place is shown only as an illustration with spa-example's names
 
+- Noel Aguilar, 2026-11-24 (the brief for this update): what changed that day (site-release 0.5.0 and its
+  `cacheFor` rules, spa-example 1.0.4 and the develop auto-deploy, the how-to split, §15.2.1, approvals per
+  CODEOWNERS); the live state as develop 1.0.4 and staging 1.0.2 (develop serving 1.0.4 was being verified
+  separately); the demo promotes 1.0.4 and adds a short `curl -I` beat; the backup slide keeps the 2026-11-23
+  captures, labelled, with a placeholder for a re-capture with 1.0.4. The beat follows TRACKER's follow-up to
+  check `assets/*` `immutable` and `favicon.svg` `no-cache` with `curl -I`
+
 ### Data & assets
 - `assets/brand-title.jpg`: the title and Questions background, taken unchanged from `ppt/media/image1.jpeg` in `2026-08-nj-rubric-update.pptx`
 - `assets/vector-logo.png` and `assets/vector-logo-white.png`: the Vector Solutions logos, taken unchanged from `vector-template.pptx` (`ppt/media/image2.png` and `image7.png`). The white one is used on brand slides and in dark mode
 - `assets/diagrams/*-light.svg`, `*-dark.svg`: exported from the archify candidates in `assets/diagrams/src/`
-  (see Diagrams), 2026-11-17; `four-phases`, `site-unit`, `ci` and `shared-function` 2026-11-23
+  (see Diagrams), 2026-11-17; `four-phases`, `site-unit`, `ci` and `shared-function` 2026-11-23; `four-phases`
+  again 2026-11-24
 - `assets/demo-spa-example-staging-1.0.2.png`: headless Chrome screenshot of https://spa-example.staging.vsp-nonprod.com/about
   on 2026-11-23 at 2× pixel density, cropped to the release paragraph and the footer "staging · release 1.0.2"
   (slide 16). Replaces `demo-mfe-example-1.9.0.png`

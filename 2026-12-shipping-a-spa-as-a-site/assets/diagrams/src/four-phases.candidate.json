@@ -21,7 +21,7 @@
   "mainPath": ["fnunit", "unit", "chart", "ci", "promote", "job"],
   "nodes": [
     { "id": "fnunit", "lane": "product", "col": 0, "type": "cloud", "label": "Function unit", "sublabel": "once per account", "tag": "DevOps approves" },
-    { "id": "unit", "lane": "product", "col": 1, "type": "cloud", "label": "Site unit", "sublabel": "per environment", "tag": "DevOps approves" },
+    { "id": "unit", "lane": "product", "col": 1, "type": "cloud", "label": "Site unit", "sublabel": "per environment", "tag": "code owner approves" },
     { "id": "ecr", "lane": "devops", "col": 1, "type": "database", "label": "ECR repository", "sublabel": "<product>/<app>-site" },
     { "id": "chart", "lane": "product", "col": 2, "type": "frontend", "label": "Build + chart", "sublabel": "helm/<app>" },
     { "id": "ci", "lane": "product", "col": 3, "type": "backend", "label": "CI", "sublabel": "one release image" },
