@@ -42,8 +42,7 @@ Estimates from the speaker notes. The target is 45 minutes, including questions.
 - **Re-check the status slide (21)** and its speaker notes. As of 2026-11-24: `site-v2.0.0` and
   `site-function-v1.0.1` tagged (`site-v2.0.1` since, CHANGELOG only); `site-release@v0.5.0` the latest chart,
   with `cacheFor`; spa-example on site-release 0.5.0 from 1.0.4, live on develop (1.0.4) and staging (1.0.2); no
-  site in-place on v2 yet; mfe-example on v1 until COREOPS-4759 (its unit on terragrunt-demo-infrastructure#19,
-  open); no test environment or production on v2; the how-to split in two: *Create a site unit*
+  site in-place on v2 yet; no test environment or production on v2; the how-to split in two: *Create a site unit*
   (infrastructure-standards `docs/how-to/site-unit.md`, with §15.2.1, in review on #39) and *Deliver a SPA as a
   site* (moving to cicd-standards `docs/how-to/deliver-a-spa-as-a-site.md` after #39 merges, COREOPS-4543); #43
   (§16 certificates) and #44 (§17 DNS) open. Anything merged or moved since changes its row; slides 2, 9, 11, 18
@@ -162,22 +161,21 @@ Every source of information used in this presentation goes here.
 
 ### Internal (Confluence / Jira / repos)
 - [COREOPS-4535](https://lmsportal.atlassian.net/browse/COREOPS-4535) (epic),
-  [COREOPS-4543](https://lmsportal.atlassian.net/browse/COREOPS-4543) (the how-to, to cicd-standards),
-  [COREOPS-4759](https://lmsportal.atlassian.net/browse/COREOPS-4759) (mfe-example to v2) and
+  [COREOPS-4543](https://lmsportal.atlassian.net/browse/COREOPS-4543) (the how-to, to cicd-standards) and
   [COREOPS-4789](https://lmsportal.atlassian.net/browse/COREOPS-4789) (`cacheFor`): cited on slides 3 and 21.
   COREOPS-4783 and 4784 (the library's site build) in slide 13's notes
 - vector-shared-terraform-modules: tags `site-v2.0.0` (#46, 2026-11-22) and `site-function-v1.0.1` (#47,
   2026-11-21), checked with `git` on 2026-11-23; `modules/site-function/functions/viewer-request-in-place.js` and
   `viewer-request-versioned.js` (slide 8); `modules/site` `variables.tf` at `site-v2.0.0` (`function`,
   `dns_zones`, `retention`). `site-v1.0.0` and `site-v1.1.0` are v1 and not presented
-- vector-shared-helm-charts `charts/site-release/README.md` on `main`; tags up to `site-release@v0.4.1`: exactly one
+- vector-shared-helm-charts `charts/site-release/README.md` on `main`; tags up to `site-release@v0.5.0` (`cacheFor`, slide 12): exactly one
   of `site:` and `inPlace:`, pin an exact version; `templates/_release.tpl`: the Job is a hook with
   `hook-delete-policy: BeforeHookCreation`, so each sync replaces it (slide 15's notes)
-- spa-example `main` at `2470067`: `helm/spa-example` (`Chart.yaml` on `site-release` 0.4.1,
+- spa-example `main` at `8e66069` (#7): `helm/spa-example` (`Chart.yaml` on `site-release` 0.5.0, `cacheFor` in `values.yaml`,
   `envs/values-develop.yaml`, `envs/values-staging.yaml`, slide 12), `.github/workflows/ci.yml` (slide 13),
-  `src/App.tsx` and `src/pages/About.tsx` (the footer and the About page, slides 15–16); tags `v1.0.0`–`v1.0.3`
+  `src/App.tsx` and `src/pages/About.tsx` (the footer and the About page, slides 15–16); tags `v1.0.0`–`v1.0.4`
 - terragrunt-demo-infrastructure `main`: `platform/spa-example-site-function` and `application/spa-example-site`
-  (PRs #20 and #21, merged 2026-11-22), the names on slide 4; #19 (mfe-example's unit, open, `site-v1.1.0`)
+  (PRs #20 and #21, merged 2026-11-22), the names on slide 4
 - poc-rendered-k8s-manifests commit `818f695` (2026-11-23): `chore(rollback): revert
   app-manifests/spa-example-appset/core-nonprod-east/staging/manifests.yaml to 1.0.2`, the Promotion Manager
   rollback (slide 17); `894b129` and `b39f2ab` (2026-11-23, after it): staging promoted to 1.0.3 and develop rolled
@@ -185,7 +183,7 @@ Every source of information used in this presentation goes here.
 - vector-shared-helm-charts `charts/site-release/templates/_helpers.tpl` and `tests/fixture/envs/values-in-place.yaml`
   at `site-release@v0.4.1`: the keys an `inPlace:` block accepts (`target`, `ssmPrefix`, `bucket`, `invalidate`,
   `invalidationTimeoutSeconds`, `sourcePath`, `hook`, `noCache`), for slide 12's in-place illustration
-- mfe-example `main` at `7d71044`: the MFE shell on v1 (slide 3), #44 retired CircleCI (slide 21's notes)
+- mfe-example: the MFE shell (slide 3); #44 retired CircleCI (slide 21's notes)
 - infrastructure-standards #39 (*Create a site unit*), #43 (§16 certificates), #44 (§17 DNS), all open on
   2026-11-23: slides 11 and 21
 - PR and tag states checked with `gh` and `git` on 2026-11-23
